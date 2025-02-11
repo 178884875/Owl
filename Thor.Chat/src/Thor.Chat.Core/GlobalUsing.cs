@@ -1,1 +1,0 @@
-﻿global using Thor.Chat.Core.Extensions;
