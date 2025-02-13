@@ -51,24 +51,20 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "Model",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", maxLength: 36, nullable: false),
-                    Provider = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
-                    Reasoning = table.Column<bool>(type: "INTEGER", nullable: false),
-                    FunctionCall = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Vision = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ContextWindowTokens = table.Column<int>(type: "INTEGER", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    DisplayName = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
-                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    MaxOutputTokens = table.Column<int>(type: "INTEGER", nullable: false),
-                    PricingInput = table.Column<decimal>(type: "TEXT", nullable: true),
-                    PricingOutput = table.Column<decimal>(type: "TEXT", nullable: true),
-                    PricingAudioInput = table.Column<decimal>(type: "TEXT", nullable: true),
-                    PricingAudioOutput = table.Column<decimal>(type: "TEXT", nullable: true),
-                    PricingCachedAudioInput = table.Column<decimal>(type: "TEXT", nullable: true),
-                    PricingCachedInput = table.Column<decimal>(type: "TEXT", nullable: true),
-                    ReleasedAt = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Provider = table.Column<string>(type: "TEXT", nullable: false),
+                    DisplayName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    ContextWindowTokens = table.Column<int>(type: "INTEGER", nullable: true),
+                    MaxOutput = table.Column<int>(type: "INTEGER", nullable: true),
+                    Pricing = table.Column<string>(type: "TEXT", nullable: false),
+                    ReleasedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Abilities = table.Column<string>(type: "TEXT", nullable: false),
+                    Resolutions = table.Column<string>(type: "TEXT", nullable: false),
+                    MaxDimension = table.Column<int>(type: "INTEGER", nullable: true),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: true),
+                    Legacy = table.Column<bool>(type: "INTEGER", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
@@ -241,7 +237,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Avatar", "CreatedAt", "CreatedBy", "DisplayName", "Email", "Enabled", "PasswordHash", "Phone", "Role", "UserName" },
-                values: new object[] { "F62438CE-D1FE-4183-91B4-409D6B45E7B9", "https://avatars.githubusercontent.com/u/61819790?v=4", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "", "管理员", "239573049@qq.com", true, "21232f297a57a5a743894a0e4a801fc3", "13049809673", "Admin", "admin" });
+                values: new object[] { "F62438CE-D1FE-4183-91B4-409D6B45E7B9", "https://avatars.githubusercontent.com/u/61819790?v=4", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "", "管理员", "239573049@qq.com", true, "4E71002969FCD46813B869E931AEDF4B", "13049809673", "Admin", "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileStorages_CreatedBy",
@@ -313,6 +309,11 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "IX_Model_CreatedBy",
                 table: "Model",
                 column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Model_DisplayName",
+                table: "Model",
+                column: "DisplayName");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Model_Provider",

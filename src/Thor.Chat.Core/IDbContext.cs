@@ -5,23 +5,23 @@ namespace Thor.Chat.Core;
 
 public interface IDbContext
 {
-    DbSet<User> Users { get; }
+    DbSet<User> Users { get; set; }
 
-    DbSet<UserOAuth> UserOAuths { get; }
+    DbSet<UserOAuth> UserOAuths { get;set; }
 
-    DbSet<Session> Sessions { get; }
+    DbSet<Session> Sessions { get; set;}
 
-    DbSet<SessionGroup> SessionGroups { get; }
+    DbSet<SessionGroup> SessionGroups { get; set;}
 
-    DbSet<MessageText> MessageTexts { get; }
+    DbSet<MessageText> MessageTexts { get;set; }
 
-    DbSet<MessageFile> MessageFiles { get; }
+    DbSet<MessageFile> MessageFiles { get; set;}
 
-    DbSet<MessageModelUsage> MessageModelUsages { get; }
+    DbSet<MessageModelUsage> MessageModelUsages { get;set; }
 
-    DbSet<Message> Messages { get; }
+    DbSet<Message> Messages { get;set; }
 
-    DbSet<FileStorage> FileStorages { get; }
+    DbSet<FileStorage> FileStorages { get; set;}
 
     Task SaveChangesAsync();
 }

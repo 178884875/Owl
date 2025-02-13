@@ -1,0 +1,105 @@
+body{
+    margin: 0;
+}
+
+.login-container {
+    height: 100vh;
+}
+
+.form-header{
+    font-size: 40px;
+    font-weight: 500;
+    /* 居中 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    user-select: none;
+
+}
+
+.login-banner {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.login-form-container {
+    flex: 1;
+    max-width: 480px;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 320px;
+}
+
+.form-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+}
+
+.form-subtitle {
+    color: #666;
+    margin-bottom: 32px;
+}
+
+.site-form-item-icon {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+.login-form-forgot {
+    color: #1890ff;
+}
+
+.social-login {
+    margin-top: 32px;
+    text-align: center;
+}
+
+.divider {
+    color: #666;
+    position: relative;
+    margin: 16px 0;
+}
+
+.divider:before,
+.divider:after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+    margin: auto 10px;
+}
+
+.social-icons .ant-btn {
+    color: #666;
+    border-color: #ddd;
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+    }
+
+    .login-banner {
+        display: none;
+    }
+
+    .login-form-container {
+        width: 100%;
+        max-width: 100%;
+    }
+}

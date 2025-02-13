@@ -15,4 +15,9 @@ public sealed class AuthInput
     /// 验证码ID
     /// </summary>
     public string? CodeId { get; set; }
+    
+    /// <summary>
+    /// 是否记住
+    /// </summary>
+    public bool Remember { get; set; }
 }

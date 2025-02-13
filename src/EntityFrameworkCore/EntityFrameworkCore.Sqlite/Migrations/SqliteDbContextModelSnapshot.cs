@@ -207,10 +207,13 @@ namespace EntityFrameworkCore.Sqlite.Migrations
             modelBuilder.Entity("Thor.Chat.Core.Entities.Model", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ContextWindowTokens")
+                    b.Property<string>("Abilities")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ContextWindowTokens")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
@@ -221,62 +224,52 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(256)
+                        .IsRequired()
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasMaxLength(128)
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Enabled")
+                    b.Property<bool?>("Enabled")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("FunctionCall")
+                    b.Property<bool?>("Legacy")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("MaxOutputTokens")
+                    b.Property<int?>("MaxDimension")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal?>("PricingAudioInput")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("MaxOutput")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<decimal?>("PricingAudioOutput")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("PricingCachedAudioInput")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("PricingCachedInput")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("PricingInput")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("PricingOutput")
+                    b.Property<string>("Pricing")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Provider")
                         .IsRequired()
-                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Reasoning")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime?>("ReleasedAt")
+                        .HasColumnType("TEXT");
 
-                    b.Property<string>("ReleasedAt")
+                    b.Property<string>("Resolutions")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("Vision")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DisplayName");
 
                     b.HasIndex("Provider");
 
@@ -446,7 +439,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                             DisplayName = "管理员",
                             Email = "239573049@qq.com",
                             Enabled = true,
-                            PasswordHash = "21232f297a57a5a743894a0e4a801fc3",
+                            PasswordHash = "4E71002969FCD46813B869E931AEDF4B",
                             Phone = "13049809673",
                             Role = "Admin",
                             UserName = "admin"

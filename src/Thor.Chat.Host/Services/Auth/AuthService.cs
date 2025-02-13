@@ -31,6 +31,9 @@ public class AuthService(ICaptcha captcha, UserService userService, JwtHelper jw
         {
             throw new BusinessException("密码错误");
         }
+        
+        user.PasswordHash = string.Empty;
+        user.Phone = string.Empty;
 
         var dist = new Dictionary<string, string>
         {

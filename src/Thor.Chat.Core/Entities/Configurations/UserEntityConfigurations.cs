@@ -43,7 +43,7 @@ public class UserEntityConfigurations : IEntityTypeConfiguration<User>
         {
             Id = "F62438CE-D1FE-4183-91B4-409D6B45E7B9",
             UserName = "admin",
-            PasswordHash = "21232f297a57a5a743894a0e4a801fc3",
+            PasswordHash = "4E71002969FCD46813B869E931AEDF4B",
             Email = "239573049@qq.com",
             Phone = "13049809673",
             Avatar = "https://avatars.githubusercontent.com/u/61819790?v=4",

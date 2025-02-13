@@ -9,23 +9,23 @@ namespace Thor.Chat.Core;
 public abstract class DbContextBase<TDbContext>(DbContextOptions<TDbContext> options)
     : DbContext(options), IDbContext where TDbContext : DbContext
 {
-    public DbSet<User> Users { get; }
+    public DbSet<User> Users { get; set; }
 
-    public DbSet<UserOAuth> UserOAuths { get; }
+    public DbSet<UserOAuth> UserOAuths { get; set; }
 
-    public DbSet<Session> Sessions { get; }
+    public DbSet<Session> Sessions { get; set; }
 
-    public DbSet<SessionGroup> SessionGroups { get; }
+    public DbSet<SessionGroup> SessionGroups { get; set; }
 
-    public DbSet<MessageText> MessageTexts { get; }
+    public DbSet<MessageText> MessageTexts { get; set; }
 
-    public DbSet<MessageFile> MessageFiles { get; }
+    public DbSet<MessageFile> MessageFiles { get; set; }
 
-    public DbSet<MessageModelUsage> MessageModelUsages { get; }
+    public DbSet<MessageModelUsage> MessageModelUsages { get; set; }
 
-    public DbSet<Message> Messages { get; }
+    public DbSet<Message> Messages { get; set; }
 
-    public DbSet<FileStorage> FileStorages { get; }
+    public DbSet<FileStorage> FileStorages { get; set; }
 
     public async Task SaveChangesAsync()
     {
