@@ -26,6 +26,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.Sqlite\EntityFrameworkCore.Sqlite.csproj" />
+      <ProjectReference Include="..\Storage\Storage.Core\Storage.Core.csproj" />
+      <ProjectReference Include="..\Storage\Storage.LiteDB\Storage.LiteDB.csproj" />
       <ProjectReference Include="..\Thor.Chat.Core\Thor.Chat.Core.csproj" />
     </ItemGroup>
 

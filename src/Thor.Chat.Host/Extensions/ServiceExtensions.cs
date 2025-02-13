@@ -3,6 +3,7 @@ using EntityFrameworkCore.Sqlite.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Storage.LiteDB.Extensions;
 using Thor.Chat.Host.Infrastructure;
 using Thor.Chat.Host.Options;
 
@@ -21,7 +22,7 @@ public static class ServiceExtensions
         var jwtOption = option.Get<JwtOptions>();
 
         services.Configure<JwtOptions>(option);
-        
+
         services.Configure<ChatSessionOptions>(configuration.GetSection(ChatSessionOptions.Session));
 
         services.AddAuthorization()
@@ -51,7 +52,7 @@ public static class ServiceExtensions
         services.AddSingleton<JwtHelper>();
 
         services.AddCaptcha();
-        
+
         return services;
     }
 
@@ -72,11 +73,23 @@ public static class ServiceExtensions
         return services;
     }
 
+    public static IServiceCollection AddStorage(this IServiceCollection services, IConfiguration configuration)
+    {
+        if (configuration["Storage:Type"].Equals("LiteDB", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddLiteDB();
+        }
+
+        return services;
+    }
+
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddJwt(configuration);
 
         services.AddDbContext(configuration);
+
+        services.AddStorage(configuration);
 
         return services;
     }
