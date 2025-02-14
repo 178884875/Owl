@@ -1,28 +1,24 @@
-import {Flexbox} from 'react-layout-kit';
+import { Flexbox } from 'react-layout-kit';
 import { useChatStore } from '../../../../store/chat';
+import SessionItem from './sessiont-item';
+import { chatSelectors } from '../../../../store/chat/selectors';
+import DefaultSession from './default';
 
-export default function Session(){
-    const [sessions,currentSession] = useChatStore(state => [state.sessions,state.currentSession]);
+export default function Session() {
+    const [sessionIds] = useChatStore(state => [chatSelectors.getSessions(state)]);
+
     return (
         <Flexbox style={{
             transition: 'width 0.3s',
             padding: 5,
             marginTop: 10,
+            width: 'auto',
+            flex: 1,
         }}>
+            <DefaultSession />
             {
-                sessions?.map((session:any) => {
-                    return (
-                        <Flexbox
-                            key={session.id}
-                            style={{
-                                padding: 5,
-                                cursor: 'pointer',
-                                backgroundColor: currentSession?.id === session.id ? '#f0f0f0' : 'transparent',
-                            }}
-                        >
-                            {session.name}
-                        </Flexbox>
-                    );
+                sessionIds?.map((session: any) => {
+                    return (<SessionItem id={session} />);
                 })
             }
         </Flexbox>

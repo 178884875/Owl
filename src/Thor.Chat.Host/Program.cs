@@ -1,3 +1,7 @@
+using System.ComponentModel;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Thor.Chat.Host.Converters;
 using Thor.Chat.Host.Extensions;
 
 namespace Thor.Chat.Host;
@@ -10,20 +14,17 @@ public static class Program
 
         builder.Services.AddServices(builder.Configuration);
 
+        builder.Services.ConfigureHttpJsonOptions((options =>
+        {
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.SerializerOptions.Converters.Add(new JsonDateTimeConverter());
+            options.SerializerOptions.Converters.Add(new JsonDateTimeOffsetConverter());
+        }));
+
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        
-        builder.Services
-            .AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                    builder => builder
-                        .SetIsOriginAllowed(_ => true)
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials());
-            });
-
 
         var app = builder.Build();
 
@@ -32,11 +33,10 @@ public static class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        app.UseCors("AllowAll");
 
         app.UseAuthentication();
         app.UseAuthorization();
-        
+
         app.MapMiniApis();
 
         await app.RunAsync();

@@ -12,6 +12,7 @@ dayjs.locale('zh-cn');
 export default function GlobalLayout() {
     return (<Flexbox style={{
         flex: 1,
+        overflow: 'hidden',
     }}>
         <ConfigProvider locale={zhCN}>
             <Outlet />

@@ -3,6 +3,7 @@ import { Flexbox } from "react-layout-kit";
 import { useNavigate } from 'react-router-dom'
 import SideMenu from "./side-menu";
 import Workspace from "./workspace";
+import Title from "./features/Title";
 
 
 export default function Chat() {
@@ -23,7 +24,13 @@ export default function Chat() {
             horizontal
         >
             <SideMenu />
-            <Workspace />
+            <Flexbox style={{
+                flex: 1,
+                height: '100%',
+            }}>
+                <Title />
+                <Workspace />
+            </Flexbox>
         </Flexbox>
     )
 }

@@ -10,7 +10,10 @@ using Thor.Chat.Host.Options;
 namespace Thor.Chat.Host.Services.FileStorage;
 
 [Tags("FileStorage")]
-public sealed class FileStorageService(IStorageService storageService, IUserContext userContext,IOptions<ChatOptions> options) : FastApi
+public sealed class FileStorageService(
+    IStorageService storageService,
+    IUserContext userContext,
+    IOptions<ChatOptions> options) : FastApi
 {
     /// <summary>
     /// 上传文件
@@ -24,13 +27,13 @@ public sealed class FileStorageService(IStorageService storageService, IUserCont
         var fileName = Guid.NewGuid().ToString("N") + ext;
 
         var path = await storageService.UploadFileAsync(fileName, file.OpenReadStream(), userContext.UserId);
-        
-        if(!string.IsNullOrEmpty(path))
+
+        if (!string.IsNullOrEmpty(path))
         {
-            return options.Value.App.TrimEnd('/')+""
+            return options.Value.App.TrimEnd('/') + "/api/FileStorage?id=" + path;
         }
 
-        return path;
+        throw new BusinessException("上传失败");
     }
 
     /// <summary>
@@ -38,9 +41,9 @@ public sealed class FileStorageService(IStorageService storageService, IUserCont
     /// </summary>
     [EndpointSummary("获取文件")]
     [AllowAnonymous]
-    public async Task GetAsync(string path, HttpContext context)
+    public async Task GetAsync(string id, HttpContext context)
     {
-        var stream = await storageService.GetFileAsync(path);
+        var stream = await storageService.GetFileAsync(id);
 
         if (stream.stream == null)
         {
@@ -48,7 +51,7 @@ public sealed class FileStorageService(IStorageService storageService, IUserCont
             return;
         }
 
-        var type = GetContentType(path);
+        var type = GetContentType(id);
 
         context.Response.ContentType = type;
 
@@ -59,7 +62,7 @@ public sealed class FileStorageService(IStorageService storageService, IUserCont
     /// 根据文件名称获取文件类型
     /// </summary>
     /// <returns></returns>
-    public static string GetContentType(string fileName)
+    private static string GetContentType(string fileName)
     {
         var provider = new FileExtensionContentTypeProvider();
         if (!provider.TryGetContentType(fileName, out var contentType))

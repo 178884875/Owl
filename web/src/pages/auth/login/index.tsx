@@ -8,9 +8,11 @@ import { useEffect, useState } from 'react';
 import Verification from '../../../apis/Verification';
 import { LoginInput } from '../../../types/Auth';
 import AuthLogin from '../../../apis/Auth';
+import { useUserStore } from '@/store/user/store';
 
 export default function Login() {
     const [loading, setLoading] = useState(false)
+    const [SignIn] = useUserStore(state => [state.SignIn])
 
     const [codeImage, setCodeImage] = useState({
         code: '',
@@ -26,21 +28,13 @@ export default function Login() {
             console.log(result);
 
             if (result.success) {
-                localStorage.setItem('token', result.data)
+                SignIn(result.data)
                 window.location.href = '/'
             } else {
                 notification.error({
                     message: '错误',
                     description: result.message
                 })
-                notification.open({
-                    message: 'Notification Title',
-                    description:
-                      'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
-                    onClick: () => {
-                      console.log('Notification Clicked!');
-                    },
-                  });
             }
 
         } catch (e) {

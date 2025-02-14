@@ -23,7 +23,7 @@ public sealed class Session : Entity<long>
     /// <summary>
     /// 会话标签
     /// </summary>
-    public string[] Tags { get; set; } = Array.Empty<string>();
+    public string[] Tags { get; set; } = [];
 
     /// <summary>
     /// 模型名称

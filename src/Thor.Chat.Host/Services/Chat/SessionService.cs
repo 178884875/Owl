@@ -26,10 +26,10 @@ public class SessionService(
     /// 获取所有会话
     /// </summary>
     [EndpointSummary("获取所有会话")]
-    public async Task<IEnumerable<SessionDto>> GetSessionsAsync()
+    public async Task<IEnumerable<SessionDto>> GetListAsync(string? search)
     {
         var sessions = await dbContext.Sessions
-            .Where(x => x.CreatedBy == userContext.UserId)
+            .Where(x => x.CreatedBy == userContext.UserId && (string.IsNullOrEmpty(search) || x.Name.Contains(search)))
             .OrderBy(x => x.CreatedAt)
             .ToListAsync();
 

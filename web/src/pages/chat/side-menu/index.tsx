@@ -4,9 +4,23 @@ import { useChatStore } from "../../../store/chat";
 import { Button, Divider, Input } from "antd";
 import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import Session from "./session";
+import { useEffect } from "react";
+import { getSessionLite } from "../../../apis/Session";
+import UserInfo from "./user-info";
 
 export default function SideMenu() {
-    const [expanded, setExpanded] = useChatStore(state => [state.sideBarExpanded, state.setSideBarExpanded]);
+    const [expanded, setExpanded, search, setSessions, setSearch] =
+        useChatStore(state => [state.sideBarExpanded, state.setSideBarExpanded, state.searchSessionValue, state.setSessions, state.setSearchSessionValue]);
+
+    useEffect(() => {
+        onSearch(search);
+    }, [search])
+
+    const onSearch = (value?: string) => {
+        getSessionLite(value).then(result => {
+            setSessions(result.data);
+        });
+    }
 
     const toggleExpanded = () => {
         setExpanded(!expanded);
@@ -14,7 +28,7 @@ export default function SideMenu() {
 
     return (<>
         <Flexbox style={{
-            width: expanded ? 200 : 50,
+            width: expanded ? 240 : 50,
             transition: 'width 0.3s',
             padding: 5,
         }}>
@@ -24,12 +38,13 @@ export default function SideMenu() {
             }}>
                 <Flexbox style={{
                     marginRight: 5,
-                    width: expanded ? 140 : 0,
                 }}>
                     {expanded &&
                         <Input.Search
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
                             style={{
-                                width: 140,
+                                width: 180,
                             }}
                             placeholder="搜索"
                         />}
@@ -49,9 +64,8 @@ export default function SideMenu() {
                     }
                 </Button>
             </Flexbox>
-            {
-                expanded && <Session />
-            }
+            <Session />
+            <UserInfo/>
         </Flexbox>
         <Divider type="vertical" style={{
             height: '100%',

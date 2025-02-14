@@ -22,7 +22,7 @@ public class SessionDto : EntityDto<long>
     /// <summary>
     /// 会话标签
     /// </summary>
-    public string[] Tags { get; set; } = Array.Empty<string>();
+    public string[] Tags { get; set; } = [];
 
     /// <summary>
     /// 模型名称
@@ -63,5 +63,32 @@ public class SessionDto : EntityDto<long>
     /// 会话组Id
     /// </summary>
     public string? SessionGroupId { get; set; }
+
+    public string CreatedAtName
+    {
+        get
+        {
+            // 如果创建时间是今天，则显示小时分钟
+            if (CreatedAt.Date == DateTime.Today)
+            {
+                return CreatedAt.ToString("HH:mm");
+            }
+            
+            // 如果创建时间是昨天，则显示昨天：小时分钟
+            if (CreatedAt.Date == DateTime.Today.AddDays(-1))
+            {
+                return $"昨天 {CreatedAt:HH:mm}";
+            }
+            
+            // 如果创建时间是今年，则显示月日
+            if (CreatedAt.Year == DateTime.Today.Year)
+            {
+                return CreatedAt.ToString("MM-dd");
+            }
+            
+            // 否则显示年月日
+            return CreatedAt.ToString("yyyy-MM-dd");
+        }
+    }
 
 }
