@@ -23,7 +23,9 @@ public static class ServiceExtensions
 
         services.Configure<JwtOptions>(option);
 
-        services.Configure<ChatSessionOptions>(configuration.GetSection(ChatSessionOptions.Session));
+        services.Configure<ChatSessionOptions>(configuration.GetSection(ChatSessionOptions.Name));
+        
+        services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Name));
 
         services.AddAuthorization()
             .AddAuthentication(options =>

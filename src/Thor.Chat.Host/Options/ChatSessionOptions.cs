@@ -2,7 +2,7 @@
 
 public class ChatSessionOptions
 {
-    public const string Session = "Session";
+    public const string Name = "Session";
     
     /// <summary>
     /// 会话默认模型

@@ -1,13 +1,16 @@
 ﻿using FastService;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Options;
 using Storage.Core;
 using Thor.Chat.Host.Infrastructure;
+using Thor.Chat.Host.Options;
 
 namespace Thor.Chat.Host.Services.FileStorage;
 
 [Tags("FileStorage")]
-public sealed class FileStorageService(IStorageService storageService, IUserContext userContext) : FastApi
+public sealed class FileStorageService(IStorageService storageService, IUserContext userContext,IOptions<ChatOptions> options) : FastApi
 {
     /// <summary>
     /// 上传文件
@@ -21,6 +24,11 @@ public sealed class FileStorageService(IStorageService storageService, IUserCont
         var fileName = Guid.NewGuid().ToString("N") + ext;
 
         var path = await storageService.UploadFileAsync(fileName, file.OpenReadStream(), userContext.UserId);
+        
+        if(!string.IsNullOrEmpty(path))
+        {
+            return options.Value.App.TrimEnd('/')+""
+        }
 
         return path;
     }

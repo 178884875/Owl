@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { Flexbox } from "react-layout-kit";
 import { useNavigate } from 'react-router-dom'
+import SideMenu from "./side-menu";
+import Workspace from "./workspace";
 
 
 export default function Chat() {
@@ -16,9 +18,12 @@ export default function Chat() {
 
     return (
         <Flexbox style={{
-            flex: 1,
-        }}>
-            Chat
+            height: '100vh',
+        }}
+            horizontal
+        >
+            <SideMenu />
+            <Workspace />
         </Flexbox>
     )
 }
