@@ -42,7 +42,7 @@ public class SessionService(
     /// 根据Id获取会话
     /// </summary>
     [EndpointSummary("根据Id获取会话")]
-    public async Task<Session> GetSessionAsync(long id)
+    public async Task<Session> GetAsync(long id)
     {
         var session = await dbContext.Sessions
             .AsNoTracking()
@@ -61,13 +61,14 @@ public class SessionService(
     /// 创建新会话
     /// </summary>
     [EndpointSummary("创建新会话")]
-    public async Task<Session> CreateSessionAsync(CreateSessionInput sessionInput)
+    public async Task<Session> CreateAsync(CreateSessionInput sessionInput)
     {
+        sessionInput.Avatar = "🧸";
         var session = mapper.Map<Session>(sessionInput);
 
         session.CreatedBy = userContext.UserId;
         session.CreatedAt = DateTime.Now;
-        session.Model = sessionOptions.Value.Model;
+        session.Model = sessionInput.ModelId;
 
         await dbContext.Sessions.AddAsync(session);
         await dbContext.SaveChangesAsync();
@@ -79,7 +80,7 @@ public class SessionService(
     /// 删除会话
     /// </summary>
     [EndpointSummary("删除会话")]
-    public async Task DeleteSessionAsync(long id)
+    public async Task DeleteAsync(long id)
     {
         await dbContext.Sessions
             .Where(s => s.Id == id && s.CreatedBy == userContext.UserId)
@@ -126,6 +127,17 @@ public class SessionService(
     }
 
     /// <summary>
+    /// 切换会话模型
+    /// </summary>
+    [EndpointSummary("切换会话模型")]
+    public async Task SwitchModelAsync(long sessionId, string modelId)
+    {
+        await dbContext.Sessions
+            .Where(s => s.Id == sessionId && s.CreatedBy == userContext.UserId)
+            .ExecuteUpdateAsync(x => x.SetProperty(a => a.Model, modelId));
+    }
+
+    /// <summary>
     /// 创建新会话组
     /// </summary>
     [EndpointSummary("创建新会话组")]
@@ -151,5 +163,35 @@ public class SessionService(
         await dbContext.SessionGroups
             .Where(sg => sg.Id == id && sg.CreatedBy == userContext.UserId)
             .ExecuteDeleteAsync();
+    }
+
+    /// <summary>
+    /// 更新会话
+    /// </summary>
+    [EndpointSummary("更新会话")]
+    public async Task UpdateAsync(UpdateSessionInput sessionInput)
+    {
+        var session = await dbContext.Sessions
+            .FirstOrDefaultAsync(x => x.Id == sessionInput.Id && x.CreatedBy == userContext.UserId);
+
+        if (session == null)
+        {
+            throw new BusinessException("会话不存在");
+        }
+
+        await dbContext.Sessions
+            .Where(x => x.Id == sessionInput.Id)
+            .ExecuteUpdateAsync(x =>
+                x.SetProperty(a => a.Description, sessionInput.Description)
+                    .SetProperty(a => a.Avatar, sessionInput.Avatar)
+                    .SetProperty(a => a.Favorite, sessionInput.Favorite)
+                    .SetProperty(a => a.Temperature, sessionInput.Temperature)
+                    .SetProperty(a => a.MaxTokens, sessionInput.MaxTokens)
+                    .SetProperty(a => a.TopP, sessionInput.TopP)
+                    .SetProperty(a => a.FrequencyPenalty, sessionInput.FrequencyPenalty)
+                    .SetProperty(a => a.PresencePenalty, sessionInput.PresencePenalty)
+                    .SetProperty(a => a.SessionGroupId, sessionInput.SessionGroupId)
+                    .SetProperty(a => a.HistoryMessagesCount, sessionInput.HistoryMessagesCount)
+                    .SetProperty(a => a.Tags, sessionInput.Tags));
     }
 }

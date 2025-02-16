@@ -15,10 +15,15 @@ public class CreateSessionInput
     /// <summary>
     /// 会话图标
     /// </summary>
-    public required string Avatar { get; set; }
+    public  string? Avatar { get; set; }
     
     /// <summary>
     /// 会话组Id
     /// </summary>
     public string? SessionGroupId { get; set; }
+    
+    /// <summary>
+    /// 选择的模型Id
+    /// </summary>
+    public string ModelId { get; set; } = null!;
 }

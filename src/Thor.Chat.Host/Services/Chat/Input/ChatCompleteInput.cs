@@ -1,0 +1,29 @@
+﻿namespace Thor.Chat.Host.Services.Chat.Input;
+
+public class ChatCompleteInput
+{
+    /// <summary>
+    /// 会话Id
+    /// </summary>
+    public long SessionId { get; set; }
+    
+    /// <summary>
+    /// 上级消息Id
+    /// </summary>
+    public long? ParentId { get; set; }
+    
+    /// <summary>
+    /// 消息
+    /// </summary>
+    public string Text { get; set; }
+
+    /// <summary>
+    /// 文件Id
+    /// </summary>
+    public List<string> FileIds { get; set; } = new();
+
+    /// <summary>
+    /// 启用function call
+    /// </summary>
+    public List<string> FunctionCalls { get; set; } = new();
+}

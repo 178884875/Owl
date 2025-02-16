@@ -59,6 +59,12 @@ public sealed class Session : Entity<long>
     /// 是否收藏
     /// </summary>
     public bool Favorite { get; set; }
+    
+    /// <summary>
+    /// 使用历史消息数量
+    /// </summary>
+    /// <returns></returns>
+    public int HistoryMessagesCount { get; set; }
 
     /// <summary>
     /// 会话组Id

@@ -21,6 +21,11 @@ public class CreateMessage : EntityDto<long>
     /// 分析会话Id
     /// </summary>
     public long? ShareId { get; set; }
+    
+    /// <summary>
+    /// 创建角色
+    /// </summary>
+    public required string Role { get; set; } = null!;
 
     /// <summary>
     /// 对话文本

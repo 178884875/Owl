@@ -12,13 +12,14 @@ namespace Thor.Chat.Host.Services.Chat;
 
 [Tags("Chat")]
 [Authorize]
+[Filter(typeof(ResultFilter))]
 public class MessageService(IDbContext dbContext, IUserContext userContext, IMapper mapper) : FastApi
 {
     /// <summary>
     /// 获取所有消息
     /// </summary>
     [EndpointSummary("获取所有消息")]
-    public async Task<IEnumerable<MessageDto>> GetListAsync(long sessionId, int? lastId)
+    public async Task<List<MessageDto>> GetListAsync(long sessionId, int? lastId)
     {
         var query = dbContext.Messages.AsQueryable();
 
@@ -35,7 +36,9 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
             .OrderByDescending(x => x.Id)
             .Take(20);
 
-        var dto = mapper.Map<IEnumerable<MessageDto>>(await query.ToListAsync());
+        var result = await query.ToListAsync();
+        
+        var dto = mapper.Map<List<MessageDto>>(result);
 
         return dto;
     }
@@ -65,7 +68,7 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
     /// </summary>
     /// <param name="message"></param>
     [EndpointSummary("创建新消息")]
-    public async Task<Message> CreateAsync(CreateMessage message)
+    public async Task CreateAsync(CreateMessage message)
     {
         var value = mapper.Map<Message>(message);
 
@@ -76,7 +79,7 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
 
         await dbContext.SaveChangesAsync();
 
-        return value;
+        
     }
 
     /// <summary>

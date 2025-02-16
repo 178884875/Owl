@@ -10,6 +10,11 @@ public sealed class Message : Entity<long>
     /// 空=临时会话？
     /// </summary>
     public long? SessionId { get; set; }
+    
+    /// <summary>
+    /// 创建角色
+    /// </summary>
+    public string Role { get; set; } = null!;
 
     /// <summary>
     /// 上级消息Id

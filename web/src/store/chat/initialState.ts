@@ -11,6 +11,8 @@ export interface ChatState {
     files: any[];
     // 展开文件
     fileExpanded?: boolean;
+    createSessionVisible?: boolean;
+    models: any[];
 }
 
 export const initialState: ChatState = {
@@ -25,4 +27,5 @@ export const initialState: ChatState = {
     files: [],
     searchSessionValue: '',
     fileExpanded: false,
+    models: [],
 }

@@ -74,6 +74,10 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Property<long?>("ParentId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<long?>("SessionId")
                         .HasColumnType("INTEGER");
 
@@ -224,7 +228,6 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
@@ -236,14 +239,12 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Property<bool?>("Enabled")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool?>("Legacy")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("MaxDimension")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("MaxOutput")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ModelId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Pricing")
                         .IsRequired()
@@ -253,7 +254,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("ReleasedAt")
+                    b.Property<string>("ReleasedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Resolutions")
@@ -273,7 +274,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
 
                     b.HasIndex("Provider");
 
-                    b.ToTable("Model");
+                    b.ToTable("Models");
                 });
 
             modelBuilder.Entity("Thor.Chat.Core.Entities.Session", b =>
@@ -300,6 +301,9 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("FrequencyPenalty")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("HistoryMessagesCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("MaxTokens")

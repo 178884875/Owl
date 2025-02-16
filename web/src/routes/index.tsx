@@ -1,6 +1,8 @@
+import Chat from "@/pages/main/chat";
 import GlobalLayout from "../layouts/GlobalLayout";
 import Login from "../pages/auth/login";
-import Chat from "../pages/chat";
+import MainLayout from "../pages/main";
+import Welcome from "@/pages/main/welcome";
 
 
 const routes = [
@@ -12,8 +14,17 @@ const routes = [
                 element: <Login />
             },
             {
-                path: '/',
-                element: <Chat/>
+                element: <MainLayout />,
+                children: [
+                    {
+                        path: '/',
+                        element: <Welcome />
+                    },
+                    {
+                        path: '/chat',
+                        element: <Chat />
+                    }
+                ]
             }
         ]
     }

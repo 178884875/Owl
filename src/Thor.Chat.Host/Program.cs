@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Thor.Chat.Host.Converters;
 using Thor.Chat.Host.Extensions;
+using Thor.Chat.Host.Service;
 
 namespace Thor.Chat.Host;
 
@@ -22,6 +23,8 @@ public static class Program
             options.SerializerOptions.Converters.Add(new JsonDateTimeConverter());
             options.SerializerOptions.Converters.Add(new JsonDateTimeOffsetConverter());
         }));
+
+        builder.Services.AddHostedService<InitModelBackstageService>();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();

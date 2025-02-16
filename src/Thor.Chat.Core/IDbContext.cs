@@ -22,6 +22,8 @@ public interface IDbContext
     DbSet<Message> Messages { get;set; }
 
     DbSet<FileStorage> FileStorages { get; set;}
+    
+    DbSet<Model> Models { get; set; }
 
     Task SaveChangesAsync();
 }

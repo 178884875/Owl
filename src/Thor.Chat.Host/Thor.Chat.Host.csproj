@@ -31,4 +31,10 @@
       <ProjectReference Include="..\Thor.Chat.Core\Thor.Chat.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="Configs\Models.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

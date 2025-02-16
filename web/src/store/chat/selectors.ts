@@ -25,6 +25,11 @@ const getSessionById = (state: ChatState, id: number) => state.sessions?.find(se
 const isCurrentSession = (state: ChatState, id: number) => state.currentSession?.id === id;
 
 
+/**
+ * 获取所有消息Ids
+ * @param state
+ * @returns 
+ */
 const getMessages = (state: ChatState) => state.messages?.map(message => message.id) || [];
 
 
@@ -36,10 +41,20 @@ const getMessagesBySessionId = (state: ChatState, messageId: number) => {
     return null
 }
 
+const getCurrentModel = (state: ChatState) => {
+    // 从state.currentSession中获取modelId
+    const modelId = state.currentSession?.model;
+    // 从state.models中获取model
+    const model = state.models?.find(item => item.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === modelId) !== undefined)?.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === modelId);
+
+    return model
+}
+
 export const chatSelectors = {
     getSessions,
     getSessionById,
     isCurrentSession,
     getMessages,
-    getMessagesBySessionId
+    getMessagesBySessionId,
+    getCurrentModel
 }
