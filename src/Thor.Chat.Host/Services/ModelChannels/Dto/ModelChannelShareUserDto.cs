@@ -1,9 +1,8 @@
-﻿namespace Thor.Chat.Core.Entities;
+﻿using Thor.Chat.Host.Dto;
 
-/// <summary>
-/// 模型渠道分享可用用户
-/// </summary>
-public sealed class ModelChannelShareUser : Entity<long>
+namespace Thor.Chat.Host.Services.ModelChannels.Dto;
+
+public class ModelChannelShareUserDto : EntityDto<long>
 {
     public long ChannelId { get; set; }
 
@@ -17,10 +16,10 @@ public sealed class ModelChannelShareUser : Entity<long>
     /// <summary>
     /// 模型渠道
     /// </summary>
-    public ModelChannel Channel { get; set; } = null!;
+    public ModelChannelDto Channel { get; set; } = null!;
 
     /// <summary>
     /// 用户
     /// </summary>
-    public User User { get; set; } = null!;
+    public UserDto User { get; set; } = null!;
 }

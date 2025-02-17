@@ -3,6 +3,9 @@ import GlobalLayout from "../layouts/GlobalLayout";
 import Login from "../pages/auth/login";
 import MainLayout from "../pages/main";
 import Welcome from "@/pages/main/welcome";
+import ConsoleLayout from "@/pages/console";
+import ConsoleWelcome from "@/pages/console/welcome";
+import ConsoleChannel from "@/pages/console/channel";
 
 
 const routes = [
@@ -23,6 +26,20 @@ const routes = [
                     {
                         path: '/chat',
                         element: <Chat />
+                    }
+                ]
+            },
+            {
+                path: "/console",
+                element: <ConsoleLayout />,
+                children: [
+                    {
+                        path: "",
+                        element: <ConsoleWelcome />
+                    },
+                    {
+                        path: "/console/channel",
+                        element: <ConsoleChannel />
                     }
                 ]
             }

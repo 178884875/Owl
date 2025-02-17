@@ -135,9 +135,7 @@ const XAI = lazy(() => import('@lobehub/icons').then(module => ({ default: modul
 const Xuanyuan = lazy(() => import('@lobehub/icons').then(module => ({ default: module.Xuanyuan })));
 const Zeabur = lazy(() => import('@lobehub/icons').then(module => ({ default: module.Zeabur })));
 const ZeroOne = lazy(() => import('@lobehub/icons').then(module => ({ default: module.ZeroOne })));
-const { 
-  useToken
-} = theme;
+
 const iconMap: { [key: string]: React.LazyExoticComponent<any> } = {
   OpenAI, ChatGLM, Claude, Baichuan, Ai21, Google, Grok, Hunyuan, Minimax, Spark,
   Moonshot, Wenxin, Yi, Zhipu, DeepSeek, Qingyan, Qwen, Adobe, AdobeFirefly, Ai360,

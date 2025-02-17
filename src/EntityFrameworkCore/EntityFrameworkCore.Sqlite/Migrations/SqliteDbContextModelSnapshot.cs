@@ -277,6 +277,173 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("Models");
                 });
 
+            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Available")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Avatar")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Favorite")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Keys")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ModelIds")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("RequestCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("ResponseTime")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("TokenCost")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("Provider");
+
+                    b.ToTable("ModelChannels");
+                });
+
+            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannelInviteCode", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ChannelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ExpireTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Inviter")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MaxUseCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UsedCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UsedUsers")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("ChannelId", "Code", "Inviter");
+
+                    b.ToTable("ModelChannelInviteCodes");
+                });
+
+            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannelShareUser", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ChannelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("ModelChannelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("ModelChannelId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ChannelId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("ModelChannelShareUsers");
+                });
+
             modelBuilder.Entity("Thor.Chat.Core.Entities.Session", b =>
                 {
                     b.Property<long>("Id")
@@ -524,6 +691,40 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Navigation("Message");
                 });
 
+            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannelInviteCode", b =>
+                {
+                    b.HasOne("Thor.Chat.Core.Entities.ModelChannel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
+                });
+
+            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannelShareUser", b =>
+                {
+                    b.HasOne("Thor.Chat.Core.Entities.ModelChannel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Thor.Chat.Core.Entities.ModelChannel", null)
+                        .WithMany("ShareUsers")
+                        .HasForeignKey("ModelChannelId");
+
+                    b.HasOne("Thor.Chat.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Thor.Chat.Core.Entities.Session", b =>
                 {
                     b.HasOne("Thor.Chat.Core.Entities.SessionGroup", "SessionGroup")
@@ -540,6 +741,11 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Navigation("ModelUsages");
 
                     b.Navigation("Texts");
+                });
+
+            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannel", b =>
+                {
+                    b.Navigation("ShareUsers");
                 });
 #pragma warning restore 612, 618
         }

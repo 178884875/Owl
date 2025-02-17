@@ -25,7 +25,7 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
             }
 
             var json = await File.ReadAllTextAsync(modelPath, stoppingToken);
-            
+
             var models = JsonSerializer.Deserialize<InitModelsDto[]>(json,
                 JsonOptions.DefaultJsonSerializerOptions);
 
@@ -37,7 +37,7 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
                 return;
             }
 
-            var items = new List<Model>(models.SelectMany(x=>x.ChatModels).Count());
+            var items = new List<Model>(models.SelectMany(x => x.ChatModels).Count());
 
             foreach (var model in models)
             {
@@ -61,10 +61,64 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
 
             await dbContext.Models.AddRangeAsync(items, stoppingToken);
 
+            await HandleAsync(dbContext, items);
+
+
             await dbContext.SaveChangesAsync();
         }
         finally
         {
         }
+    }
+
+    /// <summary>
+    /// 初始化渠道
+    /// </summary>
+    private async Task HandleAsync(IDbContext context, List<Model> items)
+    {
+        // 判断是否已经初始化
+        if (await context.ModelChannels.AnyAsync())
+        {
+            return;
+        }
+
+        await CreateChannelAsync(context, "OpenAI", "OpenAI", "OpenAI", "https://api.openai.com/v1",
+            items
+                .Where(x => x.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "OpenAI", true, ["OpenAI"]);
+
+        // 创建DeepSeek
+        await CreateChannelAsync(context, "DeepSeek", "DeepSeek", "DeepSeek", "https://api.deepseek.com/v1",
+            items.Select(x => x.Id).ToList(), "DeepSeek", true, ["DeepSeek"]);
+
+        // 创建google,使用OpenAI兼容接口
+        await CreateChannelAsync(context, "Google", "Google", "Google",
+            "https://generativelanguage.googleapis.com/v1beta/openai/",
+            items
+                .Where(x => x.Provider.Equals("Google", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "OpenAI", false, ["Google"]);
+    }
+
+    /// <summary>
+    /// 创建渠道
+    /// </summary>
+    public async Task CreateChannelAsync(IDbContext context, string name, string description, string avatar,
+        string endpoint, List<string> modelIds, string provider, bool favorite, string[] tags)
+    {
+        var channel = new ModelChannel()
+        {
+            Name = name,
+            Description = description,
+            Avatar = avatar,
+            Endpoint = endpoint,
+            Enabled = true,
+            ModelIds = modelIds,
+            Provider = provider,
+            Favorite = favorite,
+            Available = true,
+            Tags = tags,
+        };
+
+        await context.ModelChannels.AddAsync(channel);
     }
 }

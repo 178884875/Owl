@@ -1,6 +1,11 @@
 import { useUser } from "@/hooks/useUser";
 import { useUserStore } from "@/store/user/store";
-import { Avatar,  Divider, Dropdown, theme } from "antd";
+import { Avatar, Divider, Dropdown, theme } from "antd";
+import {
+    ChartArea, MessageSquareText, LogOut as LogOutIcon, User, Webhook,
+    Newspaper,
+    CircleHelp
+} from "lucide-react";
 import React from "react";
 import { Flexbox } from "react-layout-kit";
 import { useNavigate } from "react-router-dom";
@@ -82,6 +87,9 @@ export function UserMenu({
                     {
                         key: 'profile',
                         label: '个人信息',
+                        icon: <User
+                            size={18}
+                        />,
                         onClick: () => {
                             navigate('/profile')
                         }
@@ -95,6 +103,7 @@ export function UserMenu({
                         children: [
                             {
                                 key: 'about',
+                                icon: <Newspaper size={18} />,
                                 label: '关于Thor Chat',
                                 onClick: () => {
                                     navigate('/about')
@@ -105,6 +114,7 @@ export function UserMenu({
                             },
                             {
                                 key: 'help',
+                                icon:<CircleHelp size={18} />,
                                 label: '帮助和反馈',
                                 onClick: () => {
                                     navigate('/help')
@@ -113,10 +123,27 @@ export function UserMenu({
                         ]
                     },
                     {
+                        key: 'chat',
+                        label: '对话',
+                        icon: <MessageSquareText size={18} />,
+                        onClick: () => {
+                            navigate('/')
+                        }
+                    },
+                    {
                         key: 'console',
+                        icon: <ChartArea size={18} />,
                         label: '控制台',
                         onClick: () => {
                             navigate('/console')
+                        }
+                    },
+                    {
+                        key: 'channel',
+                        icon: <Webhook size={18} />,
+                        label: '渠道管理',
+                        onClick: () => {
+                            navigate('/console/channel')
                         }
                     },
                     {
@@ -124,6 +151,7 @@ export function UserMenu({
                     },
                     {
                         key: 'logout',
+                        icon: <LogOutIcon size={18} />,
                         label: '退出登录',
                         onClick: () => {
                             LogOut()

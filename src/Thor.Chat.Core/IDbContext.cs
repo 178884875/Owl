@@ -25,9 +25,20 @@ public interface IDbContext
 
     DbSet<Model> Models { get; set; }
 
+    /// <summary>
+    /// 模型渠道
+    /// </summary>
     DbSet<ModelChannel> ModelChannels { get; set; }
 
+    /// <summary>
+    /// 模型渠道分享用户
+    /// </summary>
     DbSet<ModelChannelShareUser> ModelChannelShareUsers { get; set; }
+    
+    /// <summary>
+    /// 模型渠道邀请码
+    /// </summary>
+    DbSet<ModelChannelInviteCode> ModelChannelInviteCodes { get; set; }
 
     Task SaveChangesAsync();
 }

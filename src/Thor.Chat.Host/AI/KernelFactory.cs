@@ -1,6 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.SemanticKernel;
 
+#pragma warning disable SKEXP0070
+#pragma warning disable SKEXP0010
+
 namespace Thor.Chat.Host.AI;
 
 public class KernelFactory
@@ -22,7 +25,15 @@ public class KernelFactory
                 switch (provider.ToLower())
                 {
                     case "openai":
+                    case "deepseek":
+                    case "custom":
                         kernelBuilder.AddOpenAIChatCompletion(model, new Uri(endpoint), apiKey, "Thor-Chat");
+                        break;
+                    case "azure":
+                        kernelBuilder.AddAzureOpenAIChatCompletion(model, endpoint, apiKey);
+                        break;
+                    case "google":
+                        kernelBuilder.AddGoogleAIGeminiChatCompletion(model, apiKey);
                         break;
                     case "ollama":
                         kernelBuilder.AddOllamaChatCompletion(model, new Uri(endpoint));

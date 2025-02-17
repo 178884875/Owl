@@ -49,6 +49,34 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ModelChannels",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Provider = table.Column<string>(type: "TEXT", nullable: false),
+                    Endpoint = table.Column<string>(type: "TEXT", nullable: false),
+                    ModelIds = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Avatar = table.Column<string>(type: "TEXT", nullable: true),
+                    Tags = table.Column<string>(type: "TEXT", nullable: false),
+                    Favorite = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ResponseTime = table.Column<long>(type: "INTEGER", nullable: true),
+                    TokenCost = table.Column<long>(type: "INTEGER", nullable: true),
+                    RequestCount = table.Column<long>(type: "INTEGER", nullable: true),
+                    Available = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Keys = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ModelChannels", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Models",
                 columns: table => new
                 {
@@ -204,6 +232,35 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ModelChannelInviteCodes",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ChannelId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Code = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
+                    ExpireTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    IsUsed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UsedCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    MaxUseCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    UsedUsers = table.Column<string>(type: "TEXT", nullable: false),
+                    Inviter = table.Column<string>(type: "TEXT", nullable: false),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ModelChannelInviteCodes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ModelChannelInviteCodes_ModelChannels_ChannelId",
+                        column: x => x.ChannelId,
+                        principalTable: "ModelChannels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Sessions",
                 columns: table => new
                 {
@@ -220,6 +277,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     FrequencyPenalty = table.Column<int>(type: "INTEGER", nullable: true),
                     PresencePenalty = table.Column<int>(type: "INTEGER", nullable: true),
                     Favorite = table.Column<bool>(type: "INTEGER", nullable: false),
+                    HistoryMessagesCount = table.Column<int>(type: "INTEGER", nullable: false),
                     SessionGroupId = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
@@ -232,6 +290,41 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                         column: x => x.SessionGroupId,
                         principalTable: "SessionGroups",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ModelChannelShareUsers",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ChannelId = table.Column<long>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ModelChannelId = table.Column<long>(type: "INTEGER", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ModelChannelShareUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ModelChannelShareUsers_ModelChannels_ChannelId",
+                        column: x => x.ChannelId,
+                        principalTable: "ModelChannels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ModelChannelShareUsers_ModelChannels_ModelChannelId",
+                        column: x => x.ModelChannelId,
+                        principalTable: "ModelChannels",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ModelChannelShareUsers_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -304,6 +397,57 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "IX_MessageTexts_MessageId",
                 table: "MessageTexts",
                 column: "MessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannelInviteCodes_ChannelId_Code_Inviter",
+                table: "ModelChannelInviteCodes",
+                columns: new[] { "ChannelId", "Code", "Inviter" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannelInviteCodes_CreatedBy",
+                table: "ModelChannelInviteCodes",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannels_CreatedBy",
+                table: "ModelChannels",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannels_Name",
+                table: "ModelChannels",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannels_Provider",
+                table: "ModelChannels",
+                column: "Provider");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannelShareUsers_ChannelId",
+                table: "ModelChannelShareUsers",
+                column: "ChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannelShareUsers_ChannelId_UserId",
+                table: "ModelChannelShareUsers",
+                columns: new[] { "ChannelId", "UserId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannelShareUsers_CreatedBy",
+                table: "ModelChannelShareUsers",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannelShareUsers_ModelChannelId",
+                table: "ModelChannelShareUsers",
+                column: "ModelChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModelChannelShareUsers_UserId",
+                table: "ModelChannelShareUsers",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Models_CreatedBy",
@@ -390,6 +534,12 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "MessageTexts");
 
             migrationBuilder.DropTable(
+                name: "ModelChannelInviteCodes");
+
+            migrationBuilder.DropTable(
+                name: "ModelChannelShareUsers");
+
+            migrationBuilder.DropTable(
                 name: "Models");
 
             migrationBuilder.DropTable(
@@ -399,13 +549,16 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "UserOAuths");
 
             migrationBuilder.DropTable(
-                name: "Users");
-
-            migrationBuilder.DropTable(
                 name: "FileStorages");
 
             migrationBuilder.DropTable(
                 name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "ModelChannels");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "SessionGroups");

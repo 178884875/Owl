@@ -38,7 +38,7 @@ public sealed class ModelChannel : Entity<long>
     /// <summary>
     /// 渠道标签
     /// </summary>
-    public string[] Tags { get; set; } = Array.Empty<string>();
+    public string[] Tags { get; set; } = [];
 
     /// <summary>
     /// 是否收藏
@@ -66,6 +66,11 @@ public sealed class ModelChannel : Entity<long>
     /// </summary>
     public long? RequestCount { get; set; }
 
+    /// <summary>
+    /// 是否可用
+    /// </summary>
+    public bool Available { get; set; }
+    
     /// <summary>
     /// 密钥列表
     /// </summary>

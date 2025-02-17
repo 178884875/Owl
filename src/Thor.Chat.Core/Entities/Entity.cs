@@ -2,7 +2,7 @@
 
 public abstract class Entity<TKey> : ICreation
 {
-    public required TKey Id { get; set; }
+    public TKey Id { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
