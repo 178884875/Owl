@@ -156,8 +156,6 @@ const Login = () => {
                             />
                         );
                     })}
-
-                    {/* 星云效果 */}
                     <div className="nebula"></div>
                 </div>
             </div>
@@ -166,7 +164,9 @@ const Login = () => {
                 <div className="login-content">
                     <div className="logo-container">
                         <div className="cyber-circle"></div>
-                        <h1 className="form-header">Thor Chat</h1>
+                        <h1 className="form-header">
+                            Thor Chat
+                        </h1>
                     </div>
                     <h2 className="form-title">欢迎登录</h2>
                     <p className="form-subtitle">请填写您的用户名和密码登录</p>
