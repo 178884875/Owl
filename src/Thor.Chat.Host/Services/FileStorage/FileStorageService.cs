@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 using Storage.Core;
+using Thor.Chat.Core;
 using Thor.Chat.Host.Infrastructure;
 using Thor.Chat.Host.Options;
 

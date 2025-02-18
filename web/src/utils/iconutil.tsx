@@ -1,6 +1,5 @@
 import { IconAvatar } from "@lobehub/icons";
 import React, { lazy, Suspense } from 'react';
-import { theme } from "antd";
 
 const OpenAI = lazy(() => import('@lobehub/icons').then(module => ({ default: module.OpenAI })));
 const ChatGLM = lazy(() => import('@lobehub/icons').then(module => ({ default: module.ChatGLM })));
@@ -157,13 +156,17 @@ const iconMap: { [key: string]: React.LazyExoticComponent<any> } = {
 // 根据名称获取对应的图标
 export function getIconByName(name: string, size: number = 36) {
   const IconComponent = iconMap[name] || OpenAI;
-  
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <IconAvatar 
-        Icon={IconComponent} 
+      <IconAvatar
+        Icon={IconComponent}
         color="var(--color-primary)"
         size={size} />
     </Suspense>
   );
 }
+
+export {
+  iconMap
+};

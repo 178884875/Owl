@@ -4,7 +4,7 @@ import { Dropdown, message, Modal, Tooltip } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { useEffect, useState } from "react";
 import { Flexbox } from "react-layout-kit";
-import ModelFeatureTags from "../../chat/workspace/ChatInput/SenderHeader/features/ModelFeatureTags";
+import ModelFeatureTags from "../../../../features/ModelFeatureTags";
 import { MenuItemGroupType } from "antd/es/menu/interface";
 import { theme } from "antd";
 import { useNavigate } from "react-router-dom";

@@ -37,24 +37,5 @@ public class UserEntityConfigurations : IEntityTypeConfiguration<User>
         builder.HasIndex(x => x.Phone);
 
         builder.UseEntityConfiguration();
-
-        // 初始化用户
-        var user = new User
-        {
-            Id = "F62438CE-D1FE-4183-91B4-409D6B45E7B9",
-            UserName = "admin",
-            PasswordHash = "4E71002969FCD46813B869E931AEDF4B",
-            Email = "239573049@qq.com",
-            Phone = "13049809673",
-            Avatar = "https://avatars.githubusercontent.com/u/61819790?v=4",
-            CreatedBy = string.Empty,
-            Role = "Admin",
-            DisplayName = "管理员",
-            Enabled = true
-        };
-        
-        builder.HasData(user);
-        
-        
     }
 }

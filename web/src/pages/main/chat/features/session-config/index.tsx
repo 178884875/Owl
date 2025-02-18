@@ -1,8 +1,7 @@
 import { Flexbox } from 'react-layout-kit';
 import { useChatStore } from '@/store/chat';
 import { useStyles } from './styles';
-import { Button, Divider, Input, Select, Slider, Switch, InputNumber, Form, Checkbox } from 'antd';
-import { X } from 'lucide-react';
+import { Button,  Input, Select, Slider, Form, Checkbox } from 'antd';
 import { chatSelectors } from '@/store/chat/selectors';
 
 export default function SessionConfig() {

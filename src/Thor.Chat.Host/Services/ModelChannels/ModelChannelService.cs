@@ -22,9 +22,8 @@ public class ModelChannelService(IDbContext dbContext, IMapper mapper, IUserCont
     [Authorize]
     public async Task<List<ModelChannelDto>> GetListAsync(string keyword)
     {
-        // 如果createdBy为空，则表示是系统创建的渠道
         var result = await dbContext.ModelChannels.Where(x =>
-                (x.CreatedBy == null || x.CreatedBy == userContext.UserId || x.ShareUsers.Any(x => x.UserId == userContext.UserId)) &&
+                (x.CreatedBy == userContext.UserId || x.ShareUsers.Any(x => x.UserId == userContext.UserId)) &&
                 (string.IsNullOrEmpty(keyword) || x.Name.Contains(keyword) || x.Description.Contains(keyword)))
             .ToListAsync();
 
@@ -40,8 +39,18 @@ public class ModelChannelService(IDbContext dbContext, IMapper mapper, IUserCont
         var result = await dbContext.ModelChannels
             .AsNoTracking()
             .Where(x => x.Id == id)
-            .Include(x => x.ShareUsers)
             .FirstOrDefaultAsync();
+
+        if (userContext.UserId == result.CreatedBy)
+        {
+            // 查询共享用户
+            var shareUsers = await dbContext.ModelChannelShareUsers
+                .Where(x => x.ChannelId == id)
+                .Include(x => x.User)
+                .ToListAsync();
+            
+            result.ShareUsers = shareUsers;
+        }
 
         // 如果不是创建人，但是属于共享列表，则清空敏感数据
         if (userContext.UserId != result.CreatedBy && result.ShareUsers.Any(x => x.UserId == userContext.UserId))
@@ -64,7 +73,7 @@ public class ModelChannelService(IDbContext dbContext, IMapper mapper, IUserCont
     /// </summary>
     [Authorize]
     [EndpointSummary("创建渠道")]
-    public async Task CreateAsync(ModelChannelInput input)
+    public async Task CreateAsync(CreateModelChannelInput input)
     {
         var entity = mapper.Map<ModelChannel>(input);
 

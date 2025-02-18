@@ -4,6 +4,7 @@ using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Storage.LiteDB.Extensions;
+using Thor.Chat.Core;
 using Thor.Chat.Host.Infrastructure;
 using Thor.Chat.Host.Options;
 

@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
-using Thor.Chat.Host.Dto;
+using Thor.Chat.Core;
 
 namespace Thor.Chat.Host.Infrastructure;
 
@@ -16,19 +16,16 @@ public class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContex
         }
     }
 
-    public UserDto? User
+    public T GetUser<T>()
     {
-        get
+        var user = httpContextAccessor.HttpContext?.User.FindFirst("User")?.Value;
+
+        if (user == null)
         {
-            var user = httpContextAccessor.HttpContext?.User.FindFirst("User")?.Value;
-
-            if (user == null)
-            {
-                return null;
-            }
-
-            return JsonSerializer.Deserialize<UserDto>(user);
+            return default;
         }
+
+        return JsonSerializer.Deserialize<T>(user);
     }
 
     public bool IsAuthenticated => httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;

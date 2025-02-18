@@ -82,28 +82,45 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
             return;
         }
 
+        // 初始化用户
+        var user = new User
+        {
+            Id = "F62438CE-D1FE-4183-91B4-409D6B45E7B9",
+            UserName = "admin",
+            PasswordHash = "4E71002969FCD46813B869E931AEDF4B",
+            Email = "239573049@qq.com",
+            Phone = "13049809673",
+            Avatar = "https://avatars.githubusercontent.com/u/61819790?v=4",
+            CreatedBy = string.Empty,
+            Role = "Admin",
+            DisplayName = "管理员",
+            Enabled = true
+        };
+
+        await context.Users.AddAsync(user);
+
         await CreateChannelAsync(context, "OpenAI", "OpenAI", "OpenAI", "https://api.openai.com/v1",
             items
                 .Where(x => x.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "OpenAI", true, ["OpenAI"]);
+                .Select(x => x.Id).ToList(), "OpenAI", true, ["OpenAI"], user.Id);
 
         // 创建DeepSeek
         await CreateChannelAsync(context, "DeepSeek", "DeepSeek", "DeepSeek", "https://api.deepseek.com/v1",
-            items.Select(x => x.Id).ToList(), "DeepSeek", true, ["DeepSeek"]);
+            items.Select(x => x.Id).ToList(), "DeepSeek", true, ["DeepSeek"], user.Id);
 
         // 创建google,使用OpenAI兼容接口
         await CreateChannelAsync(context, "Google", "Google", "Google",
             "https://generativelanguage.googleapis.com/v1beta/openai/",
             items
                 .Where(x => x.Provider.Equals("Google", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "OpenAI", false, ["Google"]);
+                .Select(x => x.Id).ToList(), "OpenAI", false, ["Google"], user.Id);
     }
 
     /// <summary>
     /// 创建渠道
     /// </summary>
-    public async Task CreateChannelAsync(IDbContext context, string name, string description, string avatar,
-        string endpoint, List<string> modelIds, string provider, bool favorite, string[] tags)
+    private static async Task CreateChannelAsync(IDbContext context, string name, string description, string avatar,
+        string endpoint, List<string> modelIds, string provider, bool favorite, string[] tags, string userId)
     {
         var channel = new ModelChannel()
         {
@@ -117,6 +134,7 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
             Favorite = favorite,
             Available = true,
             Tags = tags,
+            CreatedBy = userId
         };
 
         await context.ModelChannels.AddAsync(channel);

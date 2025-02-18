@@ -1,8 +1,8 @@
-﻿using Thor.Chat.Host.Dto;
+﻿using Thor.Chat.Host.Services.ModelChannels.Dto;
 
-namespace Thor.Chat.Host.Services.ModelChannels.Dto;
+namespace Thor.Chat.Host.Services.ModelChannels.Input;
 
-public class ModelChannelDto : EntityDto<long>
+public class CreateModelChannelInput
 {
     /// <summary>
     /// 模型提供商
@@ -40,38 +40,7 @@ public class ModelChannelDto : EntityDto<long>
     public string[] Tags { get; set; } = Array.Empty<string>();
 
     /// <summary>
-    /// 是否收藏
-    /// </summary>
-    public bool Favorite { get; set; }
-
-    /// <summary>
-    /// 是否启用
-    /// </summary>
-    public bool Enabled { get; set; }
-
-    /// <summary>
-    /// 最近响应耗时
-    /// </summary>
-    public long? ResponseTime { get; set; }
-
-    /// <summary>
-    /// token消耗总量
-    /// </summary>
-    /// <returns></returns>
-    public long? TokenCost { get; set; }
-
-    /// <summary>
-    /// 请求数量
-    /// </summary>
-    public long? RequestCount { get; set; }
-
-    /// <summary>
     /// 密钥列表
     /// </summary>
     public List<ModelChannelKeyDto> Keys { get; set; } = [];
-    
-    /// <summary>
-    /// 共享用户列表
-    /// </summary>
-    public List<ModelChannelShareUserDto>? ShareUsers { get; set; }
 }

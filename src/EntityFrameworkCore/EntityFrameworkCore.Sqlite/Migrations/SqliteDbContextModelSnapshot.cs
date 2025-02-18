@@ -599,22 +599,6 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.HasIndex("UserName");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "F62438CE-D1FE-4183-91B4-409D6B45E7B9",
-                            Avatar = "https://avatars.githubusercontent.com/u/61819790?v=4",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "",
-                            DisplayName = "管理员",
-                            Email = "239573049@qq.com",
-                            Enabled = true,
-                            PasswordHash = "4E71002969FCD46813B869E931AEDF4B",
-                            Phone = "13049809673",
-                            Role = "Admin",
-                            UserName = "admin"
-                        });
                 });
 
             modelBuilder.Entity("Thor.Chat.Core.Entities.UserOAuth", b =>

@@ -1,12 +1,10 @@
-﻿using Thor.Chat.Host.Dto;
-
-namespace Thor.Chat.Host.Infrastructure;
+﻿namespace Thor.Chat.Core;
 
 public interface IUserContext
 {
     string UserId { get; }
 
-    UserDto? User { get; }
+    T GetUser<T>();
 
     bool IsAuthenticated { get; }
 

@@ -5,7 +5,6 @@ import { Flexbox } from "react-layout-kit";
 import { useStyles } from "./styles";
 
 export default function Title() {
-    // 路由是否/chat开头
     const isChat = window.location.pathname.startsWith('/chat');
     const [
         expanded,

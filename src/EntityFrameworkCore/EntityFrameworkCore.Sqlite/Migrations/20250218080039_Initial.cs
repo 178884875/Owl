@@ -327,11 +327,6 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "Avatar", "CreatedAt", "CreatedBy", "DisplayName", "Email", "Enabled", "PasswordHash", "Phone", "Role", "UserName" },
-                values: new object[] { "F62438CE-D1FE-4183-91B4-409D6B45E7B9", "https://avatars.githubusercontent.com/u/61819790?v=4", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "", "管理员", "239573049@qq.com", true, "4E71002969FCD46813B869E931AEDF4B", "13049809673", "Admin", "admin" });
-
             migrationBuilder.CreateIndex(
                 name: "IX_FileStorages_CreatedBy",
                 table: "FileStorages",

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Flexbox } from "react-layout-kit";
-import { List, Card, Tag, Typography, Button } from "antd";
+import { List, Card, Tag, Typography, Button, Dropdown, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { getChannelList } from "@/apis/ModelaChannel";
+import { deleteChannel, getChannelList } from "@/apis/ModelaChannel";
 import { theme } from "antd";
 import CreateChannel from "../CreateChannel";
 import { getIconByName } from "@/utils/iconutil";
@@ -10,7 +10,7 @@ import { getIconByName } from "@/utils/iconutil";
 const { useToken } = theme;
 
 // 定义 ChannelItem 接口
-interface ChannelItem {
+export interface ChannelItem {
     id: number;
     provider: string;
     endpoint: string;
@@ -25,38 +25,26 @@ interface ChannelItem {
     tokenCost?: number;
     requestCount?: number;
     createdBy?: string;
+    shareUsers?: any[]
 }
 
-export default function ChannelList() {
+interface ChannelListProps {
+    channel: ChannelItem | null;
+    onChannelChange: (id: number) => void;
+    onChannelListChange: (channelList: ChannelItem[]) => void;
+    onChannelCreateSuccess: () => void;
+    channelList: ChannelItem[];
+    loading: boolean;
+}
+
+export default function ChannelList({ channel, onChannelChange, onChannelListChange, onChannelCreateSuccess, channelList, loading }: ChannelListProps) {
     const { token } = useToken();
-    const [channelList, setChannelList] = useState<ChannelItem[]>([]);
-    const [loading, setLoading] = useState(true);
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
-    const [modalItem, setModalItem] = useState<ChannelItem | null>(null);
-
-    useEffect(() => {
-        fetchChannelList();
-    }, []);
-
-    const fetchChannelList = async () => {
-        try {
-            setLoading(true);
-            const response = await getChannelList();
-            setChannelList(response.data);
-        } catch (error) {
-            console.error("获取渠道列表失败:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleAddChannel = () => {
         setIsCreateModalVisible(true);
     };
 
-    const handleCreateSuccess = () => {
-        fetchChannelList();
-    };
 
     return (
         <Flexbox
@@ -64,6 +52,7 @@ export default function ChannelList() {
                 width: '250px',
                 height: '100%',
                 overflow: 'auto',
+                borderRadius: '8px',
                 overflowX: 'hidden',
                 backgroundColor: token.colorBgElevated
             }}
@@ -101,49 +90,65 @@ export default function ChannelList() {
                     </Flexbox>
                 }}
                 renderItem={(item) => (
-                    <List.Item>
-                        <Card
-                            onClick={() => setModalItem(item)}
-                            size="small"
-                            bodyStyle={{
-                                padding: '12px',
-                                cursor: 'pointer',
-                                borderRadius: '8px',
-                                backgroundColor: modalItem?.id === item.id ? token.colorPrimaryBorderHover : token.colorBgElevated,
-                                transition: 'background-color 0.5s ease',
-                            }}
-                        >
-                            <Flexbox gap={8}>
-                                <Flexbox horizontal justify="space-between" align="center">
-                                    {getIconByName(item.provider)}
-                                    <Typography.Text style={{
-                                        flex: 1,
-                                    }} strong>{item.name}</Typography.Text>
-                                    <Flexbox horizontal>
-                                        <Tag style={{
-                                            fontSize: '10px',
-                                        }} color={item.enabled ? "green" : "red"}>{item.enabled ? "启用" : "禁用"}</Tag>
-                                        {!item?.createdBy && <Tag
-                                            style={{
+                    <Dropdown
+                        trigger={['contextMenu']}
+                        menu={{
+                            items: [
+                                {
+                                    label: '删除',
+                                    style: {
+                                        color: 'red',
+                                    },
+                                    key: 'delete',
+                                    onClick: async () => {
+                                        await deleteChannel(item.id);
+                                        message.success('删除成功');
+                                    },
+                                },
+                            ]
+                        }}>
+                        <List.Item>
+                            <Card
+                                onClick={() => onChannelChange(item.id)}
+                                size="small"
+                                bodyStyle={{
+                                    padding: '12px',
+                                    cursor: 'pointer',
+                                    borderRadius: '8px',
+                                    backgroundColor: channel?.id === item.id ? token.colorPrimaryBorderHover : token.colorBgElevated,
+                                    transition: 'background-color 0.5s ease',
+                                }}
+                            >
+                                <Flexbox gap={8}>
+                                    <Flexbox horizontal justify="space-between" align="center">
+                                        {getIconByName(item.provider)}
+                                        <Typography.Text style={{
+                                            flex: 1,
+                                        }} strong>{item.name}</Typography.Text>
+                                        <Flexbox horizontal>
+                                            <Tag style={{
                                                 fontSize: '10px',
-                                            }}
-                                            color="blue">公开</Tag>}
+                                            }} color={item.enabled ? "green" : "red"}>{item.enabled ? "启用" : "禁用"}</Tag>
+                                        </Flexbox>
                                     </Flexbox>
+                                    <div>
+                                        {item.tags.map((tag) => (
+                                            <Tag key={tag}>{tag}</Tag>
+                                        ))}
+                                    </div>
                                 </Flexbox>
-                                <div>
-                                    {item.tags.map((tag) => (
-                                        <Tag key={tag}>{tag}</Tag>
-                                    ))}
-                                </div>
-                            </Flexbox>
-                        </Card>
-                    </List.Item>
+                            </Card>
+                        </List.Item>
+                    </Dropdown>
                 )}
             />
             <CreateChannel
                 visible={isCreateModalVisible}
                 onClose={() => setIsCreateModalVisible(false)}
-                onSuccess={handleCreateSuccess}
+                onSuccess={() => {
+                    onChannelCreateSuccess();
+                    setIsCreateModalVisible(false);
+                }}
             />
         </Flexbox>
     );
