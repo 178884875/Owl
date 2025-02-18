@@ -42,9 +42,52 @@ public sealed class ChatService(IDbContext dbContext, IUserContext userContext) 
             .FirstOrDefaultAsync();
 
         // 获取当前用户是否存在当前模型类型的渠道
-        var channel = await dbContext.ModelChannelShareUsers
+        var channelShareUsers = await dbContext.ModelChannelShareUsers
             .AsNoTracking()
-            .Where(x => x.UserId == userContext.UserId)
-            .FirstOrDefaultAsync();
+            .Where(x => x.UserId == userContext.UserId && x.Enabled)
+            .Select(x => x.ChannelId)
+            .ToListAsync();
+
+        var channels = await dbContext.ModelChannels
+            .AsNoTracking()
+            .Where(x => channelShareUsers.Contains(x.Id) ||
+                        x.CreatedBy == userContext.UserId && x.ModelIds.Contains(model.ModelId))
+            .OrderByDescending(x => x.CreatedAt)
+            .ToArrayAsync();
+
+        if (channels.Length == 0)
+        {
+            throw new BusinessException("当前用户不存在当前模型类型的渠道");
+        }
+
+        // 根据权重分配Key
+        var (channel, key) = GetChannelKey(channels);
+        
+        
+    }
+
+    /// <summary>
+    /// 根据权重分配渠道和渠道的一个Key
+    /// </summary>
+    /// <returns></returns>
+    private static (ModelChannel, string) GetChannelKey(params ModelChannel[] channels)
+    {
+        var totalWeight = channels.Sum(c => c.Keys.Sum(k => k.Order));
+        var randomWeight = new Random().Next(0, totalWeight);
+        var currentWeight = 0;
+
+        foreach (var channel in channels)
+        {
+            foreach (var key in channel.Keys)
+            {
+                currentWeight += key.Order;
+                if (currentWeight >= randomWeight)
+                {
+                    return (channel, key.Key);
+                }
+            }
+        }
+
+        throw new InvalidOperationException("No key found for the given channels.");
     }
 }

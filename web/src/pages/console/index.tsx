@@ -90,6 +90,7 @@ export default function ConsoleLayout() {
         }}>
             <Flexbox style={{
                 height: 40,
+                minHeight: 40,
                 width: '100%',
                 // 居中
                 justifyContent: 'center',

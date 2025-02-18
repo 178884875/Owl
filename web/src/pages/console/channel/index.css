@@ -1,0 +1,9 @@
+.channel-tabs {
+    height: 100%;
+    overflow: auto;
+}
+
+.channel-tabs .ant-tabs-content{
+    height: calc(100vh - 140px);
+    overflow: auto;
+}

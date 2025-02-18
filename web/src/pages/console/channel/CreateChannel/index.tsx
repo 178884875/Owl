@@ -114,13 +114,16 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
         }]}>
           <Input />
         </Form.Item>
+        <Form.Item name="tags" label="模型标签">
+          <Select
+            mode="tags"
+            style={{ width: '100%' }}
+            placeholder="请输入模型标签"
+          />
+        </Form.Item>
         <Form.Item name="modelIds" label="模型列表">
-          <SelectModel modelIds={modelIds} onSelect={(modelId) => {
-            if (modelIds.includes(modelId)) {
-              setModelIds(modelIds.filter(x => x !== modelId));
-            } else {
-              setModelIds([...modelIds, modelId]);
-            }
+          <SelectModel modelIds={modelIds} onSelect={(modelIds) => {
+            setModelIds([...modelIds]);
           }} >
             <Flexbox style={{
               fontSize: 16,

@@ -15,6 +15,8 @@ public static class Program
 
         builder.Services.AddServices(builder.Configuration);
 
+        builder.Services.AddHttpClient();
+
         builder.Services.ConfigureHttpJsonOptions((options =>
         {
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());

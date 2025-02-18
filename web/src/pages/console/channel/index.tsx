@@ -1,43 +1,21 @@
 import { Flexbox } from "react-layout-kit";
 import ChannelList, { ChannelItem } from "./ChannelList";
 import { useEffect, useState } from "react";
-import { getChannelDetail, getChannelList } from "@/apis/ModelaChannel";
+import { getChannelDetail, getChannelList, testChannel } from "@/apis/ModelaChannel";
 import { Tabs, message } from "antd";
 import ChannelMember from "./ChannelMember";
-import ChannelModel from "./ChannelModel";
 import ChannelConfig from "./ChannelConfig";
 import ChannelInviteCode from "./ChannelInviteCode";
-
+import "./index.css";
+import ChannelKey from "./ChannelKey";
+import { useUser } from "@/hooks/useUser";
 
 export default function ConsoleChannel() {
     const [channel, setChannel] = useState<ChannelItem | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [channelList, setChannelList] = useState<ChannelItem[]>([]);
-
-    const items = [
-        {
-            key: 'channelMember',
-            label: '渠道成员',
-            children: <ChannelMember channel={channel} />
-        },
-        {
-            key: 'channelModel',
-            label: '渠道模型',
-            children: <ChannelModel />
-        },
-        {
-            key: 'channelConfig',
-            label: '渠道配置',
-            children: <ChannelConfig />
-        },
-        {
-            label: "渠道邀请码",
-            key: "channelInviteCode",
-            children: <ChannelInviteCode />
-        }
-    ]
-
+    const user = useUser();
     useEffect(() => {
         fetchChannelList();
     }, []);
@@ -67,32 +45,62 @@ export default function ConsoleChannel() {
         }
     };
 
-    const onChange = (key: string) => {
-        console.log(key);
+    const onDeleteChannel = (id: number) => {
+        setChannelList(channelList.filter(x => x.id !== id));
+        if (channel?.id === id && channelList.length > 0) {
+            onChannelChange(channelList[0].id);
+        } else {
+            setChannel(null);
+        }
     }
 
+    const onTestChannel = async (id: number) => {
+        const res = await testChannel(id);
+        if (res.success) {
+            message.success('测试成功');
+            fetchChannelList();
+        } else {
+            message.error(res.message);
+        }
+    }
 
     return (
-        <Flexbox style={{
-            width: '100%',
-            height: '100%',
-            overflow: 'auto'
-        }} horizontal gap={16}>
+        <Flexbox className="channel-tabs" horizontal gap={16}>
             <ChannelList
                 channelList={channelList}
                 loading={loading}
                 channel={channel}
+                onDeleteChannel={onDeleteChannel}
                 onChannelChange={onChannelChange}
                 onChannelListChange={setChannelList}
                 onChannelCreateSuccess={fetchChannelList}
+                onTestChannel={onTestChannel}
             />
-            <Tabs
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    overflow: 'auto',
-                }}
-                defaultActiveKey="channelMember" items={items} onChange={onChange} />
+            {channel && (
+                <Tabs
+                    style={{
+                        flex: 1,
+                        marginRight: '16px',
+                        height: '100%',
+                        overflow: 'auto',
+                    }}
+                    defaultActiveKey="channelConfig" >
+                    <Tabs.TabPane tab="渠道配置" key="channelConfig">
+                        <ChannelConfig channel={channel} />
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab="渠道成员" key="channelMember">
+                        <ChannelMember channel={channel} />
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab="渠道邀请码" key="channelInviteCode">
+                        <ChannelInviteCode />
+                    </Tabs.TabPane>
+                    {channel?.createdBy === user?.id && (
+                        <Tabs.TabPane tab="渠道密钥管理" key="channelKey">
+                            <ChannelKey channel={channel} />
+                        </Tabs.TabPane>
+                    )}
+                </Tabs>
+            )}
         </Flexbox>
     )
 }

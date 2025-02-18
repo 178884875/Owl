@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Flexbox } from "react-layout-kit";
 import { List, Card, Tag, Typography, Button, Dropdown, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { deleteChannel, getChannelList } from "@/apis/ModelaChannel";
+import { deleteChannel, getChannelList, testChannel } from "@/apis/ModelaChannel";
 import { theme } from "antd";
 import CreateChannel from "../CreateChannel";
 import { getIconByName } from "@/utils/iconutil";
+import { msToSeconds } from "@/utils/timutil";
 
 const { useToken } = theme;
 
@@ -25,7 +26,9 @@ export interface ChannelItem {
     tokenCost?: number;
     requestCount?: number;
     createdBy?: string;
-    shareUsers?: any[]
+    shareUsers?: any[];
+    keys?: any[];
+    available: boolean;
 }
 
 interface ChannelListProps {
@@ -35,9 +38,11 @@ interface ChannelListProps {
     onChannelCreateSuccess: () => void;
     channelList: ChannelItem[];
     loading: boolean;
+    onDeleteChannel: (id: number) => void;
+    onTestChannel: (id: number) => Promise<void>;
 }
 
-export default function ChannelList({ channel, onChannelChange, onChannelListChange, onChannelCreateSuccess, channelList, loading }: ChannelListProps) {
+export default function ChannelList({ channel, onChannelChange, onChannelListChange, onChannelCreateSuccess, channelList, loading, onDeleteChannel, onTestChannel }: ChannelListProps) {
     const { token } = useToken();
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
 
@@ -95,6 +100,13 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                         menu={{
                             items: [
                                 {
+                                    label: '测试渠道',
+                                    key: 'test',
+                                    onClick: async () => {
+                                        await onTestChannel(item.id);
+                                    },
+                                },
+                                {
                                     label: '删除',
                                     style: {
                                         color: 'red',
@@ -102,6 +114,7 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                                     key: 'delete',
                                     onClick: async () => {
                                         await deleteChannel(item.id);
+                                        onDeleteChannel(item.id);
                                         message.success('删除成功');
                                     },
                                 },
@@ -109,14 +122,18 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                         }}>
                         <List.Item>
                             <Card
-                                onClick={() => onChannelChange(item.id)}
+                                onClick={() => {
+                                    if (item.id !== channel?.id) {
+                                        onChannelChange(item.id);
+                                    }
+                                }}
                                 size="small"
                                 bodyStyle={{
                                     padding: '12px',
                                     cursor: 'pointer',
                                     borderRadius: '8px',
                                     backgroundColor: channel?.id === item.id ? token.colorPrimaryBorderHover : token.colorBgElevated,
-                                    transition: 'background-color 0.5s ease',
+                                    transition: 'background-color 0.3s ease',
                                 }}
                             >
                                 <Flexbox gap={8}>
@@ -125,10 +142,15 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                                         <Typography.Text style={{
                                             flex: 1,
                                         }} strong>{item.name}</Typography.Text>
-                                        <Flexbox horizontal>
+                                        <Flexbox gap={2}>
                                             <Tag style={{
                                                 fontSize: '10px',
-                                            }} color={item.enabled ? "green" : "red"}>{item.enabled ? "启用" : "禁用"}</Tag>
+                                            }} color={item.available ? "green" : "red"}>{item.available ? "可用" : "不可用"}</Tag>
+                                            {item.available && <Tag style={{
+                                                fontSize: '10px',
+                                            }} color="blue">
+                                                {msToSeconds(item.responseTime || 0)}s
+                                            </Tag>}
                                         </Flexbox>
                                     </Flexbox>
                                     <div>

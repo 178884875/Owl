@@ -37,7 +37,7 @@ public class ModelChannelDto : EntityDto<long>
     /// <summary>
     /// 渠道标签
     /// </summary>
-    public string[] Tags { get; set; } = Array.Empty<string>();
+    public string[] Tags { get; set; } = [];
 
     /// <summary>
     /// 是否收藏
@@ -53,6 +53,11 @@ public class ModelChannelDto : EntityDto<long>
     /// 最近响应耗时
     /// </summary>
     public long? ResponseTime { get; set; }
+    
+    /// <summary>
+    /// 是否可用
+    /// </summary>
+    public bool Available { get; set; }
 
     /// <summary>
     /// token消耗总量

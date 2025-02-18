@@ -31,7 +31,7 @@ public class AuthService(ICaptcha captcha, UserService userService, JwtHelper jw
         {
             throw new BusinessException("密码错误");
         }
-        
+
         user.PasswordHash = string.Empty;
         user.Phone = string.Empty;
 
@@ -41,7 +41,7 @@ public class AuthService(ICaptcha captcha, UserService userService, JwtHelper jw
         };
 
         // 生成token
-        var token = jwtHelper.CreateToken(dist, user.Id, new[] { "User" });
+        var token = jwtHelper.CreateToken(dist, user.Id, [user.Role]);
 
         return await Task.FromResult(token);
     }

@@ -1,4 +1,4 @@
-import { del, get, postJson, putJson } from "@/utils/fetch";
+import { del, get, post, postJson, putJson } from "@/utils/fetch";
 
 /**
  * 获取渠道列表
@@ -25,7 +25,7 @@ export const createChannel = async (data: any) => {
  * @returns 更新渠道的响应数据
  */
 export const updateChannel = async (data: any) => {
-    const res = await putJson('/api/modelChannel', data);
+    const res = await putJson(`/api/modelChannel?id=${data.id}`, data);
     return res;
 }
 
@@ -100,4 +100,33 @@ export const getChannelShareList = async (id: number) => {
 }
 
 
+/**
+ * 更新渠道密钥
+ * @param data 密钥数据
+ * @returns 更新密钥的响应数据
+ */
+export const updateChannelKey = async (id: number, data: any) => {
+    const res = await putJson(`/api/modelChannel/Keys?id=${id}`, data);
+    return res;
+}
+
+/**
+ * 获取密钥
+ * 
+ */
+export const getChannelKey = async (id: number) => {
+    const res = await get(`/api/modelChannel/Keys?id=${id}`);
+    return res;
+}
+
+
+/**
+ * 测试渠道
+ * @param id 渠道ID
+ * @returns 测试渠道的响应数据
+ */
+export const testChannel = async (id: number) => {
+    const res = await post(`/api/modelChannel/test?id=${id}`);
+    return res;
+}
 

@@ -48,9 +48,4 @@ public class UpdateModelChannelInput
     /// 是否启用
     /// </summary>
     public bool Enabled { get; set; }
-
-    /// <summary>
-    /// 密钥列表
-    /// </summary>
-    public List<ModelChannelKeyDto> Keys { get; set; } = [];
 }
