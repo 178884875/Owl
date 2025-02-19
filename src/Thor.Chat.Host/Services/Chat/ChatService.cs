@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using FastService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
@@ -8,8 +9,11 @@ using Storage.Core;
 using Thor.Chat.Core;
 using Thor.Chat.Core.Entities;
 using Thor.Chat.Host.AI;
+using Thor.Chat.Host.Dto;
 using Thor.Chat.Host.Infrastructure;
 using Thor.Chat.Host.Services.Chat.Input;
+
+#pragma warning disable SKEXP0001
 
 namespace Thor.Chat.Host.Services.Chat;
 
@@ -18,195 +22,216 @@ public sealed class ChatService(IDbContext dbContext, IUserContext userContext, 
 {
     public async Task ChatCompleteAsync(HttpContext context, ChatCompleteInput input)
     {
-        var session = await dbContext.Sessions.Where(x => x.Id == input.SessionId)
-            .FirstOrDefaultAsync();
-
-        List<Message> messages;
-
-        if (session.HistoryMessagesCount <= 0)
+        try
         {
-            messages = await dbContext.Messages.Where(x => x.SessionId == input.SessionId)
-                .OrderByDescending(x => x.CreatedAt)
-                .Include(x => x.Files)
-                .Include(x => x.Texts)
-                .ToListAsync();
-        }
-        else
-        {
-            messages = await dbContext.Messages
-                .Where(x => x.SessionId == input.SessionId)
-                .OrderByDescending(x => x.CreatedAt)
-                .Take(session.HistoryMessagesCount)
-                .Include(x => x.Files)
-                .Include(x => x.Texts)
-                .ToListAsync();
-        }
+            var session = await dbContext.Sessions.Where(x => x.Id == input.SessionId)
+                .FirstOrDefaultAsync();
 
-        // 获取当前会话模型属于的模型
-        var model = await dbContext.Models
-            .AsNoTracking()
-            .Where(x => x.Id == session.Model)
-            .FirstOrDefaultAsync();
+            List<Message> messages;
 
-        // 获取当前用户是否存在当前模型类型的渠道
-        var channelShareUsers = await dbContext.ModelChannelShareUsers
-            .AsNoTracking()
-            .Where(x => x.UserId == userContext.UserId && x.Enabled)
-            .Select(x => x.ChannelId)
-            .ToListAsync();
-
-        var channels = await dbContext.ModelChannels
-            .AsNoTracking()
-            .Where(x => channelShareUsers.Contains(x.Id) ||
-                        x.CreatedBy == userContext.UserId && x.ModelIds.Contains(model.ModelId))
-            .OrderByDescending(x => x.CreatedAt)
-            .ToArrayAsync();
-
-        if (channels.Length == 0)
-        {
-            throw new BusinessException("当前用户不存在当前模型类型的渠道");
-        }
-
-        // 根据权重分配Key
-        var (channel, key) = GetChannelKey(channels);
-
-        var kernel = KernelFactory.CreateKernel(model.ModelId, channel.Endpoint, key, channel.Provider);
-
-
-        // 组成message 
-        var history = new ChatHistory();
-
-        foreach (var message in messages)
-        {
-            if (message.Files.Count != 0)
+            if (session.HistoryMessagesCount <= 0)
             {
-                // 如果是文件则需要解析文件
-                foreach (var file in message.Files)
+                messages = await dbContext.Messages.Where(x => x.SessionId == input.SessionId)
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Include(x => x.Files)
+                    .Include(x => x.Texts)
+                    .ToListAsync();
+            }
+            else
+            {
+                messages = await dbContext.Messages
+                    .Where(x => x.SessionId == input.SessionId)
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Take(session.HistoryMessagesCount)
+                    .Include(x => x.Files)
+                    .Include(x => x.Texts)
+                    .ToListAsync();
+            }
+
+            // 获取当前会话模型属于的模型
+            var model = await dbContext.Models
+                .AsNoTracking()
+                .Where(x => x.Id == session.Model)
+                .FirstOrDefaultAsync();
+
+            // 获取当前用户是否存在当前模型类型的渠道
+            var channelShareUsers = await dbContext.ModelChannelShareUsers
+                .AsNoTracking()
+                .Where(x => x.UserId == userContext.UserId && x.Enabled)
+                .Select(x => x.ChannelId)
+                .ToListAsync();
+
+            var channels = await dbContext.ModelChannels
+                .AsNoTracking()
+                .Where(x => channelShareUsers.Contains(x.Id) ||
+                            x.CreatedBy == userContext.UserId)
+                .OrderByDescending(x => x.CreatedAt)
+                .ToArrayAsync();
+
+            channels = channels.Where(x => x.ModelIds.Contains(session.Model)).ToArray();
+
+            if (channels.Length == 0)
+            {
+                throw new BusinessException("当前用户不存在当前模型类型的渠道");
+            }
+
+            // 根据权重分配Key
+            var (channel, key) = GetChannelKey(channels);
+
+            var kernel = KernelFactory.CreateKernel(model.ModelId, channel.Endpoint, key, channel.Provider);
+
+
+            // 组成message 
+            var history = new ChatHistory();
+
+            foreach (var message in messages)
+            {
+                if (message.Files.Count != 0)
                 {
-                    // 获取文件的内容
-                    var (fileName, stream) = await storageService.GetFileAsync(file.FileId.ToString());
-
-                    // 根据文件名获取文件类型
-                    var type = GetFileType(file.FileName);
-                    switch (type)
+                    // 如果是文件则需要解析文件
+                    foreach (var file in message.Files)
                     {
-                        case "image":
+                        // 获取文件的内容
+                        var (fileName, stream) = await storageService.GetFileAsync(file.FileId.ToString());
+
+                        // 根据文件名获取文件类型
+                        var type = GetFileType(file.FileName);
+                        switch (type)
                         {
-                            using var image = new MemoryStream();
-                            await stream.CopyToAsync(image);
-                            image.Position = 0;
-                            history.AddMessage(new AuthorRole(message.Role), new ChatMessageContentItemCollection()
+                            case "image":
                             {
-                                new ImageContent(image.ToArray(), null)
-                            });
-                            break;
-                        }
+                                using var image = new MemoryStream();
+                                await stream.CopyToAsync(image);
+                                image.Position = 0;
+                                history.AddMessage(new AuthorRole(message.Role), new ChatMessageContentItemCollection()
+                                {
+                                    new ImageContent(image.ToArray(), null)
+                                });
+                                break;
+                            }
 
-                        case "video":
-                            // history.AddMessage(new AuthorRole(message.Role), stream, ChatMessageType.Video);
-                            break;
-                        case "audio":
-                        {
-                            using var audio = new MemoryStream();
-                            await stream.CopyToAsync(audio);
-                            history.AddMessage(new AuthorRole(message.Role), new ChatMessageContentItemCollection()
+                            case "video":
+                                // history.AddMessage(new AuthorRole(message.Role), stream, ChatMessageType.Video);
+                                break;
+                            case "audio":
                             {
-                                new AudioContent(audio.ToArray(), null)
-                            });
-                            break;
-                        }
+                                using var audio = new MemoryStream();
+                                await stream.CopyToAsync(audio);
+                                history.AddMessage(new AuthorRole(message.Role), new ChatMessageContentItemCollection()
+                                {
+                                    new AudioContent(audio.ToArray(), null)
+                                });
+                                break;
+                            }
 
-                        case "document":
-                            // TODO: 如果是文档则需要解析文档，暂时不处理
+                            case "document":
+                                // TODO: 如果是文档则需要解析文档，暂时不处理
 
-                            break;
-                        case "markdown":
-                            // 如果的markdown则直接添加到对话中
-                            // 读取字符串
-                            using (var reader = new StreamReader(stream))
-                            {
-                                var content = await reader.ReadToEndAsync();
-                                history.AddMessage(new AuthorRole(message.Role), $@"
+                                break;
+                            case "markdown":
+                                // 如果的markdown则直接添加到对话中
+                                // 读取字符串
+                                using (var reader = new StreamReader(stream))
+                                {
+                                    var content = await reader.ReadToEndAsync();
+                                    history.AddMessage(new AuthorRole(message.Role), $@"
 ```markdown {file.FileName}
 {content}
 ```
 ");
-                                break;
-                            }
-                        case "code":
-                            // 如果是代码则直接添加到对话中
-                            using (var reader = new StreamReader(stream))
-                            {
-                                var content = await reader.ReadToEndAsync();
+                                    break;
+                                }
+                            case "code":
+                                // 如果是代码则直接添加到对话中
+                                using (var reader = new StreamReader(stream))
+                                {
+                                    var content = await reader.ReadToEndAsync();
 
-                                history.AddMessage(new AuthorRole(message.Role), $@"
+                                    history.AddMessage(new AuthorRole(message.Role), $@"
 ```{file.FileName.Split('.').LastOrDefault()} {file.FileName}
 {content}
 ```");
-                            }
+                                }
 
-                            break;
-                        case "file":
-                            // TODO:不确定的文件类型暂时不处理
+                                break;
+                            case "file":
+                                // TODO:不确定的文件类型暂时不处理
 
-                            break;
+                                break;
+                        }
                     }
+                }
+
+                if (message.Texts.Count != 0)
+                {
+                    var text = message.Texts.LastOrDefault();
+
+                    history.AddMessage(new AuthorRole(message.Role), text.Text);
                 }
             }
 
-            if (message.Texts.Count != 0)
+            // 调用ChatComplete
+            var chat = kernel.GetRequiredService<IChatCompletionService>();
+
+            var first = true;
+            var sb = new StringBuilder();
+            await foreach (var item in chat.GetStreamingChatMessageContentsAsync(history,
+                               new OpenAIPromptExecutionSettings()
+                               {
+                                   MaxTokens = session.MaxTokens,
+                                   Temperature = session.Temperature,
+                                   TopP = session.TopP,
+                                   FrequencyPenalty = session.FrequencyPenalty,
+                               }, kernel))
             {
-                var text = message.Texts.LastOrDefault();
+                if (first)
+                {
+                    // 设置sse
+                    context.Response.Headers["Content-Type"] = "text/event-stream";
+                    context.Response.Headers["Cache-Control"] = "no-cache";
+                    context.Response.Headers["Connection"] = "keep-alive";
 
-                history.AddMessage(new AuthorRole(message.Role), text.Text);
+                    first = false;
+                }
+
+                if (item.InnerContent is StreamingFunctionCallUpdateContent functionCallUpdateContent)
+                {
+                    await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
+                    {
+                        data = functionCallUpdateContent,
+                        type = "function",
+                    }) + "\n\n");
+                }
+                else
+                {
+                    sb.Append(item.ToString());
+                    await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
+                    {
+                        data = item.ToString(),
+                        type = "chat",
+                    }) + "\n\n");
+                }
             }
+
+            await context.Response.WriteAsync("data: [done]" + Environment.NewLine);
+
+            await context.Response.CompleteAsync();
+
+            await dbContext.MessageTexts.Where(x => x.Id == input.AssistantMessageId)
+                .ExecuteUpdateAsync(x => x.SetProperty(a => a.Text, x => sb.ToString()));
+
+            // 更新渠道的最后使用时间
+            await dbContext.ModelChannels.Where(x => x.Id == channel.Id)
+                .ExecuteUpdateAsync(x => x.SetProperty(a => a.RequestCount, a => a.RequestCount + 1)
+                    .SetProperty(a => a.TokenCost, a => a.TokenCost + 1));
+
+            // 创建记录
         }
-
-        // 调用ChatComplete
-        var chat = kernel.GetRequiredService<IChatCompletionService>();
-
-        // 设置sse
-        context.Response.Headers["Content-Type"] = "text/event-stream";
-        context.Response.Headers["Cache-Control"] = "no-cache";
-        context.Response.Headers["Connection"] = "keep-alive";
-
-        await foreach (var item in chat.GetStreamingChatMessageContentsAsync(history,
-                           new OpenAIPromptExecutionSettings()
-                           {
-                               MaxTokens = session.MaxTokens,
-                               Temperature = session.Temperature,
-                               TopP = session.TopP,
-                               FrequencyPenalty = session.FrequencyPenalty,
-                           }))
+        catch (Exception e)
         {
-            if (item.InnerContent is StreamingFunctionCallUpdateContent functionCallUpdateContent)
-            {
-                await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
-                {
-                    data = functionCallUpdateContent,
-                    type = "function",
-                }) + "\n\n");
-            }
-            else
-            {
-                await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
-                {
-                    data = item.ToString(),
-                    type = "chat",
-                }) + "\n\n");
-            }
+            // context.Response.StatusCode = 500;
+            await context.Response.WriteAsJsonAsync(ResultDto.FailResult("对话失败" + e.Message));
         }
-
-        await context.Response.WriteAsync("data: [done]" + Environment.NewLine);
-
-        await context.Response.CompleteAsync();
-
-        // 更新渠道的最后使用时间
-        await dbContext.ModelChannels.Where(x => x.Id == channel.Id)
-            .ExecuteUpdateAsync(x => x.SetProperty(a => a.RequestCount, a => a.RequestCount + 1)
-                .SetProperty(a => a.TokenCost, a => a.TokenCost + 1));
-
-        // 创建记录
     }
 
     /// <summary>

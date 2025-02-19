@@ -26,11 +26,11 @@ const isCurrentSession = (state: ChatState, id: number) => state.currentSession?
 
 
 /**
- * 获取所有消息Ids
+ * 获取所有唯一的消息Ids
  * @param state
  * @returns 
  */
-const getMessages = (state: ChatState) => state.messages?.map(message => message.id) || [];
+const getMessages = (state: ChatState) => [...new Set(state.messages?.map(message => message.id) || [])];
 
 
 const getMessagesBySessionId = (state: ChatState, messageId: number) => {

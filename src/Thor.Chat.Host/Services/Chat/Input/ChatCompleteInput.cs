@@ -13,6 +13,11 @@ public class ChatCompleteInput
     public long? ParentId { get; set; }
     
     /// <summary>
+    /// 助手消息id
+    /// </summary>
+    public long AssistantMessageId { get; set; }
+    
+    /// <summary>
     /// 消息
     /// </summary>
     public string Text { get; set; }

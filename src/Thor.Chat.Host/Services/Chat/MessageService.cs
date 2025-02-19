@@ -37,10 +37,10 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
             .Take(20);
 
         var result = await query.ToListAsync();
-        
+
         var dto = mapper.Map<List<MessageDto>>(result);
 
-        return dto;
+        return dto.OrderBy(x => x.Id).ToList();
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
     /// </summary>
     /// <param name="message"></param>
     [EndpointSummary("创建新消息")]
-    public async Task CreateAsync(CreateMessage message)
+    public async Task<MessageDto> CreateAsync(CreateMessage message)
     {
         var value = mapper.Map<Message>(message);
 
@@ -79,7 +79,7 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
 
         await dbContext.SaveChangesAsync();
 
-        
+        return mapper.Map<MessageDto>(value);
     }
 
     /// <summary>

@@ -1,17 +1,19 @@
 import { getCurrentUser } from "@/apis/User";
-import { UserDto } from "@/types/User";
-import { useEffect, useState } from "react";
+import { useUserStore } from "@/store/user";
+import { useEffect } from "react";
 
 
 export const useUser = () => {
-    const [user, setUser] = useState<UserDto | null>(null);
+    const { user, setUser } = useUserStore();
 
     useEffect(() => {
         loadUser();
     }, []);
 
     const loadUser = async () => {
-        // Load user from API
+        if (user) {
+            return;
+        }
         getCurrentUser().then(result => {
             setUser(result);
         });

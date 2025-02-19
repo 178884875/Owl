@@ -19,8 +19,8 @@ export default function WelcomePage() {
             }}>
                 <Welcome
                     icon="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*s5sNRo5LjfQAAAAAAAAAAAAADgCCAQ/fmt.webp"
-                    title="欢迎使用 AGI 产品"
-                    description="AGI 是一个基于 Ant Design 的中后台解决方案，我们希望能够帮助到更多的开发者。"
+                    title="欢迎使用 Thor Chat"
+                    description="Thor Chat是一款基于AI的智能聊天机器人，旨在为用户提供更加智能化的聊天体验。"
                 />
             </Flexbox>
         </Flexbox>)

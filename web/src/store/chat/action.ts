@@ -3,8 +3,9 @@ import { ChatStore } from "./store";
 import getModels from "@/apis/Model";
 import { createSession, deleteSession, getSessionLite, switchSessionModel, updateSession } from "@/apis/Session";
 import { createMessage, deleteMessage } from "@/apis/Message";
-import { ChatRole } from "@/types/Chat";
+import { ChatCompleteParams, ChatRole } from "@/types/Chat";
 import { message } from "antd";
+import { chatComplete } from '@/apis/Chat';
 
 
 export interface CreateSessionInput {
@@ -14,6 +15,7 @@ export interface CreateSessionInput {
 
 export interface chatCompleteInput {
     sessionId?: number;
+    value?: string;
 }
 
 export interface ChatAction {
@@ -213,31 +215,109 @@ export const createChatSlice: StateCreator<
             modelId: modelId,
         });
 
-        get().chatComplete({
-            sessionId: result.data.id
-        });
-
-        set({ currentSession: result.data });
+        set({ currentSession: result.data, messages: [] });
         await get().loadSessions('');
 
+        setTimeout(() => {
+            get().chatComplete({
+                sessionId: result.data.id,
+                value
+            });
+        }, 300);
 
         return result.data.id;
     },
     chatComplete: async (input: chatCompleteInput) => {
-        const value = {
-            text: get().value
-        }
-
-        const result = await createMessage({
-            sessionId: input.sessionId ?? get().currentSession?.id,
+        const sessionId = input.sessionId ?? get().currentSession?.id;
+        const userMessage = {
+            sessionId: sessionId,
             role: ChatRole.User,
             texts: [
                 {
-                    text: get().value
+                    text: input.value
                 }
-            ]
-        });
+            ],
+            files: get().files.map(file => ({
+                fileId: file.id,
+                FileUrl: file.path,
+                fileName: file.fileName
+            })),
+            id: 0
+        };
 
+
+        const result = await createMessage(userMessage);
+        userMessage.id = result.data.id;
+        // 添加一个临时的AI响应消息
+        const tempAiMessage = {
+            sessionId: sessionId,
+            role: ChatRole.Assistant,
+            texts: [{ text: '...', id: 0 }],
+            isLoading: true,
+            id: 0
+        };
+
+        const messageResponse = await createMessage(tempAiMessage);
+        tempAiMessage.id = messageResponse.data.id;
+        tempAiMessage.texts[0].id = messageResponse.data.id;
+        const messages = get().messages;
+
+        messages.push(userMessage);
+
+        messages.push(tempAiMessage);
+
+
+        set((state) => ({
+            messages: [...state.messages]
+        }))
+
+        try {
+
+            const chatCompleteParams = {
+                sessionId: sessionId,
+                parentId: 0,
+                text: userMessage.texts[0].text,
+                fileIds: userMessage.files.map(file => file.fileId),
+                functionCalls: [],
+                // @ts-ignore
+                assistantMessageId: tempAiMessage.texts[tempAiMessage.texts.length - 1].id
+            } as ChatCompleteParams;
+
+            let accumulatedText = '';
+
+            let lastUpdateTime = Date.now();
+            for await (const chunk of chatComplete(chatCompleteParams)) {
+                const { data, type } = chunk;
+                if (type === 'chat') {
+                    accumulatedText += data;
+                    tempAiMessage.texts[tempAiMessage.texts.length - 1].text = accumulatedText;
+
+                    // 每100ms更新一次
+                    const currentTime = Date.now();
+                    if (currentTime - lastUpdateTime >= 100) {
+                        set({ messages: [...messages] });
+                        lastUpdateTime = currentTime;
+                    }
+                }
+            }
+            set({ messages: [...messages] });
+
+
+        } catch (error) {
+            console.error('Error in chatComplete:', error);
+            // 将临时AI消息标记为错误
+            set(state => ({
+                messages: state.messages.map(msg =>
+                    msg === tempAiMessage ? {
+                        ...msg,
+                        texts: [{ text: '发送消息失败' }],
+                        isLoading: false,
+                        isError: true
+                    } : msg
+                )
+            }));
+            message.error('发送消息失败');
+        }
     },
     deleteMessage: async (id: number) => {
         const result = await deleteMessage(id);

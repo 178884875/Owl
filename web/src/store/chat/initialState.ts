@@ -6,7 +6,7 @@ export interface ChatState {
     currentSession?: any;
     searchSessionValue?: string;
     sessionConfigExpanded: boolean;
-    messages?: any[];
+    messages: any[];
     value?: string;
     files: any[];
     // 展开文件

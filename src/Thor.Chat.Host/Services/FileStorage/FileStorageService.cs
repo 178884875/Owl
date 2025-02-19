@@ -7,6 +7,7 @@ using Storage.Core;
 using Thor.Chat.Core;
 using Thor.Chat.Host.Infrastructure;
 using Thor.Chat.Host.Options;
+using Thor.Chat.Host.Services.FileStorage.Dto;
 
 namespace Thor.Chat.Host.Services.FileStorage;
 
@@ -21,7 +22,7 @@ public sealed class FileStorageService(
     /// </summary>
     [EndpointSummary("上传文件")]
     [Authorize]
-    public async Task<string> UploadAsync(IFormFile file)
+    public async Task<UploadDto> UploadAsync(IFormFile file)
     {
         // 获取后缀名
         var ext = Path.GetExtension(file.FileName);
@@ -31,7 +32,12 @@ public sealed class FileStorageService(
 
         if (!string.IsNullOrEmpty(path))
         {
-            return options.Value.App.TrimEnd('/') + "/api/FileStorage?id=" + path;
+            return new UploadDto
+            {
+                Path = options.Value.App.TrimEnd('/') + "/api/FileStorage?id=" + path,
+                FileName = file.FileName,
+                Id = path
+            };
         }
 
         throw new BusinessException("上传失败");
