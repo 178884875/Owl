@@ -49,7 +49,17 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
                     Enabled = chatModel.Enabled,
                     DisplayName = chatModel.DisplayName,
                     Description = chatModel.Description,
-                    Pricing = new Pricing() { Input = chatModel.Pricing?.Input, Output = chatModel.Pricing?.Output, },
+                    Pricing = new Pricing()
+                    {
+                        Input = chatModel.Pricing?.Input,
+                        Output = chatModel.Pricing?.Output,
+                        WriteCacheInput = chatModel.Pricing?.WriteCacheInput,
+                        AudioInput = chatModel.Pricing?.AudioInput,
+                        AudioOutput = chatModel.Pricing?.AudioOutput,
+                        CachedInput = chatModel.Pricing?.CachedInput,
+                        CachedAudioInput = chatModel.Pricing?.CachedAudioInput,
+                        Standard = chatModel.Pricing?.Standard
+                    },
                     Type = chatModel.Type,
                     MaxOutput = chatModel.MaxOutput,
                     Provider = model.Provider,
@@ -62,7 +72,6 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
             await dbContext.Models.AddRangeAsync(items, stoppingToken);
 
             await HandleAsync(dbContext, items);
-
 
             await dbContext.SaveChangesAsync();
         }
@@ -101,19 +110,36 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
 
         await CreateChannelAsync(context, "OpenAI", "OpenAI", "OpenAI", "https://api.openai.com/v1",
             items
-                .Where(x => x.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "OpenAI", true, ["OpenAI"], user.Id);
+                .Where(x => x.Enabled == true && x.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "OpenAI", true, ["OpenAI", "官方"], user.Id);
 
         // 创建DeepSeek
         await CreateChannelAsync(context, "DeepSeek", "DeepSeek", "DeepSeek", "https://api.deepseek.com/v1",
-            items.Select(x => x.Id).ToList(), "DeepSeek", true, ["DeepSeek"], user.Id);
+            items.Where(x => x.Enabled == true && x.Provider.Equals("DeepSeek", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "DeepSeek", true, ["DeepSeek"], user.Id);
 
         // 创建google,使用OpenAI兼容接口
         await CreateChannelAsync(context, "Google", "Google", "Google",
             "https://generativelanguage.googleapis.com/v1beta/openai/",
             items
-                .Where(x => x.Provider.Equals("Google", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "OpenAI", false, ["Google"], user.Id);
+                .Where(x => x.Enabled == true && x.Provider.Equals("Google", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "Google", false, ["Google"], user.Id);
+
+        await CreateChannelAsync(context, "Anthropic", "Anthropic", "Anthropic", "https://api.anthropic.com/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("Anthropic", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "Anthropic", false, ["Anthropic"], user.Id);
+
+        await CreateChannelAsync(context, "SiliconCloud", "SiliconCloud", "SiliconCloud",
+            "https://api.siliconcloud.com/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("SiliconCloud", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "SiliconCloud", false, ["SiliconCloud"], user.Id);
+
+        await CreateChannelAsync(context, "GiteeAI", "GiteeAI", "GiteeAI", "https://api.gitee.com/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("GiteeAI", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "GiteeAI", false, ["GiteeAI"], user.Id);
     }
 
     /// <summary>

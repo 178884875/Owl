@@ -139,11 +139,6 @@ export default function ChannelConfig({ channel }: ChannelConfigProps) {
                     <SelectModel modelIds={modelIds} onSelect={(modelIds) => {
                         setModelIds([...modelIds]);
                     }} >
-                        <Flexbox style={{
-                            fontSize: 16,
-                        }}>
-                            {modelIds.length > 0 ? '已选择' + modelIds.length + '个模型' : '选择渠道可用模型'}
-                        </Flexbox>
                     </SelectModel>
                 </Form.Item>
                 <Form.Item name="tags" label="模型标签">

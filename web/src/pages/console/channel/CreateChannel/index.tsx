@@ -125,11 +125,6 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
           <SelectModel modelIds={modelIds} onSelect={(modelIds) => {
             setModelIds([...modelIds]);
           }} >
-            <Flexbox style={{
-              fontSize: 16,
-            }}>
-              {modelIds.length > 0 ? '已选择' + modelIds.length + '个模型' : '选择渠道可用模型'}
-            </Flexbox>
           </SelectModel>
         </Form.Item>
         <Form.Item name="description" label="渠道描述">

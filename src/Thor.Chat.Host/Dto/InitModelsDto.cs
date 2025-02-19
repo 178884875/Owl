@@ -45,5 +45,13 @@ public class InitModelPricing
 
     public double? CachedInput { get; set; }
 
+    public double? CachedAudioInput { get; set; }
+    
+    public double? Standard { get; set; }
+    
     public double? WriteCacheInput { get; set; }
+    
+    public double? AudioInput { get; set; }
+    
+    public double? AudioOutput { get; set; }
 }

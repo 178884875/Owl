@@ -9,12 +9,11 @@ import { theme } from "antd";
 const { useToken } = theme;
 
 interface SelectModelProps {
-    children: React.ReactNode;
     modelIds: string[];
     onSelect: (modelIds: string[]) => void;
 }
 
-export default function SelectModel({ children, modelIds, onSelect }: SelectModelProps) {
+export default function SelectModel({  modelIds, onSelect }: SelectModelProps) {
     const { token } = useToken();
     const [loadModels, models] = useChatStore(state => [state.loadModels, state.models]);
 
@@ -34,13 +33,12 @@ export default function SelectModel({ children, modelIds, onSelect }: SelectMode
                     maxHeight: 300,
                     overflow: "auto",
                 }}
-                placeholder={children}
+                placeholder="请选择模型"
                 mode='tags'
                 value={modelIds}
+                allowClear
                 onChange={(value: string[]) => {
                     value = value.filter(x => x !== '' && x !== undefined);
-                    console.log(value);
-                    
                     if (value.length === 0) {
                         onSelect([]);
                     } else {
@@ -48,69 +46,70 @@ export default function SelectModel({ children, modelIds, onSelect }: SelectMode
                     }
                 }}
             >
-
                 {models?.map((model) => (
                     <Select.OptGroup
                         key={model.provider}
                         label={model.provider}
                     >
-                        {model.chatModels?.map((chatModel: any) => (
-                            <Select.Option
-                                key={chatModel.id}
-                                value={chatModel.id}
-                                label={
+                        {model.chatModels?.map((chatModel: any) => {
+                            return (
+                                <Select.Option
+                                    key={chatModel.id}
+                                    value={chatModel.id}
+                                    label={
+                                        <Flexbox
+                                            horizontal
+                                            style={{
+                                                fontSize: 16,
+                                            }}
+                                        >
+                                            <Tooltip
+                                                placement="right"
+                                                title={chatModel.description}
+                                            >
+                                                <div
+                                                    style={{
+                                                        flex: 1,
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        marginLeft: 5,
+                                                    }}
+                                                >
+                                                    {chatModel.displayName}
+                                                </div>
+                                            </Tooltip>
+                                            <ModelFeatureTags
+                                                tokens={chatModel.contextWindowTokens}
+                                                vision={chatModel.vision}
+                                                functionCall={chatModel.functionCall}
+                                            />
+                                        </Flexbox>
+                                    }
+                                    style={{
+                                        backgroundColor: modelIds.includes(chatModel.id)
+                                            ? token.controlItemBgActiveHover
+                                            : "transparent",
+                                    }}
+                                >
                                     <Flexbox
                                         horizontal
-                                        style={{
-                                            fontSize: 16,
-                                        }}
+                                        style={{ alignItems: "center" }}
                                     >
-                                        <Tooltip
-                                            placement="right"
-                                            title={chatModel.description}
+                                        {getIconByName(model.provider, 22)}
+                                        <span
+                                            style={{
+                                                marginLeft: 8,
+                                                flex: 1,
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                            }}
                                         >
-                                            <div
-                                                style={{
-                                                    flex: 1,
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    marginLeft: 5,
-                                                }}
-                                            >
-                                                {chatModel.displayName}
-                                            </div>
-                                        </Tooltip>
-                                        <ModelFeatureTags
-                                            tokens={chatModel.contextWindowTokens}
-                                            vision={chatModel.vision}
-                                            functionCall={chatModel.functionCall}
-                                        />
+                                            {chatModel.displayName}
+                                        </span>
                                     </Flexbox>
-                                }
-                                style={{
-                                    backgroundColor: modelIds.includes(chatModel.id)
-                                        ? token.controlItemBgActiveHover
-                                        : "transparent",
-                                }}
-                            >
-                                <Flexbox
-                                    horizontal
-                                    style={{ alignItems: "center" }}
-                                >
-                                    {getIconByName(model.provider, 22)}
-                                    <span
-                                        style={{
-                                            marginLeft: 8,
-                                            flex: 1,
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                        }}
-                                    >
-                                        {chatModel.displayName}
-                                    </span>
-                                </Flexbox>
-                            </Select.Option>
-                        ))}
+                                </Select.Option>
+                            );
+                        })}
                     </Select.OptGroup>
                 ))}
             </Select>
