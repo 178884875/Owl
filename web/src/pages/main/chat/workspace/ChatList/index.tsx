@@ -14,9 +14,10 @@ export default function ChatList() {
     const [
         messages,
         setMessages,
-        currentSession
+        currentSession,
+        regenerateMessage
     ] =
-        useChatStore(state => [state.messages, state.setMessages, state.currentSession]);
+        useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage]);
 
     const user = useUserStore(state => state.user);
 
@@ -85,7 +86,6 @@ export default function ChatList() {
                             size="small" 
                             icon={<ChevronRight size={14} />} 
                             onClick={() => {
-                                if (chatMessage.currentIndex === chatMessage.texts.length - 1) return;
                                 chatMessage.currentIndex = chatMessage.currentIndex + 1;
                                 setMessages(messages);
                             }}
@@ -101,15 +101,20 @@ export default function ChatList() {
                         <Tooltip title={'删除当前消息'}>
                             <Popconfirm
                                 title="确定删除吗？"
-                                onConfirm={() => {
-                                    deleteMessage(chatMessage.id);
+                                onConfirm={async () => {
+                                    await deleteMessage(chatMessage.id);
+                                    setMessages(messages.filter((message: any) => message.id !== chatMessage.id));
                                 }}
                             >
                                 <Button color="red" variant="text" size="small" icon={<DeleteOutlined />} />
                             </Popconfirm>
                         </Tooltip>
                         <Tooltip title={chatMessage.role === 'user' ? '重新生成' : '删除并且重新生成'}>
-                            <Button color="default" variant="text" size="small" icon={<SyncOutlined />} />
+                            <Button
+                                onClick={async () => {
+                                    await regenerateMessage(chatMessage.id);
+                                }}
+                                color="default" variant="text" size="small" icon={<SyncOutlined />} />
                         </Tooltip>
                         <Tooltip title={'复制源码'}>
                             <Button color="default"
