@@ -12,11 +12,13 @@ import { chatSelectors } from "./selectors";
 export interface CreateSessionInput {
     modelId: string;
     value: string;
+    files?: any[];
 }
 
 export interface chatCompleteInput {
     sessionId?: number;
     value?: string;
+    files?: any[];
 }
 
 export interface CreateMessageInput {
@@ -92,7 +94,7 @@ export interface ChatAction {
     /**
      * 加载模型
      */
-    loadModels: () => Promise<void>;
+    loadModels: () => Promise<any[]>;
 
     /**
      * 创建会话
@@ -218,14 +220,16 @@ export const createChatSlice: StateCreator<
     },
     loadModels: async () => {
         if (get().models.length > 0) {
-            return;
+            return get().models;
         }
         const value = await getModels()
         set({ models: value });
+        return value;
     },
     createSession: async ({
         modelId,
-        value
+        value,
+        files
     }: CreateSessionInput) => {
         const result = await createSession({
             name: '默认会话',
@@ -239,7 +243,8 @@ export const createChatSlice: StateCreator<
         setTimeout(() => {
             get().chatComplete({
                 sessionId: result.data.id,
-                value
+                value,
+                files
             });
         }, 300);
 
@@ -316,10 +321,10 @@ export const createChatSlice: StateCreator<
                     text: input.value
                 }
             ],
-            files: get().files.map(file => ({
-                fileId: file.id,
-                FileUrl: file.path,
-                fileName: file.fileName
+            files: input.files?.map(file => ({
+                fileId: file
+            })) ?? get().files.map(file => ({
+                fileId: file
             })),
             id: 0
         };
@@ -356,7 +361,7 @@ export const createChatSlice: StateCreator<
                 sessionId: sessionId,
                 parentId: 0,
                 text: userMessage.texts[0].text,
-                fileIds: userMessage.files.map(file => file.fileId),
+                fileIds: userMessage.files.map(file => file.id),
                 functionCalls: [],
                 // @ts-ignore
                 assistantMessageId: tempAiMessage.texts[tempAiMessage.texts.length - 1].id
@@ -424,7 +429,7 @@ export const createChatSlice: StateCreator<
             set((state) => ({
                 messages: state.messages.filter(msg => msg.id !== id)
             }))
-            
+
         }
         // 然后创建新的AI消息
         const tempAiMessage = {

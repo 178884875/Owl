@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 using Storage.Core;
 using Thor.Chat.Core;
+using Thor.Chat.Host.Dto;
 using Thor.Chat.Host.Infrastructure;
 using Thor.Chat.Host.Options;
 using Thor.Chat.Host.Services.FileStorage.Dto;
@@ -15,6 +16,7 @@ namespace Thor.Chat.Host.Services.FileStorage;
 public sealed class FileStorageService(
     IStorageService storageService,
     IUserContext userContext,
+    IDbContext dbContext,
     IOptions<ChatOptions> options) : FastApi
 {
     /// <summary>
@@ -22,21 +24,36 @@ public sealed class FileStorageService(
     /// </summary>
     [EndpointSummary("上传文件")]
     [Authorize]
-    public async Task<UploadDto> UploadAsync(IFormFile file)
+    public async Task<ResultDto> UploadAsync(HttpContext context)
     {
+        var file = context.Request.Form.Files[0];
         // 获取后缀名
         var ext = Path.GetExtension(file.FileName);
         var fileName = Guid.NewGuid().ToString("N") + ext;
 
         var path = await storageService.UploadFileAsync(fileName, file.OpenReadStream(), userContext.UserId);
 
+        var entity = dbContext.FileStorages.Add(new Core.Entities.FileStorage
+        {
+            FileName = file.FileName,
+            Size = (int)file.Length,
+            ContentType = file.ContentType,
+            ProviderId = path
+        }).Entity;
+
+        await dbContext.SaveChangesAsync();
+
         if (!string.IsNullOrEmpty(path))
         {
-            return new UploadDto
+            return new ResultDto()
             {
-                Path = options.Value.App.TrimEnd('/') + "/api/FileStorage?id=" + path,
-                FileName = file.FileName,
-                Id = path
+                Success = true,
+                Data = new UploadDto
+                {
+                    Path = options.Value.App.TrimEnd('/') + "/api/FileStorage?id=" + path,
+                    FileName = file.FileName,
+                    Id = entity.Id
+                }
             };
         }
 

@@ -17,7 +17,11 @@ using Thor.Chat.Host.Services.Chat.Input;
 
 namespace Thor.Chat.Host.Services.Chat;
 
-public sealed class ChatService(IDbContext dbContext, IUserContext userContext, IStorageService storageService)
+public sealed class ChatService(
+    IDbContext dbContext,
+    IUserContext userContext,
+    IStorageService storageService,
+    ILogger<ChatService> logger)
     : FastApi
 {
     public async Task ChatCompleteAsync(HttpContext context, ChatCompleteInput input)
@@ -47,6 +51,8 @@ public sealed class ChatService(IDbContext dbContext, IUserContext userContext, 
                     .Include(x => x.Texts)
                     .ToListAsync();
             }
+
+            messages.Reverse();
 
             // 获取当前会话模型属于的模型
             var model = await dbContext.Models
@@ -91,8 +97,13 @@ public sealed class ChatService(IDbContext dbContext, IUserContext userContext, 
                     // 如果是文件则需要解析文件
                     foreach (var file in message.Files)
                     {
+                        var fileEntity = await dbContext.FileStorages
+                            .AsNoTracking()
+                            .Where(x => x.Id == file.FileId)
+                            .FirstOrDefaultAsync();
+
                         // 获取文件的内容
-                        var (fileName, stream) = await storageService.GetFileAsync(file.FileId.ToString());
+                        var (fileName, stream) = await storageService.GetFileAsync(fileEntity.ProviderId);
 
                         // 根据文件名获取文件类型
                         var type = GetFileType(file.FileName);
@@ -105,7 +116,7 @@ public sealed class ChatService(IDbContext dbContext, IUserContext userContext, 
                                 image.Position = 0;
                                 history.AddMessage(new AuthorRole(message.Role), new ChatMessageContentItemCollection()
                                 {
-                                    new ImageContent(image.ToArray(), null)
+                                    new ImageContent(image.ToArray(), "image/jpeg")
                                 });
                                 break;
                             }
@@ -119,7 +130,7 @@ public sealed class ChatService(IDbContext dbContext, IUserContext userContext, 
                                 await stream.CopyToAsync(audio);
                                 history.AddMessage(new AuthorRole(message.Role), new ChatMessageContentItemCollection()
                                 {
-                                    new AudioContent(audio.ToArray(), null)
+                                    new AudioContent(audio.ToArray(), "audio/mpeg")
                                 });
                                 break;
                             }
@@ -160,6 +171,11 @@ public sealed class ChatService(IDbContext dbContext, IUserContext userContext, 
                                 break;
                         }
                     }
+                }
+
+                if (message.Role == "assistant" && message.Texts.Any(x => x.Text == "..."))
+                {
+                    continue;
                 }
 
                 if (message.Texts.Count != 0)
@@ -229,7 +245,7 @@ public sealed class ChatService(IDbContext dbContext, IUserContext userContext, 
         }
         catch (Exception e)
         {
-            // context.Response.StatusCode = 500;
+            logger.LogError(e, "对话失败");
             await context.Response.WriteAsJsonAsync(ResultDto.FailResult("对话失败" + e.Message));
         }
     }

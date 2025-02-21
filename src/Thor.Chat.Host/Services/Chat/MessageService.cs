@@ -75,6 +75,27 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
         value.CreatedBy = userContext.UserId;
         value.CreatedAt = DateTime.Now;
 
+        var fileIds = value.Files.Select(x => x.FileId).ToList();
+
+        var files = await dbContext.FileStorages
+            .Where(x => fileIds.Contains(x.Id))
+            .ToListAsync();
+
+        value.Files = value.Files.Where(x => fileIds.Contains(x.FileId)).ToList();
+        foreach (var file in value.Files)
+        {
+            var fileEntity = files.FirstOrDefault(x => x.Id == file.FileId);
+
+            if (fileEntity != null)
+            {
+                file.FileName = fileEntity.FileName;
+                file.FileSize = fileEntity.Size;
+                file.FileUrl = fileEntity.ProviderId;
+                file.FileId = fileEntity.Id;
+                file.FileStorage = fileEntity;
+            }
+        }
+
         await dbContext.Messages.AddAsync(value);
 
         await dbContext.SaveChangesAsync();

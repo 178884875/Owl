@@ -3,7 +3,7 @@ import { Flexbox } from 'react-layout-kit';
 import { getMessages } from '@/apis/Message';
 import { useEffect } from 'react';
 import { Bubble } from '@ant-design/x';
-import { Avatar, Button, message, Popconfirm, Tooltip } from 'antd';
+import { Avatar, Button, message, Popconfirm, Tooltip, Spin } from 'antd';
 import { useUserStore } from '@/store/user';
 import { SyncOutlined, CopyOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Markdown } from '@lobehub/ui';
@@ -45,19 +45,27 @@ export default function ChatList() {
             return {
                 role: chatMessage.role,
                 id: 'bubble-list-item' + chatMessage.id,
-                content: <Markdown
-                    style={{
-                        width: '100%',
-                        flex: 1,
-                    }}
-                    allowHtml
-                    headerMultiple={0.8}
-                    enableMermaid
-                    enableImageGallery
-                    enableLatex
-                    variant='chat'
-                    fullFeaturedCodeBlock
-                >{chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts.length - 1].text}</Markdown>,
+                content: chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts.length - 1].text === '...' ? (
+                    <Flexbox align="center" justify="center" style={{ height: '30px' }}>
+                        <Spin  />
+                    </Flexbox>
+                ) : (
+                    <Markdown
+                        style={{
+                            width: '100%',
+                            flex: 1,
+                        }}
+                        allowHtml
+                        headerMultiple={0.8}
+                        enableMermaid
+                        enableImageGallery
+                        enableLatex
+                        variant='chat'
+                        fullFeaturedCodeBlock
+                    >
+                        {chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts.length - 1].text}
+                    </Markdown>
+                ),
                 avatar: <Avatar src={chatMessage.role === 'user' ? user?.avatar : '/logo.png'} />,
                 header: chatMessage.role === 'user' ? user?.displayName : 'AI助手',
                 footer: <Flexbox>

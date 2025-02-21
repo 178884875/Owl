@@ -1,36 +1,41 @@
 import { Flexbox } from 'react-layout-kit';
-import Title from '../chat/features/Title';
-import { Button, Input, Layout, Menu, Typography, Avatar, Divider, Badge, Card, Space, Tag, ConfigProvider, theme, notification, Tooltip, Skeleton, List, Dropdown } from 'antd';
-import { MenuOutlined, CloseOutlined, PaperClipOutlined, CameraOutlined, RobotOutlined, SendOutlined, ArrowDownOutlined, MessageOutlined, ProjectOutlined, DownOutlined, CloseCircleOutlined, StarOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { Button, Input, Layout, Typography, Divider, Badge, Card, Space, Tag, ConfigProvider, theme, notification, Tooltip, Skeleton, List, Dropdown, Image } from 'antd';
+import { CloseOutlined, PaperClipOutlined, CameraOutlined, SendOutlined, ArrowDownOutlined, MessageOutlined, ProjectOutlined, DownOutlined, StarOutlined } from '@ant-design/icons';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useUser } from '@/hooks/useUser';
 import ModelFeatureTags from '@/features/ModelFeatureTags';
 import { useChatStore } from '@/store/chat';
 import { getIconByName } from '@/utils/iconutil';
 import { MenuItemGroupType } from 'antd/es/menu/interface';
-import { WEBSITE } from '@/consts/app';
-const { Header, Content, Sider } = Layout;
-const { Text, Paragraph } = Typography;
+import { DEFAULT_MODEL, WEBSITE } from '@/consts/app';
+import { useNavigate } from 'react-router-dom';
+import { uploadFile } from '@/apis/FileStorage';
+
+const { Content } = Layout;
+const { Text, } = Typography;
 const { TextArea } = Input;
 const { useToken } = theme;
 
 export default function WelcomePage() {
   const { token } = useToken();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [inputValue, setInputValue] = useState('');
-  const [recentChats, setRecentChats] = useState([]);
+  const [recentChats, setRecentChats] = useState<any[]>([]);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [showGoogleDocs, setShowGoogleDocs] = useState(true);
   const [isRecentChatsExpanded, setIsRecentChatsExpanded] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [loadModels, models] =
-    useChatStore(state => [state.loadModels, state.models]);
+  const [loadModels, models, createSession, setFiles] =
+    useChatStore(state => [state.loadModels, state.models, state.createSession, state.setFiles]);
   const [model, setModel] = useState<string | undefined>();
 
   const user = useUser();
 
-  // 添加获取问候语的方法
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
@@ -42,13 +47,21 @@ export default function WelcomePage() {
     } else if (hour >= 18 && hour < 22) {
       return '晚上好';
     } else {
-      return '夜深了';
+      return '深夜了';
     }
   };
 
   useEffect(() => {
-    loadModels().then(() => {
-      setModel(models?.[0]?.chatModels?.[0]?.id);
+    loadModels().then((models) => {
+      // 将所有 chatModels 扁平化为一个数组
+      const allChatModels = models.flatMap(x => x.chatModels || []);
+      // 查找默认模型
+      const defaultModel = allChatModels.find(x => x.modelId === DEFAULT_MODEL);
+      if (defaultModel) {
+        setModel(defaultModel.id);
+      } else {
+        setModel(allChatModels[0]?.id);
+      }
     });
   }, []);
 
@@ -84,7 +97,7 @@ export default function WelcomePage() {
     }
   }, [user]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     setInputValue(e.target.value);
   };
 
@@ -108,6 +121,88 @@ export default function WelcomePage() {
       {item?.displayName}
     </Flexbox>;
   }
+
+  const createChat = async () => {
+    if (inputValue.trim() === '') {
+      notification.error({
+        message: '请输入内容',
+      });
+      return;
+    }
+    if (!model) {
+      notification.error({
+        message: '请选择模型',
+      });
+      return;
+    }
+
+    let fileIds: string[] = [];
+
+    if (selectedImage) {
+      const result = await uploadFile(selectedImage);
+      debugger;
+      if (result.success) {
+        fileIds.push(result.data.id);
+      }
+    }
+
+
+    const sessionId = await createSession({
+      modelId: model,
+      value: inputValue,
+      files: fileIds
+    });
+
+    if (sessionId) {
+      navigate('/chat?sessionId=' + sessionId);
+    }
+    setInputValue('');
+    setSelectedImage(null);
+    setImagePreview(null);
+  }
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = event.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        event.preventDefault();
+        const blob = items[i].getAsFile();
+        if (blob) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setImagePreview(e.target?.result as string);
+          };
+          reader.readAsDataURL(blob);
+          setSelectedImage(blob);
+        }
+        break;
+      }
+    }
+  };
 
   return (
     <Layout style={{ height: '100vh' }}>
@@ -140,7 +235,7 @@ export default function WelcomePage() {
               bodyStyle={{ padding: '16px' }}
             >
               <TextArea
-                placeholder="How can Claude help you today?"
+                placeholder={`嗨，${user?.displayName || 'Guest'}，${getGreeting()}我可以帮助您什么？`}
                 autoSize={{ minRows: 1, maxRows: 6 }}
                 style={{
                   background: 'transparent',
@@ -152,24 +247,48 @@ export default function WelcomePage() {
                 bordered={false}
                 value={inputValue}
                 onChange={handleInputChange}
+                onPaste={handlePaste}
               />
+              {imagePreview && (
+                <div style={{ marginTop: 16, position: 'relative' }}>
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain' }}
+                  />
+                  <Button
+                    type="text"
+                    icon={<CloseOutlined />}
+                    onClick={removeImage}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      background: 'rgba(255, 255, 255, 0.8)',
+                    }}
+                  />
+                </div>
+              )}
               <motion.div
                 style={{ position: 'absolute', right: 12, bottom: 16 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
-                <Button
-                  shape="circle"
-                  type="primary"
-                  style={{
-                    background: token.colorPrimary,
-                    borderColor: token.colorPrimary
-                  }}
-                >
-                  {inputValue ? <SendOutlined /> : <ArrowDownOutlined />}
-                </Button>
+                {
+                  inputValue ?
+                    <Button
+                      shape="circle"
+                      type="primary"
+                      onClick={createChat}
+                      style={{
+                        background: token.colorPrimary,
+                        borderColor: token.colorPrimary
+                      }}
+                    >
+                      <SendOutlined />
+                    </Button> : <></>
+                }
               </motion.div>
-
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -182,8 +301,15 @@ export default function WelcomePage() {
                     <Button type="text" icon={<PaperClipOutlined />} />
                   </Tooltip>
                   <Tooltip title="Add image">
-                    <Button type="text" icon={<CameraOutlined />} />
+                    <Button type="text" icon={<CameraOutlined />} onClick={triggerImageUpload} />
                   </Tooltip>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 
@@ -245,9 +371,7 @@ export default function WelcomePage() {
                       </div>
                     </Dropdown>
                   </Flexbox>
-                  <DownOutlined style={{ fontSize: 10, marginRight: 20, }} />
-                  <Divider type="vertical" />
-                  <DownOutlined style={{ fontSize: 10 }} />
+                  <DownOutlined style={{ fontSize: 10, marginRight: 40, }} />
                 </div>
               </div>
             </Card>
@@ -270,7 +394,7 @@ export default function WelcomePage() {
               }}>
                 <div>
                   <Text style={{ color: token.colorPrimary, fontSize: 12 }}>
-                    在每一次对话中，我们都会思考广泛，并进行推理
+                    在每一次对话中，我们都会思考广泛，并进行推理，并给出详细的回答
                   </Text>
                 </div>
                 <Text type="secondary" style={{ fontSize: 12 }}>PASTED</Text>
@@ -306,7 +430,7 @@ export default function WelcomePage() {
                   </div>
                   <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
                     我们正在努力开发中，敬请期待
-                    <Text type='success' 
+                    <Text type='success'
                       onClick={() => {
                         window.open(WEBSITE, '_blank');
                       }}
@@ -317,8 +441,8 @@ export default function WelcomePage() {
                         fontSize: 12,
                         fontWeight: 500,
                         userSelect: 'none',
-                      color: token.colorPrimary,
-                    }}>
+                        color: token.colorPrimary,
+                      }}>
                       如果需要，可以联系我们
                     </Text>
                   </Text>

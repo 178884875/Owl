@@ -114,6 +114,15 @@ public class ModelService(IDbContext context, IMapper mapper) : FastApi
             });
         }
 
+        // 将OpenAI排在第一个
+        var openAi = modelsDto.FirstOrDefault(x => x.Provider == "OpenAI");
+        
+        if (openAi != null)
+        {
+            modelsDto.Remove(openAi);
+            modelsDto.Insert(0, openAi);
+        }
+        
         return modelsDto;
     }
 }

@@ -6,7 +6,7 @@ public class MessageFileDto : EntityDto<long>
 {
     public long MessageId { get; set; }
 
-    public long FileId { get; set; }
+    public string FileId { get; set; }
 
     public string FileName { get; set; } = null!;
 

@@ -3,7 +3,7 @@
 /// <summary>
 /// 文件存储
 /// </summary>
-public sealed class FileStorage : Entity<long>
+public sealed class FileStorage : Entity<string>
 {
     /// <summary>
     /// 文件名
