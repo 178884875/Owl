@@ -19,7 +19,8 @@
              "internalConsoleOptions": "openOnSessionStart",
              "env": {
                  "ASPNETCORE_ENVIRONMENT": "Development",
-                 "DOTNET_ENVIRONMENT": "Development"
+                 "DOTNET_ENVIRONMENT": "Development",
+                 "ASPNETCORE_URLS": "http://localhost:5255"
              },
              "pipeTransport": {
                  "pipeCwd": "${workspaceFolder}",

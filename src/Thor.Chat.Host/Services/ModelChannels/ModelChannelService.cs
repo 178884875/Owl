@@ -115,6 +115,9 @@ public class ModelChannelService(
             .Select(x => x.Keys)
             .FirstOrDefaultAsync();
 
+        // 将密钥脱敏
+        result.ForEach(x => x.Key = x.Key.Substring(0, 4) + "****" + x.Key[^4..]);
+
         return result;
     }
 

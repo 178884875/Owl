@@ -41,7 +41,7 @@ export default function ChatList() {
 
     return <Bubble.List
         autoScroll
-        items={messages?.map((chatMessage: any, index: number) => {
+        items={messages?.map((chatMessage: any) => {
             return {
                 role: chatMessage.role,
                 id: 'bubble-list-item' + chatMessage.id,

@@ -16,6 +16,7 @@
     "@types/node": "^22.13.4",
     "antd": "^5.24.0",
     "antd-style": "^3.7.1",
+    "framer-motion": "^12.4.7",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.475.0",
     "markdown-it": "^14.1.0",
