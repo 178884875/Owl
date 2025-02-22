@@ -6,6 +6,7 @@ import { SenderRef } from "@ant-design/x/es/sender";
 import { Flexbox } from "react-layout-kit";
 import { useChatStore } from "@/store/chat";
 import Model from "./Model";
+import Clear from "./Clear";
 
 export interface SenderHeaderProps {
     senderRef: React.RefObject<SenderRef | null>
@@ -34,30 +35,35 @@ export default function SenderHeader({
                 <Flexbox
                     horizontal
                 >
-                    <Model/>
+                    <Model />
+                    <Flexbox style={{
+                        marginLeft: 'auto',
+                    }}>
+                        <Clear />
+                    </Flexbox>
                 </Flexbox>
             }
 
         >
             {fileExpanded && (
-            <Attachments
-                ref={attachmentsRef}
-                beforeUpload={() => false}
-                items={files}
-                onChange={({ fileList }) => setFiles(fileList)}
-                placeholder={(type) =>
-                    type === 'drop'
-                        ? {
-                            title: 'Drop file here',
-                        }
-                        : {
-                            icon: <CloudUploadOutlined />,
-                            title: '上传图片',
-                            description: '点击或拖拽文件到这里上传',
-                        }
-                }
-                getDropContainer={() => senderRef.current?.nativeElement}
-            />)}
+                <Attachments
+                    ref={attachmentsRef}
+                    beforeUpload={() => false}
+                    items={files}
+                    onChange={({ fileList }) => setFiles(fileList)}
+                    placeholder={(type) =>
+                        type === 'drop'
+                            ? {
+                                title: 'Drop file here',
+                            }
+                            : {
+                                icon: <CloudUploadOutlined />,
+                                title: '上传图片',
+                                description: '点击或拖拽文件到这里上传',
+                            }
+                    }
+                    getDropContainer={() => senderRef.current?.nativeElement}
+                />)}
         </Sender.Header>
     );
 }

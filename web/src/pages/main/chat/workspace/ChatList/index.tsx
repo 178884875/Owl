@@ -3,14 +3,18 @@ import { Flexbox } from 'react-layout-kit';
 import { getMessages } from '@/apis/Message';
 import { useEffect } from 'react';
 import { Bubble } from '@ant-design/x';
-import { Avatar, Button, message, Popconfirm, Tooltip, Spin } from 'antd';
+import { Avatar, Button, message, Popconfirm, Tooltip, Spin, Card, Typography, Image } from 'antd';
 import { useUserStore } from '@/store/user';
 import { SyncOutlined, CopyOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Markdown } from '@lobehub/ui';
 import { deleteMessage } from '@/apis/Message';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
+import { theme } from 'antd';
+const { Text, } = Typography;
 
 export default function ChatList() {
+    const { token } = theme.useToken();
     const [
         messages,
         setMessages,
@@ -39,32 +43,82 @@ export default function ChatList() {
         loadMessages();
     }, [currentSession]);
 
+    const renderFile = (file: any, index: number) => {
+        // 根据文件名判断文件类型
+        const fileType = file.fileName.split('.').pop();
+        if (fileType === 'md') {
+            return <Card
+                key={index}
+                size="small"
+                style={{
+                    background: token.colorBgContainer,
+                    width: 'fit-content',
+                    height: 'fit-content',
+                    cursor: 'pointer',
+                    margin: 5
+                }}
+                bodyStyle={{
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8
+                }}
+            >
+                {file.fileName.endsWith('.md') ? (
+                    <FileMarkdownOutlined style={{ fontSize: 16 }} />
+                ) : (
+                    <FileTextOutlined style={{ fontSize: 16 }} />
+                )}
+                <Text style={{ maxWidth: 200 }} ellipsis={{ tooltip: file.fileName }}>
+                    {file.fileName}
+                </Text>
+            </Card>
+        }
+
+        //如果是图片，则返回图片
+        if (fileType === 'png' || fileType === 'jpg' || fileType === 'jpeg') {
+            return <Image style={{
+                maxHeight: 100,
+                maxWidth: 100,
+                cursor: 'pointer',
+                margin: 5
+            }} src={'/api/FileStorage?id=' + file.fileId} />
+        }
+    }
+
     return <Bubble.List
         autoScroll
-        items={messages?.map((chatMessage: any) => {
+        items={messages?.map((chatMessage: any, index: number) => {
             return {
                 role: chatMessage.role,
                 id: 'bubble-list-item' + chatMessage.id,
-                content: chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts.length - 1].text === '...' ? (
+                content: chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts?.length - 1]?.text === '...' ? (
                     <Flexbox align="center" justify="center" style={{ height: '30px' }}>
-                        <Spin  />
+                        <Spin />
                     </Flexbox>
                 ) : (
-                    <Markdown
-                        style={{
-                            width: '100%',
-                            flex: 1,
-                        }}
-                        allowHtml
-                        headerMultiple={0.8}
-                        enableMermaid
-                        enableImageGallery
-                        enableLatex
-                        variant='chat'
-                        fullFeaturedCodeBlock
-                    >
-                        {chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts.length - 1].text}
-                    </Markdown>
+                    <>
+                        <Markdown
+                            style={{
+                                width: '100%',
+                                flex: 1,
+                            }}
+                            allowHtml
+                            headerMultiple={0.8}
+                            enableMermaid
+                            enableImageGallery
+                            enableLatex
+                            variant='chat'
+                            fullFeaturedCodeBlock
+                        >
+                            {chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts?.length - 1]?.text}
+                        </Markdown>
+                        {
+                            chatMessage.files?.map((file: any, index: number) => {
+                                return renderFile(file, index);
+                            })
+                        }
+                    </>
                 ),
                 avatar: <Avatar src={chatMessage.role === 'user' ? user?.avatar : '/logo.png'} />,
                 header: chatMessage.role === 'user' ? user?.displayName : 'AI助手',
@@ -74,11 +128,11 @@ export default function ChatList() {
                         gap={2}
                         style={{ fontSize: '12px', alignItems: 'center' }}
                     >
-                        <Button 
-                            color="default" 
-                            variant="text" 
-                            size="small" 
-                            icon={<ChevronLeft size={14} />} 
+                        <Button
+                            color="default"
+                            variant="text"
+                            size="small"
+                            icon={<ChevronLeft size={14} />}
                             onClick={() => {
                                 if (chatMessage.currentIndex === 0) return;
                                 chatMessage.currentIndex = chatMessage.currentIndex - 1;
@@ -88,11 +142,11 @@ export default function ChatList() {
                             style={{ minWidth: '20px', height: '20px', padding: 0 }}
                         />
                         <span>{`${(chatMessage.currentIndex ?? chatMessage.texts.length - 1) + 1}/${chatMessage.texts.length}`}</span>
-                        <Button 
-                            color="default" 
-                            variant="text" 
-                            size="small" 
-                            icon={<ChevronRight size={14} />} 
+                        <Button
+                            color="default"
+                            variant="text"
+                            size="small"
+                            icon={<ChevronRight size={14} />}
                             onClick={() => {
                                 chatMessage.currentIndex = chatMessage.currentIndex + 1;
                                 setMessages(messages);
@@ -117,13 +171,16 @@ export default function ChatList() {
                                 <Button color="red" variant="text" size="small" icon={<DeleteOutlined />} />
                             </Popconfirm>
                         </Tooltip>
+                        {/* 如果是最后一条消息显示 */}
+                        {index === messages.length - 1 && (
                         <Tooltip title={chatMessage.role === 'user' ? '重新生成' : '删除并且重新生成'}>
                             <Button
                                 onClick={async () => {
                                     await regenerateMessage(chatMessage.id);
                                 }}
                                 color="default" variant="text" size="small" icon={<SyncOutlined />} />
-                        </Tooltip>
+                        </Tooltip>)}
+                        
                         <Tooltip title={'复制源码'}>
                             <Button color="default"
                                 onClick={() => {

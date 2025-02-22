@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using FastService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -24,6 +25,7 @@ public sealed class ChatService(
     ILogger<ChatService> logger)
     : FastApi
 {
+    [Authorize]
     public async Task ChatCompleteAsync(HttpContext context, ChatCompleteInput input)
     {
         try
@@ -248,6 +250,100 @@ public sealed class ChatService(
             logger.LogError(e, "对话失败");
             await context.Response.WriteAsJsonAsync(ResultDto.FailResult("对话失败" + e.Message));
         }
+    }
+
+    /// <summary>
+    /// 生成会话名称
+    /// </summary>
+    /// <param name="sessionId"></param>
+    /// <returns></returns>
+    [EndpointSummary("生成会话名称")]
+    [Filter(typeof(ResultFilter))]
+    [Authorize]
+    public async Task<string> GenerateSessionNameAsync(long sessionId)
+    {
+        var session = await dbContext.Sessions
+            .AsNoTracking()
+            .Where(x => x.Id == sessionId)
+            .FirstOrDefaultAsync();
+
+        if (session == null)
+        {
+            throw new BusinessException("会话不存在");
+        }
+
+        var model = await dbContext.Models
+            .AsNoTracking()
+            .Where(x => x.Id == session.RenameModel)
+            .FirstOrDefaultAsync();
+
+        if (model == null)
+        {
+            throw new BusinessException("模型不存在");
+        }
+
+        var channelShareUsers = await dbContext.ModelChannelShareUsers
+            .AsNoTracking()
+            .Where(x => x.UserId == userContext.UserId && x.Enabled)
+            .Select(x => x.ChannelId)
+            .ToListAsync();
+
+        var channels = await dbContext.ModelChannels
+            .AsNoTracking()
+            .Where(x => channelShareUsers.Contains(x.Id) ||
+                        x.CreatedBy == userContext.UserId)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToArrayAsync();
+
+        channels = channels.Where(x => x.ModelIds.Contains(session.RenameModel)).ToArray();
+
+        if (channels.Length == 0)
+        {
+            throw new BusinessException("当前用户不存在当前模型类型的渠道");
+        }
+
+        var (channel, key) = GetChannelKey(channels);
+
+        // 读取这个会话的最新的俩条消息
+        var messages = (await dbContext.Messages
+            .Where(x => x.SessionId == sessionId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(2)
+            .Include(x => x.Texts)
+            .ToListAsync());
+        
+        if(messages.Count == 0)
+        {
+            throw new BusinessException("会话不存在消息");
+        }
+
+        messages.Reverse();
+
+        var sb = new StringBuilder();
+
+        foreach (var message in messages)
+        {
+            if (message.Texts.Count != 0)
+            {
+                var text = message.Texts.LastOrDefault();
+
+                sb.AppendLine(message.Role + "：" + text.Text);
+            }
+        }
+
+        var kernel = KernelFactory.CreateKernel(model.ModelId, channel.Endpoint, key, channel.Provider);
+
+        var chatPlugin = kernel.Plugins["Chat"];
+
+        var result = await kernel.InvokeAsync(chatPlugin["TopicNaming"], new KernelArguments()
+        {
+            ["content"] = sb.ToString(),
+        });
+
+        await dbContext.Sessions.Where(x => x.Id == sessionId)
+            .ExecuteUpdateAsync(x => x.SetProperty(a => a.Name, x => result.ToString()));
+
+        return result.ToString();
     }
 
     /// <summary>

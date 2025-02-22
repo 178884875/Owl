@@ -16,7 +16,6 @@ export const uploadFile = async (file: File) => {
 
 export const getFile = async (id: string) => {
   const response = await get(`/api/FileStorage?id=${id}`);
-  // 文件流
   const fileStream = await response.blob();
   return fileStream;
 };

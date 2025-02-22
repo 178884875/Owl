@@ -1,5 +1,4 @@
 import { useChatStore } from "@/store/chat";
-import { chatSelectors } from "@/store/chat/selectors";
 import { Flexbox } from "react-layout-kit";
 import {
     theme
@@ -13,10 +12,8 @@ export default function DefaultSession() {
     const { token } = useToken();
 
     const [
-        isCurrentSession,
-        selectSession,
         sideBarExpanded
-    ] = useChatStore(state => [chatSelectors.isCurrentSession(state, -1), state.selectSession, state.sideBarExpanded]);
+    ] = useChatStore(state => [state.sideBarExpanded]);
 
     return (
         <>

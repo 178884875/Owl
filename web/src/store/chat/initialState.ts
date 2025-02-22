@@ -13,6 +13,7 @@ export interface ChatState {
     fileExpanded?: boolean;
     createSessionVisible?: boolean;
     models: any[];
+    generateLoading: boolean;
 }
 
 export const initialState: ChatState = {
@@ -28,4 +29,5 @@ export const initialState: ChatState = {
     searchSessionValue: '',
     fileExpanded: false,
     models: [],
+    generateLoading: false,
 }

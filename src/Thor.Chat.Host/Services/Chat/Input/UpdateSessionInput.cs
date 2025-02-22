@@ -59,4 +59,9 @@ public class UpdateSessionInput : EntityDto<long>
     /// 会话组Id
     /// </summary>
     public string? SessionGroupId { get; set; }
+    
+    /// <summary>
+    /// 重命名模型
+    /// </summary>
+    public string? RenameModel { get; set; }
 }

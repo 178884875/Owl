@@ -6,7 +6,7 @@ import Welcome from "@/pages/main/welcome";
 import ConsoleLayout from "@/pages/console";
 import ConsoleWelcome from "@/pages/console/welcome";
 import ConsoleChannel from "@/pages/console/channel";
-
+import User from "@/pages/console/user";
 
 const routes = [
     {
@@ -40,6 +40,10 @@ const routes = [
                     {
                         path: "/console/channel",
                         element: <ConsoleChannel />
+                    },
+                    {
+                        path: "/console/user",
+                        element: <User />
                     }
                 ]
             }

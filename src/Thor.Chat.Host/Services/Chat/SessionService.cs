@@ -69,6 +69,7 @@ public class SessionService(
         session.CreatedBy = userContext.UserId;
         session.CreatedAt = DateTime.Now;
         session.Model = sessionInput.ModelId;
+        session.RenameModel = sessionOptions.Value.RenameModel;
 
         await dbContext.Sessions.AddAsync(session);
         await dbContext.SaveChangesAsync();
@@ -185,6 +186,7 @@ public class SessionService(
                 x.SetProperty(a => a.Description, sessionInput.Description)
                     .SetProperty(a => a.Avatar, sessionInput.Avatar)
                     .SetProperty(a => a.Favorite, sessionInput.Favorite)
+                    .SetProperty(a => a.RenameModel, sessionInput.RenameModel)
                     .SetProperty(a => a.Temperature, sessionInput.Temperature)
                     .SetProperty(a => a.MaxTokens, sessionInput.MaxTokens)
                     .SetProperty(a => a.TopP, sessionInput.TopP)
@@ -193,5 +195,33 @@ public class SessionService(
                     .SetProperty(a => a.SessionGroupId, sessionInput.SessionGroupId)
                     .SetProperty(a => a.HistoryMessagesCount, sessionInput.HistoryMessagesCount)
                     .SetProperty(a => a.Tags, sessionInput.Tags));
+    }
+
+    /// <summary>
+    /// 清空会话历史消息
+    /// </summary>
+    [EndpointSummary("清空会话历史消息")]
+    public async Task ClearHistoryMessagesAsync(long sessionId)
+    {
+        await dbContext.Messages
+            .Where(m => m.SessionId == sessionId)
+            .ExecuteDeleteAsync();
+    }
+
+    /// <summary>
+    /// 获取最近的三条会话
+    /// </summary>
+    /// <returns></returns>
+    public async Task<List<SessionDto>> GetRecentSessionsAsync()
+    {
+        var sessions = await dbContext.Sessions
+            .Where(x => x.CreatedBy == userContext.UserId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(3)
+            .ToListAsync();
+
+        var dto = mapper.Map<List<SessionDto>>(sessions);
+
+        return dto;
     }
 }

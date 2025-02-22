@@ -1,6 +1,23 @@
 import { Flexbox } from 'react-layout-kit';
-import { Button, Input, Layout, Typography, Divider, Badge, Card, Space, Tag, ConfigProvider, theme, notification, Tooltip, Skeleton, List, Dropdown, Image } from 'antd';
-import { CloseOutlined, PaperClipOutlined, CameraOutlined, SendOutlined, ArrowDownOutlined, MessageOutlined, ProjectOutlined, DownOutlined, StarOutlined } from '@ant-design/icons';
+import { Button, Input, Layout, Typography, Badge, Card, Tag, theme, notification, Tooltip, Skeleton, List, Dropdown, Image } from 'antd';
+import {
+  CloseOutlined,
+  PaperClipOutlined,
+  CameraOutlined,
+  SendOutlined,
+  MessageOutlined,
+  DownOutlined,
+  FileTextOutlined,
+  FileMarkdownOutlined,
+  BookOutlined,
+  BulbOutlined,
+  RobotOutlined,
+  ExperimentOutlined,
+  ApiOutlined,
+  CodeOutlined,
+  CloudOutlined,
+  DatabaseOutlined
+} from '@ant-design/icons';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useUser } from '@/hooks/useUser';
@@ -11,7 +28,8 @@ import { MenuItemGroupType } from 'antd/es/menu/interface';
 import { DEFAULT_MODEL, WEBSITE } from '@/consts/app';
 import { useNavigate } from 'react-router-dom';
 import { uploadFile } from '@/apis/FileStorage';
-
+import { getRecentSessions } from '@/apis/Session';
+import TypewriterEffect from '@/features/TypewriterEffect';
 const { Content } = Layout;
 const { Text, } = Typography;
 const { TextArea } = Input;
@@ -23,16 +41,16 @@ export default function WelcomePage() {
   const [loading, setLoading] = useState(true);
   const [inputValue, setInputValue] = useState('');
   const [recentChats, setRecentChats] = useState<any[]>([]);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
   const [showGoogleDocs, setShowGoogleDocs] = useState(true);
   const [isRecentChatsExpanded, setIsRecentChatsExpanded] = useState(true);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const [loadModels, models, createSession, setFiles] =
-    useChatStore(state => [state.loadModels, state.models, state.createSession, state.setFiles]);
-  const [model, setModel] = useState<string | undefined>();
+  const [loadModels, models, createSession] =
+    useChatStore(state => [state.loadModels, state.models, state.createSession]);
+  const [model, setModel] = useState<any>();
 
   const user = useUser();
 
@@ -58,9 +76,9 @@ export default function WelcomePage() {
       // 查找默认模型
       const defaultModel = allChatModels.find(x => x.modelId === DEFAULT_MODEL);
       if (defaultModel) {
-        setModel(defaultModel.id);
+        setModel(defaultModel);
       } else {
-        setModel(allChatModels[0]?.id);
+        setModel(allChatModels[0]);
       }
     });
   }, []);
@@ -70,30 +88,22 @@ export default function WelcomePage() {
       return;
     }
 
-    // 模拟数据加载
-    setTimeout(() => {
-      setRecentChats([
-        { id: 1, title: '全面的网页开发指南', time: '18分钟前', icon: <ProjectOutlined /> },
-        { id: 2, title: 'UI动画设计研究', time: '2小时前', icon: <StarOutlined /> },
-        { id: 3, title: 'React组件优化', time: '1天前', icon: <ProjectOutlined /> }
-      ]);
-      setLoading(false);
-    }, 1000);
+    getRecentSessions().then((res) => {
+      setRecentChats(res.data);
+    });
 
+    setLoading(false);
     // 检查是否已经显示过欢迎通知
     const hasShownWelcome = sessionStorage.getItem('hasShownWelcome');
     if (!hasShownWelcome) {
-      setTimeout(() => {
-        notification.open({
-          message: `欢迎回来, ${user?.displayName || 'Guest'}!`,
-          description: '今天准备好协助您的项目了吗？',
-          icon: <Badge status="processing" color={token.colorPrimary} />,
-          placement: 'topRight',
-          duration: 4,
-        });
-        // 设置标记表示已经显示过通知
-        sessionStorage.setItem('hasShownWelcome', 'true');
-      }, 1500);
+      sessionStorage.setItem('hasShownWelcome', 'true');
+      notification.open({
+        message: `欢迎回来, ${user?.displayName || 'Guest'}!`,
+        description: '今天准备好协助您的项目了吗？',
+        icon: <Badge status="processing" color={token.colorPrimary} />,
+        placement: 'topRight',
+        duration: 4,
+      });
     }
   }, [user]);
 
@@ -101,16 +111,12 @@ export default function WelcomePage() {
     setInputValue(e.target.value);
   };
 
-  const toggleSidebar = () => {
-    setSidebarVisible(!sidebarVisible);
-  };
-
   const toggleRecentChats = () => {
     setIsRecentChatsExpanded(!isRecentChatsExpanded);
   };
 
   const renderModel = () => {
-    const item = models?.find(item => item.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === model) !== undefined)?.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === model);
+    const item = models?.find(item => item.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === model?.id) !== undefined)?.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === model?.id);
     return <Flexbox
       horizontal
       style={{
@@ -121,6 +127,27 @@ export default function WelcomePage() {
       {item?.displayName}
     </Flexbox>;
   }
+
+  const handleTextFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setSelectedFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeFile = (fileToRemove: File) => {
+    setSelectedFiles(prev => prev.filter(file => file !== fileToRemove));
+  };
+
+  const triggerTextFileUpload = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.txt,.md,.cs,.java,.js,.ts,.py,.go,.php,.ruby,.swift,.sql,.html,.css,.json,.xml,.yaml,.yml,.toml,.ini,.csv,.tsv,.log';
+    input.multiple = true;
+    input.onchange = (e) => handleTextFileUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
+    input.click();
+  };
 
   const createChat = async () => {
     if (inputValue.trim() === '') {
@@ -136,21 +163,36 @@ export default function WelcomePage() {
       return;
     }
 
-    let fileIds: string[] = [];
+    let files: any[] = [];
 
+    // 处理图片文件
     if (selectedImage) {
       const result = await uploadFile(selectedImage);
-      debugger;
       if (result.success) {
-        fileIds.push(result.data.id);
+        files.push({
+          id: result.data.id,
+          fileName: result.data.fileName,
+          path: result.data.path,
+        });
       }
     }
 
+    // 处理文本文件
+    for (const file of selectedFiles) {
+      const result = await uploadFile(file);
+      if (result.success) {
+        files.push({
+          id: result.data.id,
+          fileName: result.data.fileName,
+          path: result.data.path,
+        });
+      }
+    }
 
     const sessionId = await createSession({
-      modelId: model,
+      modelId: model?.id,
       value: inputValue,
-      files: fileIds
+      files: files
     });
 
     if (sessionId) {
@@ -159,6 +201,7 @@ export default function WelcomePage() {
     setInputValue('');
     setSelectedImage(null);
     setImagePreview(null);
+    setSelectedFiles([]);
   }
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,6 +247,50 @@ export default function WelcomePage() {
     }
   };
 
+  // 添加随机图标数组和获取随机图标的函数
+  const chatIcons = [
+    <BookOutlined />,
+    <BulbOutlined />,
+    <RobotOutlined />,
+    <ExperimentOutlined />,
+    <ApiOutlined />,
+    <CodeOutlined />,
+    <CloudOutlined />,
+    <DatabaseOutlined />,
+  ];
+
+  const getRandomIcon = () => {
+    const randomIndex = Math.floor(Math.random() * chatIcons.length);
+    return chatIcons[randomIndex];
+  };
+
+  const formatTimeDisplay = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMilliseconds = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+    const diffInHours = Math.floor(diffInMilliseconds / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
+
+    // 如果时间差小于1小时
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} 分钟前`;
+    }
+    // 如果时间差小于24小时
+    else if (diffInHours < 24) {
+      return `${diffInHours} 小时前`;
+    }
+    // 如果在本周内
+    else if (diffInDays < 7) {
+      const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      return weekdays[date.getDay()];
+    }
+    // 超过一周
+    else {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+  };
+
   return (
     <Layout style={{ height: '100vh' }}>
       <Layout style={{ background: token.colorBgLayout }}>
@@ -217,6 +304,33 @@ export default function WelcomePage() {
             <Tag color="purple" style={{ borderRadius: 16, padding: '2px 12px' }}>
               开源社区版
             </Tag>
+          </motion.div>
+
+          <motion.div
+            style={{ marginBottom: 24, position: 'relative' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <Flexbox style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+              width: '100%',
+            }} horizontal>
+              <Text style={{
+                fontSize: 24,
+                fontWeight: 600,
+                fontStyle: 'italic',
+                textAlign: 'center',
+                marginBottom: 24
+              }}>
+                <TypewriterEffect 
+                  text={`${getGreeting()}，欢迎您使用雷神咖啡。`}
+                  speed={150}
+                />
+              </Text>
+            </Flexbox>
           </motion.div>
 
           <motion.div
@@ -249,26 +363,67 @@ export default function WelcomePage() {
                 onChange={handleInputChange}
                 onPaste={handlePaste}
               />
-              {imagePreview && (
-                <div style={{ marginTop: 16, position: 'relative' }}>
-                  <Image
-                    src={imagePreview}
-                    alt="Preview"
-                    style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain' }}
-                  />
-                  <Button
-                    type="text"
-                    icon={<CloseOutlined />}
-                    onClick={removeImage}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      background: 'rgba(255, 255, 255, 0.8)',
-                    }}
-                  />
-                </div>
-              )}
+              <Flexbox horizontal gap={8}>
+
+                {(imagePreview || selectedFiles.length > 0) && (
+                  <>
+                    {imagePreview && (
+                      <div style={{ marginBottom: 8, position: 'relative' }}>
+                        <Image
+                          src={imagePreview}
+                          alt="Preview"
+                          style={{ maxWidth: '180px', maxHeight: 180, objectFit: 'contain' }}
+                        />
+                        <Button
+                          type="text"
+                          icon={<CloseOutlined />}
+                          onClick={removeImage}
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            background: 'rgba(255, 255, 255, 0.8)',
+                          }}
+                        />
+                      </div>
+                    )}
+                    {selectedFiles.map((file, index) => (
+                      <Card
+                        key={index}
+                        size="small"
+                        style={{
+                          background: token.colorBgContainer,
+                          width: 'fit-content',
+                          height: 'fit-content',
+                          margin: 5
+                        }}
+                        bodyStyle={{
+                          padding: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8
+                        }}
+                      >
+                        {file.name.endsWith('.md') ? (
+                          <FileMarkdownOutlined style={{ fontSize: 16 }} />
+                        ) : (
+                          <FileTextOutlined style={{ fontSize: 16 }} />
+                        )}
+                        <Text style={{ maxWidth: 200 }} ellipsis={{ tooltip: file.name }}>
+                          {file.name}
+                        </Text>
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<CloseOutlined />}
+                          onClick={() => removeFile(file)}
+                          style={{ padding: 0 }}
+                        />
+                      </Card>
+                    ))}
+                  </>
+                )}
+              </Flexbox>
               <motion.div
                 style={{ position: 'absolute', right: 12, bottom: 16 }}
                 whileHover={{ scale: 1.1 }}
@@ -297,12 +452,18 @@ export default function WelcomePage() {
                 paddingTop: 12
               }}>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <Tooltip title="Add attachment">
-                    <Button type="text" icon={<PaperClipOutlined />} />
+                  <Tooltip title="添加文本文件 (txt, md,代码文件)">
+                    <Button
+                      type="text"
+                      icon={<PaperClipOutlined />}
+                      onClick={triggerTextFileUpload}
+                    />
                   </Tooltip>
-                  <Tooltip title="Add image">
-                    <Button type="text" icon={<CameraOutlined />} onClick={triggerImageUpload} />
-                  </Tooltip>
+                  {model?.vision && (
+                    <Tooltip title="添加图片">
+                      <Button type="text" icon={<CameraOutlined />} onClick={triggerImageUpload} />
+                    </Tooltip>
+                  )}
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -354,10 +515,10 @@ export default function WelcomePage() {
                             value: chatModel.id,
                             key: chatModel.id,
                             style: {
-                              backgroundColor: chatModel.id === model ? token.controlItemBgActiveHover : 'transparent',
+                              backgroundColor: chatModel.id === model?.id ? token.controlItemBgActiveHover : 'transparent',
                             },
                             onClick: () => {
-                              setModel(chatModel.id);
+                              setModel(chatModel);
                             },
                             icon: getIconByName(item.provider, 22),
                           })),
@@ -529,6 +690,9 @@ export default function WelcomePage() {
                         >
                           <Card
                             key={item.id}
+                            onClick={() => {
+                              navigate('/chat?sessionId=' + item.id);
+                            }}
                             style={{
                               borderRadius: token.borderRadius,
                               background: token.colorBgElevated,
@@ -540,10 +704,12 @@ export default function WelcomePage() {
                             hoverable
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              {item.icon}
-                              <Text>{item.title}</Text>
+                              {getRandomIcon()}
+                              <Text>{item.name}</Text>
                             </div>
-                            <Text type="secondary" style={{ marginLeft: 24, fontSize: 12 }}>{item.time}</Text>
+                            <Text type="secondary" style={{ marginLeft: 24, fontSize: 12 }}>
+                              {formatTimeDisplay(item.createdAt)}
+                            </Text>
                           </Card>
                         </motion.div>
                       )}

@@ -10,7 +10,7 @@ export default function ChatInput() {
 
     const attachmentsRef = React.useRef<GetRef<typeof Attachments>>(null);
     const senderRef = React.useRef<GetRef<typeof Sender>>(null);
-    const [value, updateValue, files, setFiles, fileExpanded, setFileExpanded, createMessageAndSend, currentSession]
+    const [value, updateValue, files, setFiles, fileExpanded, setFileExpanded, createMessageAndSend, currentSession, generateLoading]
         = useChatStore(state => [state.value,
         state.updateValue,
         state.files,
@@ -18,7 +18,8 @@ export default function ChatInput() {
         state.fileExpanded,
         state.setFileExpanded,
         state.createMessageAndSend,
-        state.currentSession]);
+        state.currentSession,
+        state.generateLoading]);
 
     return (
         <Flexbox style={{
@@ -49,6 +50,7 @@ export default function ChatInput() {
                     attachmentsRef.current?.upload(file);
                     setFileExpanded(true);
                 }}
+                loading={generateLoading}
                 onSubmit={async () => {
                     await createMessageAndSend({
                         sessionId: currentSession?.id,

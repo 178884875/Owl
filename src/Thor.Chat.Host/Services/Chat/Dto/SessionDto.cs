@@ -30,6 +30,11 @@ public class SessionDto : EntityDto<long>
     public required string Model { get; set; }
 
     /// <summary>
+    /// 重命名模型
+    /// </summary>
+    public string? RenameModel { get; set; }
+    
+    /// <summary>
     /// 温度参数
     /// </summary>
     public double? Temperature { get; set; }

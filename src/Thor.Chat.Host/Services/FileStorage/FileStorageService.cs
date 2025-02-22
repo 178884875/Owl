@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Storage.Core;
 using Thor.Chat.Core;
@@ -67,7 +68,9 @@ public sealed class FileStorageService(
     [AllowAnonymous]
     public async Task GetAsync(string id, HttpContext context)
     {
-        var stream = await storageService.GetFileAsync(id);
+        var file = await dbContext.FileStorages.FirstOrDefaultAsync(x => x.Id == id);
+
+        var stream = await storageService.GetFileAsync(file.ProviderId);
 
         if (stream.stream == null)
         {

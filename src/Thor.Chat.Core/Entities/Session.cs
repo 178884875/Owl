@@ -29,6 +29,11 @@ public sealed class Session : Entity<long>
     /// 模型名称
     /// </summary>
     public required string Model { get; set; }
+    
+    /// <summary>
+    /// 会话主题重命名模型
+    /// </summary>
+    public string RenameModel { get; set; } = null!;
 
     /// <summary>
     /// 温度参数

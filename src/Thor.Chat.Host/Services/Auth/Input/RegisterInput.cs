@@ -1,15 +1,7 @@
-﻿namespace Thor.Chat.Core.Entities;
+﻿namespace Thor.Chat.Host.Services.Auth.Input;
 
-/// <summary>
-/// 系统用户
-/// </summary>
-public sealed class User : Entity<string>
+public class RegisterInput
 {
-    /// <summary>
-    /// 用户头像
-    /// </summary>
-    public string? Avatar { get; set; }
-
     /// <summary>
     /// 用户名
     /// </summary>
@@ -34,14 +26,15 @@ public sealed class User : Entity<string>
     /// 当前用户的电话
     /// </summary>
     public string? Phone { get; set; }
+    
+    /// <summary>
+    /// 验证码
+    /// </summary>
+    public string? Code { get; set; }
 
     /// <summary>
-    /// 当前用户的角色
+    /// 验证码ID
     /// </summary>
-    public string Role { get; set; } = null!;
+    public string? CodeId { get; set; }
 
-    /// <summary>
-    /// 是否启用账号
-    /// </summary>
-    public bool Enabled { get; set; }
 }

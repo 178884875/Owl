@@ -1,10 +1,10 @@
 import { Flexbox } from 'react-layout-kit';
 import { chatSelectors } from '../../../../../store/chat/selectors';
 import { useChatStore } from '../../../../../store/chat';
-
+import { clearHistoryMessages } from '@/apis/Session';
 
 import { useStyles } from './style';
-import { Dropdown, Popconfirm } from 'antd';
+import { Dropdown, Popconfirm, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 export interface SessionItemProps {
     id: number;
@@ -22,6 +22,7 @@ export default function SessionItem({
         isCurrentSession,
         selectSession,
         deleteSession,
+        renameSession,
         sideBarExpanded
     ] =
         useChatStore(state => [
@@ -29,6 +30,7 @@ export default function SessionItem({
             chatSelectors.isCurrentSession(state, id),
             state.selectSession,
             state.deleteSession,
+            state.renameSession,
             state.sideBarExpanded]);
 
     const { styles, cx } = useStyles();
@@ -41,7 +43,19 @@ export default function SessionItem({
                     {
                         key: 'rename',
                         label: '重命名',
-                        onClick: () => {
+                        onClick: async () => {
+                            await renameSession(id);
+                        }
+                    },
+                    {
+                        key: 'clearHistory',    
+                        label: '清空历史',
+                        style: {
+                            color: 'red'
+                        },
+                        onClick: async () => {
+                            await clearHistoryMessages(id);
+                            message.success('清空成功');
                         }
                     },
                     {

@@ -15,7 +15,7 @@ export const useUser = () => {
             return;
         }
         getCurrentUser().then(result => {
-            setUser(result);
+            setUser(result.data);
         });
     }
 

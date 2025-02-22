@@ -5,7 +5,7 @@ import { createSession, deleteSession, getSessionLite, switchSessionModel, updat
 import { createMessage, deleteMessage } from "@/apis/Message";
 import { ChatCompleteParams, ChatRole } from "@/types/Chat";
 import { message } from "antd";
-import { chatComplete } from '@/apis/Chat';
+import { chatComplete, generateSessionName } from '@/apis/Chat';
 import { chatSelectors } from "./selectors";
 
 
@@ -138,6 +138,11 @@ export interface ChatAction {
      * 重新生成
      */
     regenerateMessage: (id: number) => Promise<void>;
+
+    /**
+     * 重命名session
+     */
+    renameSession: (id: number) => Promise<void>;
 }
 
 
@@ -160,6 +165,18 @@ export const createChatSlice: StateCreator<
             message.success('更新成功');
         } else {
             message.error(result.message);
+        }
+    },
+    renameSession: async (id: number) => {
+        try {
+            const result = await generateSessionName(id);
+            if (result.success) {
+                // 更新session列表
+                const sessions = get().sessions?.map(session => session.id === id ? { ...session, name: result.data } : session);
+                set({ sessions });
+            }
+        } catch (error) {
+            console.error('Error in renameSession:', error);
         }
     },
     setSideBarExpanded: (expanded: boolean) => {
@@ -266,7 +283,7 @@ export const createChatSlice: StateCreator<
         const messageResponse = await createMessage(userMessage);
         userMessage.id = messageResponse.data.id;
 
-        set({ messages: [...get().messages, userMessage], value: '', files: [] });
+        set({ messages: [...get().messages, userMessage], value: '', files: [], generateLoading: true });
 
         const tempAiMessage = {
             sessionId: input.sessionId,
@@ -308,8 +325,9 @@ export const createChatSlice: StateCreator<
             }
         }
 
-        set({ messages: [...get().messages] });
+        set({ messages: [...get().messages], generateLoading: false });
 
+        await get().renameSession(input.sessionId);
     },
     chatComplete: async (input: chatCompleteInput) => {
         const sessionId = input.sessionId ?? get().currentSession?.id;
@@ -322,9 +340,13 @@ export const createChatSlice: StateCreator<
                 }
             ],
             files: input.files?.map(file => ({
-                fileId: file
+                fileId: file.id,
+                fileName: file.fileName,
+                FileUrl: file.path,
             })) ?? get().files.map(file => ({
-                fileId: file
+                fileId: file.id,
+                fileName: file.fileName,
+                FileUrl: file.path,
             })),
             id: 0
         };
@@ -352,7 +374,8 @@ export const createChatSlice: StateCreator<
 
 
         set((state) => ({
-            messages: [...state.messages]
+            messages: [...state.messages],
+            generateLoading: true
         }))
 
         try {
@@ -361,7 +384,7 @@ export const createChatSlice: StateCreator<
                 sessionId: sessionId,
                 parentId: 0,
                 text: userMessage.texts[0].text,
-                fileIds: userMessage.files.map(file => file.id),
+                fileIds: userMessage.files.map(file => file.fileId),
                 functionCalls: [],
                 // @ts-ignore
                 assistantMessageId: tempAiMessage.texts[tempAiMessage.texts.length - 1].id
@@ -384,8 +407,9 @@ export const createChatSlice: StateCreator<
                     }
                 }
             }
-            set({ messages: [...messages] });
+            set({ messages: [...messages], generateLoading: false });
 
+            await get().renameSession(sessionId);
 
         } catch (error) {
             console.error('Error in chatComplete:', error);
@@ -398,7 +422,8 @@ export const createChatSlice: StateCreator<
                         isLoading: false,
                         isError: true
                     } : msg
-                )
+                    ),
+                generateLoading: false
             }));
             message.error('发送消息失败');
         }
@@ -448,7 +473,8 @@ export const createChatSlice: StateCreator<
 
 
         set((state) => ({
-            messages: [...state.messages]
+            messages: [...state.messages],
+            generateLoading: true
         }))
 
         try {
@@ -480,9 +506,9 @@ export const createChatSlice: StateCreator<
                     }
                 }
             }
-            set({ messages: [...messages] });
+            set({ messages: [...messages], generateLoading: false });
 
-            // 更新当前session
+            await get().renameSession(get().currentSession.id);
 
         } catch (error) {
             console.error('Error in chatComplete:', error);
@@ -495,7 +521,8 @@ export const createChatSlice: StateCreator<
                         isLoading: false,
                         isError: true
                     } : msg
-                )
+                ),
+                generateLoading: false
             }));
             message.error('发送消息失败');
         }

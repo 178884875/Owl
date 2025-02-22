@@ -22,6 +22,9 @@ public class KernelFactory
             {
                 var kernelBuilder = Kernel.CreateBuilder();
 
+                kernelBuilder.Plugins.AddFromPromptDirectory(
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins", "Chat"), "Chat");
+
                 switch (provider.ToLower())
                 {
                     case "openai":

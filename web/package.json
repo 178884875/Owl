@@ -14,6 +14,7 @@
     "@lobehub/icons": "^1.71.0",
     "@lobehub/ui": "^1.165.1",
     "@types/node": "^22.13.4",
+    "@types/styled-components": "^5.1.34",
     "antd": "^5.24.0",
     "antd-style": "^3.7.1",
     "framer-motion": "^12.4.7",
@@ -25,6 +26,7 @@
     "react-dom": "^19.0.0",
     "react-layout-kit": "^1.9.1",
     "react-router-dom": "^7.1.5",
+    "styled-components": "^6.1.15",
     "zustand": "^5.0.3",
     "zustand-utils": "^2.1.0"
   },

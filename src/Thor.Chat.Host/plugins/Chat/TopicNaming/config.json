@@ -1,0 +1,23 @@
+﻿{
+  "schema": 1,
+  "type": "completion",
+  "description": "提供对话内容，返回一个话题名称。",
+  "execution_settings": {
+    "default": {
+      "max_tokens": 50,
+      "temperature": 0
+    },
+    "gpt-4o": {
+      "model_id": "gpt-4o",
+      "max_tokens": 50,
+      "temperature": 0.5
+    }
+  },
+  "input_variables": [
+    {
+      "name": "content",
+      "description": "对话内容",
+      "required": true
+    }
+  ]
+}

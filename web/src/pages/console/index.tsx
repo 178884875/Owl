@@ -6,30 +6,58 @@ import UserInfo from "../main/side-menu/user-info";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { theme } from "antd";
+import { User } from "lucide-react";
+import { useUser } from "@/hooks/useUser";
 
 const { useToken } = theme;
 
 export default function ConsoleLayout() {
     const navigate = useNavigate();
     const location = useLocation();
-    const {token} = useToken();
-    const menus = [
-        {
-            icon: <ChartArea />,
-            label: '控制台',
-            key: '/console',
-        },
-        {
-            icon: <Webhook />,
-            label: '渠道管理',
-            key: '/console/channel',
-        }
-    ]
+    const { token } = useToken();
+    const user = useUser();
+    const [menus, setMenus] = useState<any[]>([]);
     const [key, setKey] = useState('/console');
 
     useEffect(() => {
         setKey(location.pathname);
     }, [location.pathname])
+
+    useEffect(() => {
+        if (user?.role?.toLowerCase() === 'admin') {
+            setMenus([
+
+                {
+                    icon: <ChartArea />,
+                    label: '控制台',
+                    key: '/console',
+                },
+                {
+                    icon: <Webhook />,
+                    label: '渠道管理',
+                    key: '/console/channel',
+                },
+                {
+                    icon: <User />,
+                    label: '用户管理',
+                    key: '/console/user',
+                }
+            ])
+        } else {
+            setMenus([
+                {
+                    icon: <ChartArea />,
+                    label: '控制台',
+                    key: '/console',
+                },
+                {
+                    icon: <Webhook />,
+                    label: '渠道管理',
+                    key: '/console/channel',
+                },
+            ])
+        }
+    }, [user])
 
 
     return (<Flexbox
@@ -86,7 +114,7 @@ export default function ConsoleLayout() {
         </Flexbox>
         <Flexbox style={{
             flex: 1,
-            backgroundColor:token.colorBgContainerDisabled
+            backgroundColor: token.colorBgContainerDisabled
         }}>
             <Flexbox style={{
                 height: 40,

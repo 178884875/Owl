@@ -38,6 +38,25 @@ export const switchSessionModel = (sessionId: number, modelId: string) => {
  * @param value 
  * @returns 
  */
-export const updateSession = (value:any) => {
+export const updateSession = (value: any) => {
     return putJson('/api/Session', value);
+}
+
+/**
+ * 清空历史消息
+ * @param sessionId 
+ * @returns 
+ */
+export const clearHistoryMessages = (sessionId: number) => {
+    return post(`/api/Session/ClearHistoryMessages?sessionId=${sessionId}`);
+}
+
+
+/**
+ * 获取最近的会话
+ * @param id 
+ * @returns 
+ */
+export const getRecentSessions = () => {
+    return get('/api/Session/RecentSessions');
 }
