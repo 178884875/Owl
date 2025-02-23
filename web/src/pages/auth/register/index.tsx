@@ -1,37 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Button, Form, Input, Typography, theme, Divider, notification } from 'antd';
-import { GoogleOutlined } from '@ant-design/icons';
+import { GoogleOutlined, UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { LoginInput } from '@/types/Auth';
-import { AuthLogin, OAuths } from '../../../apis/Auth';
+import { RegisterInput } from '@/types/Auth';
+import { AuthRegister } from '../../../apis/Auth';
 import TypewriterEffect from '@/features/TypewriterEffect';
 import { Flexbox } from 'react-layout-kit';
 import Verification from '../../../apis/Verification';
-import { getIconByName } from '@/utils/iconutil';
+
 const { Title, Text, Link } = Typography;
 
-export default function Login() {
+export default function Register() {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const { token } = theme.useToken();
-    const [oauths, setOauths] = useState<any[]>([]);
     const [codeImage, setCodeImage] = useState({
         code: '',
         id: ''
     });
 
-    useEffect(() => {
-        const loadOauths = async () => {
-            const res = await OAuths();
-            setOauths(res.data);
-        };
-        loadOauths();
-    }, []);
-
     const loadCodeImage = async () => {
         try {
-            const res = await Verification('login');
+            const res = await Verification('register');
             if (res.success) {
                 setCodeImage(res.data);
             } else {
@@ -52,17 +43,18 @@ export default function Login() {
         loadCodeImage();
     }, []);
 
-    const onFinish = async (values: LoginInput) => {
+    const onFinish = async (values: RegisterInput) => {
         setLoading(true);
         try {
-            const result = await AuthLogin({
+            const result = await AuthRegister({
                 ...values,
                 codeId: codeImage.id
             });
+
             if (result.success) {
                 notification.success({
                     message: '成功',
-                    description: '登录成功'
+                    description: '注册成功，请登录'
                 });
                 localStorage.setItem('token', result.data);
                 navigate('/');
@@ -77,18 +69,10 @@ export default function Login() {
         } catch (error) {
             notification.error({
                 message: '错误',
-                description: '登录失败，请稍后重试'
+                description: '注册失败，请稍后重试'
             });
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleOAuthLogin = async (provider: string, clientId: string) => {
-        // 判断provider是哪种OAuth
-        if (provider === 'Google') {
-            // 跳转到Google登录页面
-            window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${window.location.origin}/auth/oauth?type=google&response_type=code&scope=email profile`;
         }
     };
 
@@ -123,41 +107,96 @@ export default function Login() {
                         }}
                     />
                     <TypewriterEffect
-                        text="放大你的想法"
+                        text="加入雷神咖啡，放大你的想法"
                         style={{
                             fontSize: '48px',
                             marginBottom: '16px',
                             fontFamily: 'serif'
                         }}
-                    >
-                    </TypewriterEffect>
+                    />
                 </Flexbox>
 
                 <Form
                     form={form}
-                    name="login"
+                    name="register"
                     onFinish={onFinish}
                     layout="vertical"
                     style={{ width: '100%' }}
                 >
                     <Form.Item
-                        name="userName"
-                        rules={[{ required: true, message: '请输入你的用户名或工作邮箱' }]}
+                        name="displayName"
+                        rules={[{ required: true, message: '请输入您的昵称' }]}
                     >
                         <Input
                             size="large"
-                            placeholder="输入你的用户名或工作邮箱"
+                            placeholder="输入您的昵称"
+                            prefix={<UserOutlined />}
                             style={{ height: '48px' }}
                         />
                     </Form.Item>
 
                     <Form.Item
-                        name="password"
-                        rules={[{ required: true, message: '请输入你的密码' }]}
+                        name="username"
+                        rules={[{ required: true, message: '请输入您的用户名' }]}
+                    >
+                        <Input
+                            size="large"
+                            placeholder="输入您的用户名"
+                            prefix={<UserOutlined />}
+                            style={{ height: '48px' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="email"
+                        rules={[
+                            { required: true, message: '请输入您的邮箱' },
+                            { type: 'email', message: '请输入有效的邮箱地址' }
+                        ]}
+                    >
+                        <Input
+                            size="large"
+                            placeholder="输入您的邮箱"
+                            prefix={<MailOutlined />}
+                            style={{ height: '48px' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="passwordHash"
+                        rules={[
+                            { required: true, message: '请输入您的密码' },
+                            { min: 6, message: '密码长度不能少于6个字符' },
+                            { pattern: /^(?=.*[a-zA-Z])(?=.*\d).+$/, message: '密码必须包含字母和数字' }
+                        ]}
                     >
                         <Input.Password
                             size="large"
-                            placeholder="输入你的密码"
+                            placeholder="输入您的密码"
+                            prefix={<LockOutlined />}
+                            style={{ height: '48px' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="confirmPassword"
+                        dependencies={['passwordHash']}
+                        rules={[
+                            { required: true, message: '请确认您的密码' },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    if (!value || getFieldValue('passwordHash') === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('两次输入的密码不一致'));
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input.Password
+                            size="large"
+                            placeholder="确认密码"
+                            prefix={<LockOutlined />}
                             style={{ height: '48px' }}
                         />
                     </Form.Item>
@@ -197,38 +236,34 @@ export default function Login() {
                             marginBottom: '24px'
                         }}
                     >
-                        登录
+                        注册
                     </Button>
-                    <Flexbox
-                        horizontal
-                        gap={16}
-                        style={{ justifyContent: 'space-between', marginBottom: '24px' }}>
-                        <Link href="/auth/reset-password">忘记密码</Link>
 
+                    <Flexbox horizontal gap={16} style={{ justifyContent: 'center', marginBottom: '24px' }}>
                         <span>
-                            如果还没有账号，请
-                            <Link href="/auth/register">
-                                注册
+                            已有账号？
+                            <Link href="/auth/login">
+                                立即登录
                             </Link>
                         </span>
                     </Flexbox>
-                    <Divider plain>或</Divider>
-                    <Flexbox style={{
-                        justifyContent: 'center',
-                        marginBottom: '24px'
-                    }} horizontal gap={16}>
-                        {oauths.map((oauth) => (
-                            <Button
-                                key={oauth.clientId}
-                                icon={getIconByName(oauth.icon)}
-                                size="large"
-                                onClick={() => handleOAuthLogin(oauth.provider, oauth.clientId)}
-                            >
 
-                                继续使用{oauth.provider}
-                            </Button>
-                        ))}
-                    </Flexbox>
+                    {/* <Divider plain>或</Divider>
+
+                    <Button
+                        icon={<GoogleOutlined />}
+                        size="large"
+                        block
+                        style={{
+                            height: '48px',
+                            marginBottom: '24px',
+                            borderColor: token.colorBorder,
+                            color: token.colorText
+                        }}
+                    >
+                        继续使用Google
+                    </Button> */}
+
                     <Text style={{
                         fontSize: '14px',
                         color: token.colorTextSecondary,
@@ -249,16 +284,6 @@ export default function Login() {
                         </Link>
                         .
                     </Text>
-                    <Button
-                        type="text"
-                        style={{
-                            marginTop: '48px',
-                            display: 'block',
-                            margin: '48px auto 0'
-                        }}
-                    >
-                        了解更多 ↓
-                    </Button>
                 </Form>
             </div>
         </div>

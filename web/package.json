@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "github": "https://github.com/AIDotNet/ThorChat",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

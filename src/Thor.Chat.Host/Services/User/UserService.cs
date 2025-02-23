@@ -31,8 +31,6 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
             throw new BusinessException("用户不存在");
         }
 
-        user.PasswordHash = null;
-
         return mapper.Map<UserDto>(user);
     }
 

@@ -7,6 +7,11 @@ import ConsoleLayout from "@/pages/console";
 import ConsoleWelcome from "@/pages/console/welcome";
 import ConsoleChannel from "@/pages/console/channel";
 import User from "@/pages/console/user";
+import Register from "@/pages/auth/register";
+import OAuth from "@/pages/auth/oauth";
+import Profile from "@/pages/main/profile";
+import About from "@/pages/about";
+import Help from "@/pages/help";
 
 const routes = [
     {
@@ -15,6 +20,22 @@ const routes = [
             {
                 path: '/auth/login',
                 element: <Login />
+            },
+            {
+                path: '/auth/register',
+                element: <Register />
+            },
+            {
+                path: '/auth/oauth',
+                element: <OAuth />
+            },
+            {
+                path: '/about',
+                element: <About />
+            },
+            {
+                path: '/help',
+                element: <Help />
             },
             {
                 element: <MainLayout />,
@@ -26,6 +47,10 @@ const routes = [
                     {
                         path: '/chat',
                         element: <Chat />
+                    },
+                    {
+                        path: '/profile',
+                        element: <Profile />
                     }
                 ]
             },

@@ -16,6 +16,12 @@ public static class Program
         builder.Services.AddServices(builder.Configuration);
 
         builder.Services.AddHttpClient();
+        builder.Services.AddHttpClient("Authorize")
+            .ConfigureHttpClient(((provider, client) =>
+            {
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.Add("User-Agent", "ThorChat");
+            }));
 
         builder.Services.ConfigureHttpJsonOptions((options =>
         {

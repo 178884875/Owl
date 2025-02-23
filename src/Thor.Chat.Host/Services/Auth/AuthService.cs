@@ -4,9 +4,13 @@ using System.Text.RegularExpressions;
 using FastService;
 using Lazy.Captcha.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Thor.Chat.Core;
+using Thor.Chat.Core.Entities;
 using Thor.Chat.Host.Dto;
 using Thor.Chat.Host.Infrastructure;
+using Thor.Chat.Host.Options;
+using Thor.Chat.Host.Services.Auth.Dto;
 using Thor.Chat.Host.Services.Auth.Input;
 using Thor.Chat.Host.Services.User;
 using Thor.Chat.Host.Services.User.Dto;
@@ -18,7 +22,13 @@ namespace Thor.Chat.Host.Services.Auth;
 /// </summary>
 [Filter(typeof(ResultFilter))]
 [Tags("Auth")]
-public class AuthService(ICaptcha captcha, UserService userService, JwtHelper jwtHelper, IDbContext dbContext) : FastApi
+public class AuthService(
+    ICaptcha captcha,
+    UserService userService,
+    JwtHelper jwtHelper,
+    IDbContext dbContext,
+    IOptions<GoogelOption> googenOptions,
+    IHttpClientFactory httpClientFactory) : FastApi
 {
     [EndpointSummary("登录")]
     public async Task<string> Login(AuthInput input)
@@ -90,17 +100,11 @@ public class AuthService(ICaptcha captcha, UserService userService, JwtHelper jw
             throw new BusinessException("验证码错误");
         }
 
-        var user = await userService.GetAsync(input.UserName);
+        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.UserName == input.UserName);
 
         if (user != null)
         {
             throw new BusinessException("用户名已存在");
-        }
-
-        // 校验手机号
-        if (await dbContext.Users.AnyAsync(x => x.Phone == input.Phone))
-        {
-            throw new BusinessException("手机号已存在");
         }
 
         // 校验邮箱
@@ -113,7 +117,7 @@ public class AuthService(ICaptcha captcha, UserService userService, JwtHelper jw
         {
             UserName = input.UserName,
             DisplayName = input.DisplayName,
-            PasswordHash = input.PasswordHash,
+            PasswordHash = EncryptionHelper.Md5(input.PasswordHash),
             Email = input.Email,
             Phone = input.Phone,
             Role = "User",
@@ -122,7 +126,7 @@ public class AuthService(ICaptcha captcha, UserService userService, JwtHelper jw
             CreatedAt = DateTime.Now,
         };
 
-        await dbContext.Users.AddAsync(userEntity);
+        user = (await dbContext.Users.AddAsync(userEntity)).Entity;
 
         await dbContext.SaveChangesAsync();
 
@@ -135,6 +139,169 @@ public class AuthService(ICaptcha captcha, UserService userService, JwtHelper jw
         };
 
         // 生成token
+        var token = jwtHelper.CreateToken(dist, user.Id, [user.Role]);
+
+        return await Task.FromResult(token);
+    }
+
+    public async Task<List<AuthOauthDto>> GetOAuths()
+    {
+        var result = new List<AuthOauthDto>();
+
+        if (googenOptions.Value.Enabled)
+        {
+            result.Add(new AuthOauthDto()
+            {
+                Provider = "Google",
+                Icon = "Google",
+                ClientId = googenOptions.Value.ClientId
+            });
+        }
+
+        return await Task.FromResult(result);
+    }
+
+    public async Task<string> Callback(string provider, string code, string redirectUri)
+    {
+        var client = httpClientFactory.CreateClient("Authorize");
+
+        OAuthUserDto<object> userDto = null;
+
+        // 这里需要处理第三方登录的逻辑
+        if (provider.Equals("github", StringComparison.OrdinalIgnoreCase))
+        {
+            // 处理github登录
+            // var clientId = configuration["OAuth:Github:ClientId"];
+            // var clientSecret = configuration["OAuth:Github:ClientSecret"];
+            //
+            // var response =
+            //     await client.PostAsync(
+            //         $"https://github.com/login/oauth/access_token?code={code}&client_id={clientId}&client_secret={clientSecret}",
+            //         null);
+            //
+            // var result = await response.Content.ReadFromJsonAsync<OAuthTokenDto>();
+            // if (result is null)
+            // {
+            //     throw new Exception("Github授权失败");
+            // }
+            //
+            // var request = new HttpRequestMessage(HttpMethod.Get,
+            //     $"https://api.github.com/user")
+            // {
+            //     Headers =
+            //     {
+            //         Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken)
+            //     }
+            // };
+            //
+            // var responseMessage = await client.SendAsync(request);
+            //
+            // userDto = await responseMessage.Content.ReadFromJsonAsync<OAuthUserDto>();
+        }
+        else if (provider.Equals("gitee", StringComparison.OrdinalIgnoreCase))
+        {
+            // 处理github登录
+            // var clientId = configuration["OAuth:Gitee:ClientId"];
+            // var clientSecret = configuration["OAuth:Gitee:ClientSecret"];
+            //
+            // var response =
+            //     await client.PostAsync(
+            //         $"https://gitee.com/oauth/token?grant_type=authorization_code&redirect_uri={redirectUri}&response_type=code&code={code}&client_id={clientId}&client_secret={clientSecret}",
+            //         null);
+            //
+            // var result = await response.Content.ReadFromJsonAsync<OAuthTokenDto>();
+            // if (result?.AccessToken is null)
+            // {
+            //     throw new Exception("Gitee授权失败");
+            // }
+            //
+            //
+            // var request = new HttpRequestMessage(HttpMethod.Get,
+            //     $"https://gitee.com/api/v5/user?access_token=" + result.AccessToken);
+            //
+            // var responseMessage = await client.SendAsync(request);
+            //
+            // userDto = await responseMessage.Content.ReadFromJsonAsync<OAuthUserDto>();
+        }
+        else if (provider.Equals("google", StringComparison.OrdinalIgnoreCase))
+        {
+            var clientId = googenOptions.Value.ClientId;
+            var clientSecret = googenOptions.Value.ClientSecret;
+
+            var response =
+                await client.PostAsync(
+                    $"https://oauth2.googleapis.com/token?code={code}&client_id={clientId}&client_secret={clientSecret}&redirect_uri={redirectUri}&grant_type=authorization_code",
+                    null);
+
+            var result = await response.Content.ReadFromJsonAsync<OAuthTokenDto>();
+
+            if (result is null)
+            {
+                throw new Exception("Google授权失败");
+            }
+
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + result.AccessToken);
+
+            var responseMessage = await client.SendAsync(request);
+
+            userDto = await responseMessage.Content.ReadFromJsonAsync<OAuthUserDto<object>>();
+        }
+
+        // 获取是否存在当前渠道
+        var oauth = await dbContext.UserOAuths.FirstOrDefaultAsync(x =>
+            x.Provider == provider && x.ProviderUserId == userDto.Id.ToString());
+
+        Core.Entities.User user;
+
+        if (oauth == null)
+        {
+            // 如果邮箱是空则随机生成
+            if (string.IsNullOrEmpty(userDto.Email))
+            {
+                userDto.Email = "oauth_" + Guid.NewGuid().ToString("N") + "@token-ai.cn";
+            }
+
+
+            // 创建一个新的用户
+            user = new Core.Entities.User()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Avatar = userDto.AvatarUrl ?? "/logo.png",
+                UserName = userDto.Email,
+                Email = userDto.Email,
+                PasswordHash = string.Empty,
+                DisplayName = userDto.Name,
+                Enabled = true,
+                Phone = string.Empty,
+                Role = "User",
+            };
+
+            oauth = new UserOAuth()
+            {
+                Provider = provider,
+                UserId = user.Id,
+                ProviderUserId = userDto.Id.ToString(),
+            };
+
+            await dbContext.UserOAuths.AddAsync(oauth);
+
+            user = (await dbContext.Users.AddAsync(user)).Entity;
+
+            await dbContext.SaveChangesAsync();
+        }
+        else
+        {
+            user = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == oauth.UserId);
+        }
+
+        user.PasswordHash = string.Empty;
+
+        var dist = new Dictionary<string, string>
+        {
+            { "User", JsonSerializer.Serialize(user) }
+        };
+
         var token = jwtHelper.CreateToken(dist, user.Id, [user.Role]);
 
         return await Task.FromResult(token);

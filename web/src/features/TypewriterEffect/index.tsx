@@ -5,8 +5,9 @@ import styled from 'styled-components';
 const { Text } = Typography;
 
 interface TypewriterEffectProps {
-    text: string;
+    text: React.ReactNode | string;
     speed?: number;
+    style?: React.CSSProperties;
 }
 
 const CursorSpan = styled.span`
@@ -23,25 +24,29 @@ const CursorSpan = styled.span`
     }
 `;
 
-const TypewriterEffect = ({ text, speed = 200 }: TypewriterEffectProps) => {
-    const [displayText, setDisplayText] = useState('');
+const TypewriterEffect = ({ text, speed = 200, style }: TypewriterEffectProps) => {
+    const [displayText, setDisplayText] = useState<React.ReactNode | string>('');
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showCursor, setShowCursor] = useState(true);
 
     useEffect(() => {
-        if (currentIndex < text.length) {
-            const timer = setTimeout(() => {
-                setDisplayText(prev => prev + text[currentIndex]);
-                setCurrentIndex(currentIndex + 1);
-            }, speed);
+        if (typeof text === 'string') {
+            if (currentIndex < text.length) {
+                const timer = setTimeout(() => {
+                    setDisplayText(prev => prev + text[currentIndex]);
+                    setCurrentIndex(currentIndex + 1);
+                }, speed);
 
-            return () => clearTimeout(timer);
+                return () => clearTimeout(timer);
+            } else {
+                const hideTimer = setTimeout(() => {
+                    setShowCursor(false);
+                }, 1000);
+
+                return () => clearTimeout(hideTimer);
+            }
         } else {
-            const hideTimer = setTimeout(() => {
-                setShowCursor(false);
-            }, 1000);
-            
-            return () => clearTimeout(hideTimer);
+            setDisplayText(text);
         }
     }, [currentIndex, text, speed]);
 
@@ -51,7 +56,8 @@ const TypewriterEffect = ({ text, speed = 200 }: TypewriterEffectProps) => {
             fontWeight: 600,
             textAlign: 'center',
             marginBottom: 24,
-            textShadow: 'none'
+            textShadow: 'none',
+            ...style
         }}>
             {displayText}
             {showCursor && <CursorSpan>|</CursorSpan>}

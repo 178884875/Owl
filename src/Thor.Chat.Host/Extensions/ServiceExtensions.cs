@@ -28,6 +28,8 @@ public static class ServiceExtensions
         
         services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Name));
 
+        services.Configure<GoogelOption>(configuration.GetSection(GoogelOption.Name));
+
         services.AddAuthorization()
             .AddAuthentication(options =>
             {
@@ -93,7 +95,7 @@ public static class ServiceExtensions
         services.AddDbContext(configuration);
 
         services.AddStorage(configuration);
-
+        
         return services;
     }
 
