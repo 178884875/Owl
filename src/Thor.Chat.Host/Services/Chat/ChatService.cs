@@ -1,11 +1,15 @@
-﻿using System.Diagnostics;
+﻿#pragma warning disable SKEXP0001
+using System.ClientModel.Primitives;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using DocumentConverter;
 using FastService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -16,6 +20,9 @@ using Thor.Chat.Host.AI;
 using Thor.Chat.Host.Dto;
 using Thor.Chat.Host.Infrastructure;
 using Thor.Chat.Host.Services.Chat.Input;
+using AudioContent = Microsoft.SemanticKernel.AudioContent;
+using ImageContent = Microsoft.SemanticKernel.ImageContent;
+using StreamingChatCompletionUpdate = OpenAI.Chat.StreamingChatCompletionUpdate;
 
 #pragma warning disable SKEXP0001
 
@@ -220,6 +227,7 @@ public sealed class ChatService(
             var sw = Stopwatch.StartNew();
             var first = true;
             var sb = new StringBuilder();
+            var reasoningUpdateSb = new StringBuilder();
             await foreach (var item in chat.GetStreamingChatMessageContentsAsync(history,
                                new OpenAIPromptExecutionSettings()
                                {
@@ -245,39 +253,71 @@ public sealed class ChatService(
                     {
                         data = functionCallUpdateContent,
                         type = "function",
-                    }) + "\n\n");
+                    }) + Environment.NewLine);
                 }
                 else
                 {
-                    sb.Append(item);
-                    await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
+                    var jsonContent = JsonNode.Parse(ModelReaderWriter.Write(item.InnerContent!));
+
+                    // 判断jsonContent["choices"]索引是=0
+                    if (jsonContent["choices"].AsArray().Count == 0)
                     {
-                        data = item.ToString(),
-                        type = "chat",
-                    }) + "\n\n");
+                        continue;
+                    }
+
+                    // 如果存在reasoning_content则说明是推理
+                    if (jsonContent!["choices"]![0]!["delta"]!["reasoning_content"] != null)
+                    {
+                        var reasoningUpdate = jsonContent!["choices"]![0]!["delta"]!["reasoning_content"];
+                        reasoningUpdateSb.Append(reasoningUpdate);
+                        await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
+                        {
+                            data = reasoningUpdate,
+                            type = "reasoning",
+                        }) + Environment.NewLine);
+                    }
+                    else
+                    {
+                        sb.Append(item);
+                        await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
+                        {
+                            data = item.ToString(),
+                            type = "chat",
+                        }) + Environment.NewLine);
+                    }
                 }
             }
 
-            await context.Response.WriteAsync("data: [done]" + Environment.NewLine);
-
-            await context.Response.CompleteAsync();
             sw.Stop();
-
             completeTokens = TokenHelper.GetTokens(sb.ToString());
-
-            await dbContext.MessageTexts.Where(x => x.Id == input.AssistantMessageId)
-                .ExecuteUpdateAsync(x =>
-                    x.SetProperty(a => a.Text, x => sb.ToString()));
-
-            await dbContext.MessageModelUsages.Where(x => x.MessageId == input.AssistantMessageId).ExecuteDeleteAsync();
-
-            await dbContext.MessageModelUsages.AddAsync(new MessageModelUsage()
+            var modelUsage = new MessageModelUsage()
             {
                 MessageId = input.AssistantMessageId,
                 SessionId = input.SessionId,
                 CompleteTokens = completeTokens,
-                ResponseTime = sw.Elapsed.Milliseconds,
-            });
+                PromptTokens = requestToken,
+                ResponseTime = (int)sw.ElapsedMilliseconds
+            };
+
+            await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
+            {
+                data = modelUsage,
+                type = "model_usage",
+            }) + Environment.NewLine);
+            await context.Response.WriteAsync("data: [done]" + Environment.NewLine);
+
+            await context.Response.CompleteAsync();
+
+            await dbContext.MessageTexts.Where(x => x.Id == input.AssistantMessageId)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(a => a.Text, x => sb.ToString())
+                        .SetProperty(a => a.ReasoningUpdate, x => reasoningUpdateSb.ToString()));
+
+            await dbContext.MessageModelUsages.Where(x => x.MessageId == input.AssistantMessageId).ExecuteDeleteAsync();
+
+            await dbContext.MessageModelUsages.AddAsync(modelUsage);
+
+            await dbContext.SaveChangesAsync();
 
             // 更新渠道的最后使用时间
             await dbContext.ModelChannels.Where(x => x.Id == channel.Id)

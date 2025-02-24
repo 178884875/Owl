@@ -14,7 +14,9 @@ export default function GlobalLayout() {
         flex: 1,
         overflow: 'hidden',
     }}>
-        <ConfigProvider locale={zhCN}>
+        <ConfigProvider
+            locale={zhCN}
+        >
             <Outlet />
         </ConfigProvider>
     </Flexbox>)

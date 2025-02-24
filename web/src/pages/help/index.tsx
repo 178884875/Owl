@@ -1,4 +1,3 @@
-import React from 'react';
 import { Layout, Typography, Card, Collapse, Space, Divider, Tag } from 'antd';
 import { ThunderboltOutlined, ApiOutlined, SafetyCertificateOutlined, RocketOutlined } from '@ant-design/icons';
 
@@ -26,7 +25,6 @@ export default function Help() {
               </Paragraph>
             </Card>
 
-            {/* 核心特性 */}
             <Card 
               className="w-full"
               title={

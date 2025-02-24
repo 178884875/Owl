@@ -1,4 +1,5 @@
-import { del, get, postJson } from "@/utils/fetch";
+import { UpdateMessage } from "@/types/Message";
+import { del, get, postJson, putJson } from "@/utils/fetch";
 
 
 /**
@@ -32,4 +33,14 @@ export function createMessage(input: any) {
  */
 export function deleteMessage(id: number) {
     return del(`/api/message?id=${id}`);
+}
+
+/**
+ * 编辑消息
+ * @param {number} id 消息ID
+ * @param {UpdateMessage} input 更新的消息内容
+ * @returns 
+ */
+export function updateMessage(id: number, input: UpdateMessage) {
+    return putJson(`/api/message?id=${id}`, input);
 }

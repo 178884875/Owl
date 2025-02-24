@@ -315,9 +315,10 @@ export const createChatSlice: StateCreator<
         const tempAiMessage = {
             sessionId: input.sessionId,
             role: ChatRole.Assistant,
-            texts: [{ text: '...', id: 0 }],
+            texts: [{ text: '...', id: 0, reasoningUpdate: '' }],
             isLoading: true,
-            id: 0
+            id: 0,
+            modelUsages: null
         };
 
         const aiMessageResponse = await createMessage(tempAiMessage);
@@ -330,7 +331,7 @@ export const createChatSlice: StateCreator<
         const chatCompleteParams = {
             sessionId: input.sessionId,
             parentId: 0,
-            networking:get().networking,
+            networking: get().networking,
             text: userMessage.texts[0].text,
             fileIds: userMessage.files.map(file => file.fileId),
             functionCalls: [],
@@ -338,6 +339,7 @@ export const createChatSlice: StateCreator<
         };
 
         let accumulatedText = '';
+        let reasoningUpdate = '';
         let lastUpdateTime = Date.now();
         for await (const chunk of chatComplete(chatCompleteParams)) {
             const { data, type } = chunk;
@@ -350,6 +352,16 @@ export const createChatSlice: StateCreator<
                     set({ messages: [...get().messages] });
                     lastUpdateTime = currentTime;
                 }
+            } else if (type === 'reasoning') {
+                reasoningUpdate += data;
+                tempAiMessage.texts[tempAiMessage.texts.length - 1].reasoningUpdate = reasoningUpdate;
+                const currentTime = Date.now();
+                if (currentTime - lastUpdateTime >= 100) {
+                    set({ messages: [...get().messages] });
+                    lastUpdateTime = currentTime;
+                }
+            } else if (type === 'model_usage') {
+                tempAiMessage.modelUsages = data;
             }
         }
 
@@ -386,9 +398,10 @@ export const createChatSlice: StateCreator<
         const tempAiMessage = {
             sessionId: sessionId,
             role: ChatRole.Assistant,
-            texts: [{ text: '...', id: 0 }],
+            texts: [{ text: '...', id: 0, reasoningUpdate: '' }],
             isLoading: true,
-            id: 0
+            id: 0,
+            modelUsages: null
         };
 
         const messageResponse = await createMessage(tempAiMessage);
@@ -414,7 +427,7 @@ export const createChatSlice: StateCreator<
                 text: userMessage.texts[0].text,
                 fileIds: userMessage.files.map(file => file.fileId),
                 functionCalls: [],
-                networking:get().networking,
+                networking: get().networking,
                 // @ts-ignore
                 assistantMessageId: tempAiMessage.texts[tempAiMessage.texts.length - 1].id
             } as ChatCompleteParams;
@@ -422,6 +435,8 @@ export const createChatSlice: StateCreator<
             let accumulatedText = '';
 
             let lastUpdateTime = Date.now();
+            let reasoningUpdate = '';
+            debugger;
             for await (const chunk of chatComplete(chatCompleteParams)) {
                 const { data, type } = chunk;
                 if (type === 'chat') {
@@ -434,6 +449,16 @@ export const createChatSlice: StateCreator<
                         set({ messages: [...messages] });
                         lastUpdateTime = currentTime;
                     }
+                } else if (type === 'reasoning') {
+                    reasoningUpdate += data;
+                    tempAiMessage.texts[tempAiMessage.texts.length - 1].reasoningUpdate = reasoningUpdate;
+                    const currentTime = Date.now();
+                    if (currentTime - lastUpdateTime >= 100) {
+                        set({ messages: [...messages] });
+                        lastUpdateTime = currentTime;
+                    }
+                } else if (type === 'model_usage') {
+                    tempAiMessage.modelUsages = data;
                 }
             }
             set({ messages: [...messages], generateLoading: false });
@@ -489,9 +514,10 @@ export const createChatSlice: StateCreator<
         const tempAiMessage = {
             sessionId: get().currentSession.id,
             role: ChatRole.Assistant,
-            texts: [{ text: '...', id: 0 }],
+            texts: [{ text: '...', id: 0, reasoningUpdate: '' }],
             isLoading: true,
-            id: 0
+            id: 0,
+            modelUsages: null
         };
         const messageResponse = await createMessage(tempAiMessage);
         tempAiMessage.id = messageResponse.data.id;
@@ -513,7 +539,7 @@ export const createChatSlice: StateCreator<
                 parentId: 0,
                 text: '',
                 fileIds: [],
-                networking:get().networking,
+                networking: get().networking,
                 functionCalls: [],
                 // @ts-ignore
                 assistantMessageId: tempAiMessage.texts[tempAiMessage.texts.length - 1].id
@@ -522,6 +548,7 @@ export const createChatSlice: StateCreator<
             let accumulatedText = '';
 
             let lastUpdateTime = Date.now();
+            let reasoningUpdate = '';
             for await (const chunk of chatComplete(chatCompleteParams)) {
                 const { data, type } = chunk;
                 if (type === 'chat') {
@@ -534,6 +561,16 @@ export const createChatSlice: StateCreator<
                         set({ messages: [...messages] });
                         lastUpdateTime = currentTime;
                     }
+                } else if (type === 'reasoning') {
+                    reasoningUpdate += data;
+                    tempAiMessage.texts[tempAiMessage.texts.length - 1].reasoningUpdate = reasoningUpdate;
+                    const currentTime = Date.now();
+                    if (currentTime - lastUpdateTime >= 100) {
+                        set({ messages: [...messages] });
+                        lastUpdateTime = currentTime;
+                    }
+                } else if (type === 'model_usage') {
+                    tempAiMessage.modelUsages = data;
                 }
             }
             set({ messages: [...messages], generateLoading: false });

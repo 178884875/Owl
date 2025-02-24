@@ -1,17 +1,20 @@
 import { useChatStore } from '@/store/chat';
 import { Flexbox } from 'react-layout-kit';
-import { getMessages } from '@/apis/Message';
-import { useEffect } from 'react';
+import { getMessages, updateMessage } from '@/apis/Message';
+import { useEffect, useState } from 'react';
 import { Bubble } from '@ant-design/x';
-import { Avatar, Button, message, Popconfirm, Tooltip, Spin, Card, Typography, Image } from 'antd';
+import { Avatar, Button, message, Popconfirm, Tooltip, Spin, Card, Typography, Image, Input, Collapse } from 'antd';
 import { useUserStore } from '@/store/user';
-import { SyncOutlined, CopyOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { SyncOutlined, CopyOutlined, DeleteOutlined, EditOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { Markdown } from '@lobehub/ui';
 import { deleteMessage } from '@/apis/Message';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import { FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
 import { theme } from 'antd';
+import { UpdateMessage } from '@/types/Message';
 const { Text, } = Typography;
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
 export default function ChatList() {
     const { token } = theme.useToken();
@@ -24,6 +27,11 @@ export default function ChatList() {
         useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage]);
 
     const user = useUserStore(state => state.user);
+
+    const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+    const [editingText, setEditingText] = useState('');
+    const [showThinking, setShowThinking] = useState(true);
+
 
     const loadMessages = async () => {
         try {
@@ -42,6 +50,39 @@ export default function ChatList() {
     useEffect(() => {
         loadMessages();
     }, [currentSession]);
+
+    const handleEditMessage = async (messageId: number) => {
+        const messageToEdit = messages.find(m => m.id === messageId);
+        if (messageToEdit) {
+            setEditingMessageId(messageId);
+            setEditingText(messageToEdit.texts[messageToEdit.currentIndex ?? messageToEdit.texts.length - 1].text);
+        }
+    };
+
+    const handleSaveEdit = async (messageId: number) => {
+        try {
+            const updateData: UpdateMessage = {
+                texts: [{ id: messageId, text: editingText }]
+            };
+            await updateMessage(messageId, updateData);
+            const updatedMessages = messages.map(m =>
+                m.id === messageId
+                    ? { ...m, texts: [...m.texts, { text: editingText }], currentIndex: m.texts.length }
+                    : m
+            );
+            setMessages(updatedMessages);
+            setEditingMessageId(null);
+            message.success('消息已更新');
+        } catch (error) {
+            console.error('更新消息失败:', error);
+            message.error('更新消息失败');
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingMessageId(null);
+        setEditingText('');
+    };
 
     const renderFile = (file: any, index: number) => {
         // 根据文件名判断文件类型
@@ -142,44 +183,117 @@ export default function ChatList() {
         </Card>
     }
 
+    const renderContent = (chatMessage: any) => {
+        // 如果消息是...则显示加载
+        const currentText = chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts?.length - 1];
+        console.log(currentText?.reasoningUpdate === null);
+        if (currentText?.text === '...' && (currentText?.reasoningUpdate === '' || currentText?.reasoningUpdate === null)) {
+            return <Spin />
+        }
+
+        return <>
+            {currentText?.reasoningUpdate && (
+                <>
+                    <Button
+                        type="text"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '4px 8px',
+                            background: token.colorFillAlter,
+                            borderRadius: token.borderRadiusLG,
+                            marginBottom: showThinking ? 8 : 0
+                        }}
+                        onClick={() => setShowThinking(!showThinking)}
+                    >
+                        <Text strong>深度思考</Text>
+                        {showThinking ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </Button>
+                    {showThinking && (
+                        <div
+                            style={{
+                                background: token.colorFillAlter,
+                                borderRadius: token.borderRadiusLG,
+                                padding: '8px 12px',
+                                marginBottom: 12
+                            }}
+                        >
+                            <Markdown
+                                allowHtml
+                                enableMermaid
+                                enableImageGallery
+                                enableLatex
+                                showFootnotes
+                                variant='chat'
+                                fullFeaturedCodeBlock
+                            >
+                                {`> ${currentText?.reasoningUpdate.split('\n').join('\n> ')}`}
+                            </Markdown>
+                        </div>
+                    )}
+                </>
+            )}
+
+            <Markdown
+                allowHtml
+                enableMermaid
+                enableImageGallery
+                enableLatex
+                showFootnotes
+                variant='chat'
+                fullFeaturedCodeBlock
+                rehypePlugins={[rehypeKatex]}
+                remarkPlugins={[remarkMath]}
+            >
+                {currentText?.text}
+            </Markdown>
+            {
+                chatMessage.files?.map((file: any, index: number) => {
+                    return renderFile(file, index)
+                })
+            }
+        </>
+    }
+    const renderModelUsages = (modelUsages: any) => {
+        if (!modelUsages) return null;
+        return (
+            <Flexbox horizontal gap={8} style={{ fontSize: '12px', color: token.colorTextSecondary }}>
+                <span>提示词: {modelUsages.promptTokens}</span>
+                <span>完成词: {modelUsages.completeTokens}</span>
+                <span>响应时间: {modelUsages.responseTime}ms</span>
+            </Flexbox>
+        );
+    };
+
+
     return <Bubble.List
         autoScroll
         items={messages?.map((chatMessage: any, index: number) => {
+            const isEditing = chatMessage.id === editingMessageId;
             return {
                 role: chatMessage.role,
                 id: 'bubble-list-item' + chatMessage.id,
-                content: chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts?.length - 1]?.text === '...' ? (
-                    <Flexbox align="center" justify="center" style={{ height: '30px' }}>
-                        <Spin />
-                    </Flexbox>
+                style: {
+                    background: token.colorBgContainer,
+                    borderRadius: token.borderRadiusLG,
+                    padding: '8px 12px',
+                    marginBottom: 12
+                },
+                content: isEditing ? (
+                    <Input.TextArea
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        onBlur={() => handleSaveEdit(chatMessage.id)}
+                        autoSize={{ minRows: 3, maxRows: 10 }}
+                    />
                 ) : (
-                    <>
-                        <Markdown
-                            style={{
-                                width: '100%',
-                                flex: 1,
-                            }}
-                            allowHtml
-                            headerMultiple={0.8}
-                            enableMermaid
-                            enableImageGallery
-                            enableLatex
-                            variant='chat'
-                            fullFeaturedCodeBlock
-                        >
-                            {chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts?.length - 1]?.text}
-                        </Markdown>
-                        {
-                            chatMessage.files?.map((file: any, index: number) => {
-                                return renderFile(file, index);
-                            })
-                        }
-                    </>
+                    renderContent(chatMessage)
                 ),
                 avatar: <Avatar src={chatMessage.role === 'user' ? user?.avatar : '/logo.png'} />,
                 header: chatMessage.role === 'user' ? user?.displayName : 'AI助手',
-                footer: <Flexbox>
-                    <Flexbox
+                footer: <Flexbox gap={8}>
+                    {renderModelUsages(chatMessage.modelUsages)}
+                    {/* <Flexbox
                         horizontal
                         gap={2}
                         style={{ fontSize: '12px', alignItems: 'center' }}
@@ -204,18 +318,22 @@ export default function ChatList() {
                             size="small"
                             icon={<ChevronRight size={14} />}
                             onClick={() => {
-                                chatMessage.currentIndex = chatMessage.currentIndex + 1;
-                                setMessages(messages);
+                                chatMessage.currentIndex = chatMessage.currentIndex + 1
+                                setMessages(messages)
                             }}
                             disabled={chatMessage.currentIndex === chatMessage.texts.length - 1}
                             style={{ minWidth: '20px', height: '20px', padding: 0 }}
                         />
-                    </Flexbox>
+                    </Flexbox> */}
                     <Flexbox
                         horizontal
                         gap={5}
                     >
-                        <Button color="default" variant="text" size="small" icon={<EditOutlined />} />
+                        {isEditing ? (
+                            <Button color="default" variant="text" size="small" icon={<CloseOutlined />} onClick={handleCancelEdit} />
+                        ) : (
+                            <Button color="default" variant="text" size="small" icon={<EditOutlined />} onClick={() => handleEditMessage(chatMessage.id)} />
+                        )}
                         <Tooltip title={'删除当前消息'}>
                             <Popconfirm
                                 title="确定删除吗？"
@@ -229,14 +347,14 @@ export default function ChatList() {
                         </Tooltip>
                         {/* 如果是最后一条消息显示 */}
                         {index === messages.length - 1 && (
-                        <Tooltip title={chatMessage.role === 'user' ? '重新生成' : '删除并且重新生成'}>
-                            <Button
-                                onClick={async () => {
-                                    await regenerateMessage(chatMessage.id);
-                                }}
-                                color="default" variant="text" size="small" icon={<SyncOutlined />} />
-                        </Tooltip>)}
-                        
+                            <Tooltip title={chatMessage.role === 'user' ? '重新生成' : '删除并且重新生成'}>
+                                <Button
+                                    onClick={async () => {
+                                        await regenerateMessage(chatMessage.id);
+                                    }}
+                                    color="default" variant="text" size="small" icon={<SyncOutlined />} />
+                            </Tooltip>)}
+
                         <Tooltip title={'复制源码'}>
                             <Button color="default"
                                 onClick={() => {

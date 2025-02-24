@@ -123,4 +123,35 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
         await dbContext.MessageTexts.Where(x => x.CreatedBy == userContext.UserId && x.MessageId == id)
             .ExecuteDeleteAsync();
     }
+
+    /// <summary>
+    /// 编辑消息
+    /// </summary>
+    /// <param name="id">消息ID</param>
+    /// <param name="updateMessage">更新的消息内容</param>
+    [EndpointSummary("编辑消息")]
+    public async Task<MessageDto> UpdateAsync(long id, UpdateMessage updateMessage)
+    {
+        var message = await dbContext.Messages
+            .Include(x => x.Texts)
+            .Include(x => x.Files)
+            .Where(x => x.CreatedBy == userContext.UserId && x.Id == id)
+            .FirstOrDefaultAsync();
+
+        if (message == null)
+        {
+            throw new BusinessException("消息不存在");
+        }
+
+        // 更新消息内容
+        mapper.Map(updateMessage, message);
+
+        // 更新文本内容
+        message.Texts.Clear();
+        message.Texts = mapper.Map<List<MessageText>>(updateMessage.Texts);
+
+        await dbContext.SaveChangesAsync();
+
+        return mapper.Map<MessageDto>(message);
+    }
 }

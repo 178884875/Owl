@@ -1,5 +1,5 @@
 import { Flexbox } from "react-layout-kit";
-import { Typography, Button, message, Table, Modal, Form, Input, InputNumber } from "antd";
+import { Typography, Button, message, Table, Modal, Form, Input, InputNumber, Popconfirm } from "antd";
 import { ChannelItem } from "../ChannelList";
 import { useState, useEffect } from "react";
 import { getChannelKey, updateChannelKey } from "@/apis/ModelaChannel";
@@ -32,7 +32,14 @@ export default function ChannelKey({ channel }: ChannelKeyProps) {
         dataIndex: 'action',
         key: 'action',
         render: (text: string, record: any) => (
-            <Button type="link" onClick={() => handleDeleteKey(record.key)}>删除</Button>
+            <Popconfirm
+                title="确定要删除这个密钥吗？"
+                onConfirm={() => handleDeleteKey(record.key)}
+                okText="确定"
+                cancelText="取消"
+            >
+                <Button type="link">删除</Button>
+            </Popconfirm>
         ),
     }]
 
