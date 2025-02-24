@@ -254,13 +254,20 @@ export default function ChatList() {
             }
         </>
     }
+
+    const formatResponseTime = (ms: number) => {
+        if (ms < 1000) return `${ms}ms`;
+        if (ms < 60000) return `${(ms / 1000).toFixed(2)}s`;
+        return `${(ms / 60000).toFixed(2)}分钟`;
+    };
+
     const renderModelUsages = (modelUsages: any) => {
         if (!modelUsages) return null;
         return (
             <Flexbox horizontal gap={8} style={{ fontSize: '12px', color: token.colorTextSecondary }}>
                 <span>提示词: {modelUsages.promptTokens}</span>
                 <span>完成词: {modelUsages.completeTokens}</span>
-                <span>响应时间: {modelUsages.responseTime}ms</span>
+                <span>响应时间: {formatResponseTime(modelUsages.responseTime)}</span>
             </Flexbox>
         );
     };

@@ -110,9 +110,6 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
     [EndpointSummary("删除消息")]
     public async Task DeleteAsync(long id)
     {
-        await dbContext.Messages
-            .Where(x => x.CreatedBy == userContext.UserId && x.Id == id)
-            .ExecuteDeleteAsync();
 
         await dbContext.MessageFiles.Where(x => x.CreatedBy == userContext.UserId && x.MessageId == id)
             .ExecuteDeleteAsync();
@@ -121,6 +118,10 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
             .ExecuteDeleteAsync();
         
         await dbContext.MessageTexts.Where(x => x.CreatedBy == userContext.UserId && x.MessageId == id)
+            .ExecuteDeleteAsync();
+        
+        await dbContext.Messages
+            .Where(x => x.CreatedBy == userContext.UserId && x.Id == id)
             .ExecuteDeleteAsync();
     }
 

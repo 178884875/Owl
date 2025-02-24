@@ -253,7 +253,7 @@ public sealed class ChatService(
                     {
                         data = functionCallUpdateContent,
                         type = "function",
-                    }) + Environment.NewLine);
+                    }, JsonOptions.DefaultJsonSerializerOptions) + "\n\n");
                 }
                 else
                 {
@@ -274,7 +274,7 @@ public sealed class ChatService(
                         {
                             data = reasoningUpdate,
                             type = "reasoning",
-                        }) + Environment.NewLine);
+                        }, JsonOptions.DefaultJsonSerializerOptions) + "\n\n");
                     }
                     else
                     {
@@ -283,13 +283,14 @@ public sealed class ChatService(
                         {
                             data = item.ToString(),
                             type = "chat",
-                        }) + Environment.NewLine);
+                        }, JsonOptions.DefaultJsonSerializerOptions) + "\n\n");
                     }
                 }
             }
 
             sw.Stop();
             completeTokens = TokenHelper.GetTokens(sb.ToString());
+            completeTokens += TokenHelper.GetTokens(reasoningUpdateSb.ToString());
             var modelUsage = new MessageModelUsage()
             {
                 MessageId = input.AssistantMessageId,
@@ -303,8 +304,8 @@ public sealed class ChatService(
             {
                 data = modelUsage,
                 type = "model_usage",
-            }) + Environment.NewLine);
-            await context.Response.WriteAsync("data: [done]" + Environment.NewLine);
+            }, JsonOptions.DefaultJsonSerializerOptions) + "\n\n");
+            await context.Response.WriteAsync("data: [done]" + "\n\n");
 
             await context.Response.CompleteAsync();
 
@@ -355,7 +356,7 @@ public sealed class ChatService(
 
         var model = await dbContext.Models
             .AsNoTracking()
-            .Where(x => x.Id == session.RenameModel)
+            .Where(x => x.Id == session.RenameModel || x.ModelId == session.RenameModel)
             .FirstOrDefaultAsync();
 
         if (model == null)

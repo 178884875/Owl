@@ -69,7 +69,13 @@ public class SessionService(
         session.CreatedBy = userContext.UserId;
         session.CreatedAt = DateTime.Now;
         session.Model = sessionInput.ModelId;
-        session.RenameModel = sessionOptions.Value.RenameModel;
+
+        var model = await dbContext.Models
+            .AsNoTracking()
+            .Where(x => x.ModelId == sessionOptions.Value.RenameModel)
+            .FirstOrDefaultAsync();
+
+        session.RenameModel = model.Id;
 
         await dbContext.Sessions.AddAsync(session);
         await dbContext.SaveChangesAsync();
