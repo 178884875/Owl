@@ -1,5 +1,8 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
+using DocumentConverter;
 using FastService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +33,8 @@ public sealed class ChatService(
     {
         try
         {
+            var converter = new DocumentToMarkdown(imageOutputPath: "output/images");
+
             var session = await dbContext.Sessions.Where(x => x.Id == input.SessionId)
                 .FirstOrDefaultAsync();
 
@@ -88,9 +93,19 @@ public sealed class ChatService(
 
             var kernel = KernelFactory.CreateKernel(model.ModelId, channel.Endpoint, key, channel.Provider);
 
-
-            // 组成message 
             var history = new ChatHistory();
+
+            var requestToken = 0;
+            var completeTokens = 0;
+
+            if (input.Networking)
+            {
+                var last = messages.LastOrDefault(x => x.Role == "user");
+                if (last != null)
+                {
+                    // 
+                }
+            }
 
             foreach (var message in messages)
             {
@@ -122,48 +137,59 @@ public sealed class ChatService(
                                 });
                                 break;
                             }
-
-                            case "video":
-                                // history.AddMessage(new AuthorRole(message.Role), stream, ChatMessageType.Video);
-                                break;
                             case "audio":
                             {
                                 using var audio = new MemoryStream();
                                 await stream.CopyToAsync(audio);
-                                history.AddMessage(new AuthorRole(message.Role), new ChatMessageContentItemCollection()
-                                {
-                                    new AudioContent(audio.ToArray(), "audio/mpeg")
-                                });
+                                history.AddMessage(new AuthorRole(message.Role),
+                                    [new AudioContent(audio.ToArray(), "audio/mpeg")]);
                                 break;
                             }
 
                             case "document":
-                                // TODO: 如果是文档则需要解析文档，暂时不处理
+                                // 如果的pdf或者word，可以读取
+                                if (file.FileName.EndsWith(".pdf"))
+                                {
+                                    using var pdf = new MemoryStream();
+                                    await stream.CopyToAsync(pdf);
+                                    pdf.Position = 0;
+                                    string markdownFromPdf = converter.ConvertPdfToMarkdown(pdf);
+
+                                    markdownFromPdf = $"""
+                                                       ```markdown {file.FileName}
+                                                       {markdownFromPdf}
+                                                       ```
+                                                       """;
+
+                                    requestToken += TokenHelper.GetTokens(markdownFromPdf);
+                                    history.AddUserMessage(markdownFromPdf);
+                                }
 
                                 break;
                             case "markdown":
-                                // 如果的markdown则直接添加到对话中
-                                // 读取字符串
                                 using (var reader = new StreamReader(stream))
                                 {
-                                    var content = await reader.ReadToEndAsync();
-                                    history.AddMessage(new AuthorRole(message.Role), $@"
-```markdown {file.FileName}
-{content}
-```
-");
+                                    var content = $"""
+                                                   ```markdown {file.FileName}
+                                                   {await reader.ReadToEndAsync()}
+                                                   ```
+                                                   """;
+
+                                    requestToken += TokenHelper.GetTokens(content);
+                                    history.AddMessage(new AuthorRole(message.Role), content);
                                     break;
                                 }
                             case "code":
                                 // 如果是代码则直接添加到对话中
                                 using (var reader = new StreamReader(stream))
                                 {
-                                    var content = await reader.ReadToEndAsync();
-
-                                    history.AddMessage(new AuthorRole(message.Role), $@"
-```{file.FileName.Split('.').LastOrDefault()} {file.FileName}
-{content}
-```");
+                                    var content = $"""
+                                                   ```{file.FileName.Split('.').LastOrDefault()} {file.FileName}
+                                                   {await reader.ReadToEndAsync()}
+                                                   ```
+                                                   """;
+                                    requestToken += TokenHelper.GetTokens(content);
+                                    history.AddMessage(new AuthorRole(message.Role), content);
                                 }
 
                                 break;
@@ -183,7 +209,7 @@ public sealed class ChatService(
                 if (message.Texts.Count != 0)
                 {
                     var text = message.Texts.LastOrDefault();
-
+                    requestToken += TokenHelper.GetTokens(text.Text);
                     history.AddMessage(new AuthorRole(message.Role), text.Text);
                 }
             }
@@ -191,6 +217,7 @@ public sealed class ChatService(
             // 调用ChatComplete
             var chat = kernel.GetRequiredService<IChatCompletionService>();
 
+            var sw = Stopwatch.StartNew();
             var first = true;
             var sb = new StringBuilder();
             await foreach (var item in chat.GetStreamingChatMessageContentsAsync(history,
@@ -205,9 +232,9 @@ public sealed class ChatService(
                 if (first)
                 {
                     // 设置sse
-                    context.Response.Headers["Content-Type"] = "text/event-stream";
-                    context.Response.Headers["Cache-Control"] = "no-cache";
-                    context.Response.Headers["Connection"] = "keep-alive";
+                    context.Response.Headers.ContentType = "text/event-stream";
+                    context.Response.Headers.CacheControl = "no-cache";
+                    context.Response.Headers.Connection = "keep-alive";
 
                     first = false;
                 }
@@ -222,7 +249,7 @@ public sealed class ChatService(
                 }
                 else
                 {
-                    sb.Append(item.ToString());
+                    sb.Append(item);
                     await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
                     {
                         data = item.ToString(),
@@ -234,14 +261,28 @@ public sealed class ChatService(
             await context.Response.WriteAsync("data: [done]" + Environment.NewLine);
 
             await context.Response.CompleteAsync();
+            sw.Stop();
+
+            completeTokens = TokenHelper.GetTokens(sb.ToString());
 
             await dbContext.MessageTexts.Where(x => x.Id == input.AssistantMessageId)
-                .ExecuteUpdateAsync(x => x.SetProperty(a => a.Text, x => sb.ToString()));
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(a => a.Text, x => sb.ToString()));
+
+            await dbContext.MessageModelUsages.Where(x => x.MessageId == input.AssistantMessageId).ExecuteDeleteAsync();
+
+            await dbContext.MessageModelUsages.AddAsync(new MessageModelUsage()
+            {
+                MessageId = input.AssistantMessageId,
+                SessionId = input.SessionId,
+                CompleteTokens = completeTokens,
+                ResponseTime = sw.Elapsed.Milliseconds,
+            });
 
             // 更新渠道的最后使用时间
             await dbContext.ModelChannels.Where(x => x.Id == channel.Id)
                 .ExecuteUpdateAsync(x => x.SetProperty(a => a.RequestCount, a => a.RequestCount + 1)
-                    .SetProperty(a => a.TokenCost, a => a.TokenCost + 1));
+                    .SetProperty(a => a.TokenCost, a => a.TokenCost + requestToken + completeTokens));
 
             // 创建记录
         }
@@ -311,8 +352,8 @@ public sealed class ChatService(
             .Take(2)
             .Include(x => x.Texts)
             .ToListAsync());
-        
-        if(messages.Count == 0)
+
+        if (messages.Count == 0)
         {
             throw new BusinessException("会话不存在消息");
         }
@@ -350,7 +391,8 @@ public sealed class ChatService(
     /// 根据文件名获取文件类型
     /// </summary>
     /// <returns></returns>
-    private string GetFileType(string fileName)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string GetFileType(string fileName)
     {
         var fileType = fileName.Split('.').LastOrDefault();
 
@@ -394,6 +436,7 @@ public sealed class ChatService(
     /// 根据权重分配渠道和渠道的一个Key
     /// </summary>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static (ModelChannel, string) GetChannelKey(params ModelChannel[] channels)
     {
         var totalWeight = channels.Sum(c => c.Keys.Sum(k => k.Order));

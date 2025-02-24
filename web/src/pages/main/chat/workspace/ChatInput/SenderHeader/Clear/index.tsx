@@ -21,6 +21,7 @@ export default function Clear() {
         >
             <Button
                 type="text"
+                size='small'
                 danger
                 icon={<DeleteOutlined />}
             />

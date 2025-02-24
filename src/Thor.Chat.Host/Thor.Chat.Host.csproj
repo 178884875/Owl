@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="DocumentFormat.OpenXml" Version="3.2.0" />
         <PackageReference Include="FastService" Version="0.1.2" />
         <PackageReference Include="FastService.Analyzers" Version="0.1.2" />
         <PackageReference Include="Lazy.Captcha.Core" Version="2.1.0" />
@@ -24,7 +25,9 @@
         <PackageReference Include="Microsoft.SemanticKernel" Version="1.37.0" />
         <PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.37.0-alpha" />
         <PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.37.0-alpha" />
+        <PackageReference Include="SharpToken" Version="2.0.3" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+        <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     </ItemGroup>
 
     <ItemGroup>
@@ -47,6 +50,10 @@
       <None Update="plugins\Chat\TopicNaming\skprompt.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Functions\" />
     </ItemGroup>
 
 </Project>

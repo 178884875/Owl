@@ -84,6 +84,62 @@ export default function ChatList() {
                 margin: 5
             }} src={'/api/FileStorage?id=' + file.fileId} />
         }
+
+        // 如果是pdf则显示文件
+        if (fileType === 'pdf') {
+            return <Card
+                key={index}
+                size="small"
+                style={{
+                    background: token.colorBgContainer,
+                    width: 'fit-content',
+                    height: 'fit-content',
+                    cursor: 'pointer',
+                    margin: 5
+                }}
+                bodyStyle={{
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8
+                }}
+                onClick={() => {
+                    window.open('/api/FileStorage?id=' + file.fileId, '_blank');
+                }}
+            >
+                <FileTextOutlined style={{ fontSize: 16 }} />
+                <Text style={{ maxWidth: 200 }} ellipsis={{ tooltip: file.fileName }}>
+                    {file.fileName}
+                </Text>
+            </Card>
+        }
+
+        // 如果是其他类型的文件，返回默认的文件卡片
+        return <Card
+            key={index}
+            size="small"
+            style={{
+                background: token.colorBgContainer,
+                width: 'fit-content',
+                height: 'fit-content',
+                cursor: 'pointer',
+                margin: 5
+            }}
+            bodyStyle={{
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
+            }}
+            onClick={() => {
+                window.open('/api/FileStorage?id=' + file.fileId, '_blank');
+            }}
+        >
+            <FileTextOutlined style={{ fontSize: 16 }} />
+            <Text style={{ maxWidth: 200 }} ellipsis={{ tooltip: file.fileName }}>
+                {file.fileName}
+            </Text>
+        </Card>
     }
 
     return <Bubble.List

@@ -113,6 +113,14 @@ public class MessageService(IDbContext dbContext, IUserContext userContext, IMap
         await dbContext.Messages
             .Where(x => x.CreatedBy == userContext.UserId && x.Id == id)
             .ExecuteDeleteAsync();
+
+        await dbContext.MessageFiles.Where(x => x.CreatedBy == userContext.UserId && x.MessageId == id)
+            .ExecuteDeleteAsync();
+
+        await dbContext.MessageModelUsages.Where(x => x.CreatedBy == userContext.UserId && x.MessageId == id)
+            .ExecuteDeleteAsync();
+        
+        await dbContext.MessageTexts.Where(x => x.CreatedBy == userContext.UserId && x.MessageId == id)
+            .ExecuteDeleteAsync();
     }
-    
 }

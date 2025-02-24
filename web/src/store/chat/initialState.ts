@@ -14,6 +14,10 @@ export interface ChatState {
     createSessionVisible?: boolean;
     models: any[];
     generateLoading: boolean;
+    /**
+     * 是否开启联网
+     */
+    networking: boolean;
 }
 
 export const initialState: ChatState = {
@@ -30,4 +34,5 @@ export const initialState: ChatState = {
     fileExpanded: false,
     models: [],
     generateLoading: false,
+    networking: false,
 }

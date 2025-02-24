@@ -7,6 +7,7 @@ import { Flexbox } from "react-layout-kit";
 import { useChatStore } from "@/store/chat";
 import Model from "./Model";
 import Clear from "./Clear";
+import Networking from "./Networking";
 
 export interface SenderHeaderProps {
     senderRef: React.RefObject<SenderRef | null>
@@ -19,7 +20,7 @@ export default function SenderHeader({
 }: SenderHeaderProps) {
     const [files, setFiles, setFileExpanded, fileExpanded]
         = useChatStore(state => [state.files, state.setFiles, state.setFileExpanded, state.fileExpanded]);
-
+  
     return (
         <Sender.Header
             styles={{
@@ -36,6 +37,7 @@ export default function SenderHeader({
                     horizontal
                 >
                     <Model />
+                    <Networking/>
                     <Flexbox style={{
                         marginLeft: 'auto',
                     }}>

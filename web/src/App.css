@@ -54,3 +54,29 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* 全局滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;  /* 滚动条宽度 */
+  height: 8px; /* 横向滚动条高度 */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;  /* 滚动条轨道背景色 */
+  border-radius: 4px;   /* 轨道圆角 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;     /* 滚动条滑块颜色 */
+  border-radius: 4px;   /* 滑块圆角 */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;     /* 鼠标悬停时滑块颜色 */
+}
+
+/* Firefox 滚动条样式 */
+* {
+  scrollbar-width: thin;          /* 细滚动条 */
+  scrollbar-color: #888 #f1f1f1;  /* 滑块和轨道颜色 */
+}

@@ -76,8 +76,9 @@ export default function Model() {
                 <Button
                     type="text"
                     shape="circle"
+                    size='small'
                 >
-                    <BrainCog />
+                    <BrainCog size={14}/>
                 </Button>
             </Dropdown>
         </Tooltip>

@@ -7,6 +7,7 @@ import { ChatCompleteParams, ChatRole } from "@/types/Chat";
 import { message } from "antd";
 import { chatComplete, generateSessionName } from '@/apis/Chat';
 import { chatSelectors } from "./selectors";
+import { uploadFile } from "@/apis/FileStorage";
 
 
 export interface CreateSessionInput {
@@ -143,6 +144,12 @@ export interface ChatAction {
      * 重命名session
      */
     renameSession: (id: number) => Promise<void>;
+
+    /**
+     * 切换联网状态
+     * @returns 
+     */
+    switchNetworking: () => void;
 }
 
 
@@ -152,6 +159,11 @@ export const createChatSlice: StateCreator<
     [],
     ChatAction
 > = (set, get) => ({
+    switchNetworking: () => {
+        set({
+            networking: !get().networking
+        })
+    },
     updateSession: async (value: any) => {
         value.avatar = value.avatar ?? '🤖';
         const result = await updateSession(value);
@@ -268,11 +280,26 @@ export const createChatSlice: StateCreator<
         return result.data.id;
     },
     createMessageAndSend: async (input: CreateMessageInput) => {
+
+        const fileItems = []
+
+        for (let i = 0; i < get().files.length; i++) {
+            const file = get().files[i];
+            const result = await uploadFile(file.originFileObj);
+            if (result.success) {
+                fileItems.push({
+                    id: result.data.id,
+                    fileName: result.data.fileName,
+                    path: result.data.path,
+                });
+            }
+        }
+
         const userMessage = {
             sessionId: input.sessionId,
             role: ChatRole.User,
             texts: [{ text: input.value }],
-            files: get().files.map(file => ({
+            files: fileItems.map(file => ({
                 fileId: file.id,
                 FileUrl: file.path,
                 fileName: file.fileName
@@ -297,12 +324,13 @@ export const createChatSlice: StateCreator<
         tempAiMessage.id = aiMessageResponse.data.id;
         tempAiMessage.texts[0].id = aiMessageResponse.data.id;
 
-        set({ messages: [...get().messages, tempAiMessage] });
+        set({ messages: [...get().messages, tempAiMessage], fileExpanded: false });
 
 
         const chatCompleteParams = {
             sessionId: input.sessionId,
             parentId: 0,
+            networking:get().networking,
             text: userMessage.texts[0].text,
             fileIds: userMessage.files.map(file => file.fileId),
             functionCalls: [],
@@ -386,6 +414,7 @@ export const createChatSlice: StateCreator<
                 text: userMessage.texts[0].text,
                 fileIds: userMessage.files.map(file => file.fileId),
                 functionCalls: [],
+                networking:get().networking,
                 // @ts-ignore
                 assistantMessageId: tempAiMessage.texts[tempAiMessage.texts.length - 1].id
             } as ChatCompleteParams;
@@ -422,7 +451,7 @@ export const createChatSlice: StateCreator<
                         isLoading: false,
                         isError: true
                     } : msg
-                    ),
+                ),
                 generateLoading: false
             }));
             message.error('发送消息失败');
@@ -484,6 +513,7 @@ export const createChatSlice: StateCreator<
                 parentId: 0,
                 text: '',
                 fileIds: [],
+                networking:get().networking,
                 functionCalls: [],
                 // @ts-ignore
                 assistantMessageId: tempAiMessage.texts[tempAiMessage.texts.length - 1].id
