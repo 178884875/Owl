@@ -600,6 +600,40 @@
     "chatModels": [
       {
         "contextWindowTokens": 200000,
+        "description": " Claude 3.7 Sonnet 是 Anthropic 迄今为止最尖端的 AI，引入了“扩展思维”能力。这一特性使模型能够通过系统化、逐步推理的方式解决复杂问题。它还首次在 AI 行业中允许用户在快速响应（标准思维）和深度推理（扩展思维）之间切换，从而根据具体应用场景的需求提供灵活性。",
+        "displayName": "Claude 3.7 sonnet 推理",
+        "enabled": true,
+        "functionCall": true,
+        "id": "claude-3-7-sonnet-20250219-thinking",
+        "type": "chat",
+        "maxOutput": 8192,
+        "pricing": {
+          "cachedInput": 0.1,
+          "input": 3.7,
+          "output": 5,
+          "writeCacheInput": 1.25
+        },
+        "releasedAt": "2025-02-19"
+      },
+      {
+        "contextWindowTokens": 200000,
+        "description": " Claude 3.7 Sonnet 是 Anthropic 迄今为止最尖端的 AI，引入了“扩展思维”能力。这一特性使模型能够通过系统化、逐步推理的方式解决复杂问题。它还首次在 AI 行业中允许用户在快速响应（标准思维）和深度推理（扩展思维）之间切换，从而根据具体应用场景的需求提供灵活性。",
+        "displayName": "Claude 3.7 sonnet",
+        "enabled": true,
+        "functionCall": true,
+        "id": "claude-3-7-sonnet-20250219",
+        "type": "chat",
+        "maxOutput": 8192,
+        "pricing": {
+          "cachedInput": 0.1,
+          "input": 3.7,
+          "output": 5,
+          "writeCacheInput": 1.25
+        },
+        "releasedAt": "2025-02-19"
+      },
+      {
+        "contextWindowTokens": 200000,
         "description": "Claude 3.5 Haiku 是 Anthropic 最快的下一代模型。与 Claude 3 Haiku 相比，Claude 3.5 Haiku 在各项技能上都有所提升，并在许多智力基准测试中超越了上一代最大的模型 Claude 3 Opus。",
         "displayName": "Claude 3.5 Haiku",
         "enabled": true,
@@ -2275,6 +2309,97 @@
           "output": 0
         },
         "releasedAt": "2025-02-05"
+      }
+    ]
+  },
+  {
+    "provider": "Grok",
+    "chatModels": [
+      {
+        "contextWindowTokens": 131072,
+        "description": "拥有与 Grok 2 相当的性能，但具有更高的效率、速度和功能。",
+        "displayName": "Grok Beta",
+        "enabled": true,
+        "functionCall": true,
+        "type": "chat",
+        "id": "grok-beta",
+        "pricing": {
+          "input": 5,
+          "output": 15
+        }
+      },
+      {
+        "contextWindowTokens": 8192,
+        "description": "最新的图像理解模型，可以处理各种各样的视觉信息，包括文档、图表、截图和照片等。",
+        "displayName": "Grok Vision Beta",
+        "enabled": true,
+        "functionCall": true,
+        "id": "grok-vision-beta",
+        "type": "chat",
+        "pricing": {
+          "input": 5,
+          "output": 15
+        },
+        "vision": true
+      },
+      {
+        "contextWindowTokens": 131072,
+        "description": "该模型在准确性、指令遵循和多语言能力方面有所改进。",
+        "displayName": "Grok 2 1212",
+        "enabled": true,
+        "type": "chat",
+        "functionCall": true,
+        "id": "grok-2-1212",
+        "pricing": {
+          "input": 2,
+          "output": 10
+        },
+        "releasedAt": "2024-12-12"
+      },
+      {
+        "contextWindowTokens": 32768,
+        "description": "该模型在准确性、指令遵循和多语言能力方面有所改进。",
+        "displayName": "Grok 2 Vision 1212",
+        "enabled": true,
+        "type": "chat",
+        "functionCall": true,
+        "id": "grok-2-vision-1212",
+        "pricing": {
+          "input": 2,
+          "output": 10
+        },
+        "releasedAt": "2024-12-12",
+        "vision": true
+      },
+      {
+        "contextWindowTokens": 32768,
+        "description": "该模型在准确性、指令遵循和多语言能力方面有所改进。",
+        "displayName": "Grok 3",
+        "enabled": true,
+        "functionCall": true,
+        "id": "grok-3",
+        "type": "chat",
+        "pricing": {
+          "input": 2,
+          "output": 10
+        },
+        "releasedAt": "2024-12-12",
+        "vision": true
+      },
+      {
+        "contextWindowTokens": 32768,
+        "description": "该模型在准确性、指令遵循和多语言能力方面有所改进。",
+        "displayName": "Grok 3 reasoner",
+        "enabled": true,
+        "functionCall": true,
+        "type": "chat",
+        "id": "grok-3-reasoner",
+        "pricing": {
+          "input": 2,
+          "output": 10
+        },
+        "releasedAt": "2025-02-28",
+        "vision": true
       }
     ]
   }

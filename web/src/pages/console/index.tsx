@@ -6,7 +6,7 @@ import UserInfo from "../main/side-menu/user-info";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { theme } from "antd";
-import { User } from "lucide-react";
+import { User, Settings } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 
 const { useToken } = theme;
@@ -38,6 +38,11 @@ export default function ConsoleLayout() {
                     key: '/console/channel',
                 },
                 {
+                    icon: <Settings />,
+                    label: '模型管理',
+                    key: '/console/model',
+                },
+                {
                     icon: <User />,
                     label: '用户管理',
                     key: '/console/user',
@@ -51,10 +56,15 @@ export default function ConsoleLayout() {
                     key: '/console',
                 },
                 {
+                    icon: <Settings />,
+                    label: '模型管理',
+                    key: '/console/model',
+                },
+                {
                     icon: <Webhook />,
                     label: '渠道管理',
                     key: '/console/channel',
-                },
+                }
             ])
         }
     }, [user])

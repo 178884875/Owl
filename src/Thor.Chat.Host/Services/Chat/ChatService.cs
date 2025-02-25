@@ -7,9 +7,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using DocumentConverter;
 using FastService;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -19,10 +19,10 @@ using Thor.Chat.Core.Entities;
 using Thor.Chat.Host.AI;
 using Thor.Chat.Host.Dto;
 using Thor.Chat.Host.Infrastructure;
+using Thor.Chat.Host.Prompts;
 using Thor.Chat.Host.Services.Chat.Input;
 using AudioContent = Microsoft.SemanticKernel.AudioContent;
 using ImageContent = Microsoft.SemanticKernel.ImageContent;
-using StreamingChatCompletionUpdate = OpenAI.Chat.StreamingChatCompletionUpdate;
 
 #pragma warning disable SKEXP0001
 
@@ -32,6 +32,8 @@ public sealed class ChatService(
     IDbContext dbContext,
     IUserContext userContext,
     IStorageService storageService,
+    IMapper mapper,
+    BingScraper bingScraper,
     ILogger<ChatService> logger)
     : FastApi
 {
@@ -68,6 +70,7 @@ public sealed class ChatService(
 
             messages.Reverse();
 
+            var first = true;
             // 获取当前会话模型属于的模型
             var model = await dbContext.Models
                 .AsNoTracking()
@@ -110,7 +113,46 @@ public sealed class ChatService(
                 var last = messages.LastOrDefault(x => x.Role == "user");
                 if (last != null)
                 {
-                    // 
+                    var result = await bingScraper.ScrapeAsync(last.Texts.Last().Text);
+
+                    if (result.Results.Count > 0)
+                    {
+                        // 整理成prompt
+                        var prompt = new StringBuilder();
+                        foreach (var item in result.Results)
+                        {
+                            prompt.AppendLine(item.Title);
+                            prompt.AppendLine(item.Url);
+                            prompt.AppendLine(item.Snippet);
+                        }
+
+                        var value =
+                            BingPrompt.Search.Replace("{{$searchResult}}", prompt.ToString());
+
+                        requestToken += TokenHelper.GetTokens(value);
+
+                        history.AddMessage(new AuthorRole("user"), value);
+
+
+                        context.Response.Headers.ContentType = "text/event-stream";
+                        context.Response.Headers.CacheControl = "no-cache";
+                        context.Response.Headers.Connection = "keep-alive";
+
+                        first = false;
+
+                        // 发送搜索结果
+                        await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
+                        {
+                            data = result.Results,
+                            type = "search",
+                        }, JsonOptions.DefaultJsonSerializerOptions) + "\n\n");
+
+                        // 更新message
+                        await dbContext.MessageTexts.Where(x => x.Id == input.AssistantMessageId)
+                            .ExecuteUpdateAsync(x =>
+                                x.SetProperty(a => a.SearchResults,
+                                    x => mapper.Map<List<SearchResult>>(result.Results)));
+                    }
                 }
             }
 
@@ -225,7 +267,6 @@ public sealed class ChatService(
             var chat = kernel.GetRequiredService<IChatCompletionService>();
 
             var sw = Stopwatch.StartNew();
-            var first = true;
             var sb = new StringBuilder();
             var reasoningUpdateSb = new StringBuilder();
             await foreach (var item in chat.GetStreamingChatMessageContentsAsync(history,
@@ -329,6 +370,7 @@ public sealed class ChatService(
         }
         catch (Exception e)
         {
+            context.Response.StatusCode = 500;
             logger.LogError(e, "对话失败");
             await context.Response.WriteAsJsonAsync(ResultDto.FailResult("对话失败" + e.Message));
         }

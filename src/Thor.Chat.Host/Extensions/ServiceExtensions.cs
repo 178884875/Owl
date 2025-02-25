@@ -95,6 +95,8 @@ public static class ServiceExtensions
         services.AddDbContext(configuration);
 
         services.AddStorage(configuration);
+
+        services.AddSingleton<BingScraper>();
         
         return services;
     }

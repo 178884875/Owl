@@ -209,6 +209,23 @@ public class SessionService(
     [EndpointSummary("清空会话历史消息")]
     public async Task ClearHistoryMessagesAsync(long sessionId)
     {
+        var messageIds = await dbContext.Messages
+            .Where(m => m.SessionId == sessionId)
+            .Select(m => m.Id)
+            .ToListAsync();
+
+        await dbContext.MessageFiles
+            .Where(mf => messageIds.Contains(mf.MessageId))
+            .ExecuteDeleteAsync();
+
+        await dbContext.MessageModelUsages
+            .Where(mmu => mmu.MessageId != null & messageIds.Contains(mmu.MessageId.Value))
+            .ExecuteDeleteAsync();
+
+        await dbContext.MessageTexts
+            .Where(mt => messageIds.Contains(mt.MessageId))
+            .ExecuteDeleteAsync();
+
         await dbContext.Messages
             .Where(m => m.SessionId == sessionId)
             .ExecuteDeleteAsync();

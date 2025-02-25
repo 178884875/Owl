@@ -29,6 +29,7 @@ public class KernelFactory
                 {
                     case "openai":
                     case "deepseek":
+                    case "grok":
                     case "custom":
                         kernelBuilder.AddOpenAIChatCompletion(model, new Uri(endpoint), apiKey, "Thor-Chat");
                         break;

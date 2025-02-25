@@ -146,8 +146,8 @@ export async function* fetchSSE(url: string, data: any): AsyncIterableIterator<a
   if (!response.ok) {
     const errorText = await response.text();
     const json = JSON.parse(errorText);
-    if (json.success) {
-      message.error(json.message);
+    if (!json.success) {
+      message.error(json.message, 5);
     }
     throw new Error(json);
   }

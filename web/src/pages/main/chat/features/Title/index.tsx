@@ -1,16 +1,19 @@
 import { useChatStore } from "@/store/chat";
-import { Button } from "antd";
+import { Button, Tooltip } from "antd";
 import { Bolt, MessageSquarePlus } from "lucide-react";
 import { Flexbox } from "react-layout-kit";
 import { useStyles } from "./styles";
-
+import { chatSelectors } from "@/store/chat/selectors";
 export default function Title() {
     const isChat = window.location.pathname.startsWith('/chat');
     const [
         expanded,
         setExpanded,
         createSessionVisible,
-    ] = useChatStore(state => [state.sessionConfigExpanded, state.setSessionConfigExpanded, state.setCreateSessionVisible]);
+        model,
+        currentSession
+    ] = useChatStore(state => [state.sessionConfigExpanded, state.setSessionConfigExpanded, state.setCreateSessionVisible, chatSelectors.getCurrentModel(state), state.currentSession]);
+
 
     const { styles, cx } = useStyles();
 
@@ -28,9 +31,24 @@ export default function Title() {
                 horizontal
             >
                 <Flexbox style={{
-                    flex: 1,
+                    marginLeft: 10,
+                    width: 180,
+                    fontSize: 14,
                 }}>
-
+                    <Tooltip title={model?.description}>
+                        {model?.displayName}
+                    </Tooltip>
+                </Flexbox>
+                <Flexbox style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    // 超出显示省略号
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    width: 100,
+                }}>
+                    {currentSession?.name}
                 </Flexbox>
                 {isChat && <Button
                     onClick={() => setExpanded(!expanded)}

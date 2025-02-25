@@ -140,6 +140,11 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
             items
                 .Where(x => x.Enabled == true && x.Provider.Equals("GiteeAI", StringComparison.OrdinalIgnoreCase))
                 .Select(x => x.Id).ToList(), "GiteeAI", false, ["GiteeAI"], user.Id);
+
+        await CreateChannelAsync(context, "Grok", "Grok", "Grok", "https://api.token-ai.cn/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("Grok", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "Grok", false, ["Grok"], user.Id);
     }
 
     /// <summary>

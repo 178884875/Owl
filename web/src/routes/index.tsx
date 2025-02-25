@@ -12,6 +12,7 @@ import OAuth from "@/pages/auth/oauth";
 import Profile from "@/pages/main/profile";
 import About from "@/pages/about";
 import Help from "@/pages/help";
+import Model from "@/pages/console/model";
 
 const routes = [
     {
@@ -69,6 +70,10 @@ const routes = [
                     {
                         path: "/console/user",
                         element: <User />
+                    },
+                    {
+                        path: "/console/model",
+                        element: <Model />
                     }
                 ]
             }

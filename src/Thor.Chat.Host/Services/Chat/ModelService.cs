@@ -37,14 +37,42 @@ public class ModelService(IDbContext context, IMapper mapper) : FastApi
     /// 获取所有模型
     /// </summary>
     [Authorize(Roles = "Admin")]
-    public async Task<List<ModelDto>> GetListAsync()
+    public async Task<List<object>> GetListAsync()
     {
         var models = await context.Models
             .ToListAsync();
 
-        var values = mapper.Map<List<ModelDto>>(models);
-
-        return values;
+        
+        // 根据provider分组
+        var group = models.GroupBy(x => x.Provider);
+        
+        var result = new List<object>();
+        
+        foreach (var item in group)
+        {
+            var provider = new
+            {
+                Provider = item.Key,
+                Models = item.Select(x => new
+                {
+                    x.Id,
+                    x.ModelId,
+                    x.DisplayName,
+                    x.Description,
+                    x.Type,
+                    x.ContextWindowTokens,
+                    x.MaxOutput,
+                    x.Enabled,
+                    x.ReleasedAt,
+                    x.Abilities,
+                    x.Pricing,
+                })
+            };
+            
+            result.Add(provider);
+        }
+        
+        return result;
     }
 
     /// <summary>

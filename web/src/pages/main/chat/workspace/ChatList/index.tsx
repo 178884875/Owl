@@ -186,12 +186,47 @@ export default function ChatList() {
     const renderContent = (chatMessage: any) => {
         // 如果消息是...则显示加载
         const currentText = chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts?.length - 1];
-        console.log(currentText?.reasoningUpdate === null);
-        if (currentText?.text === '...' && (currentText?.reasoningUpdate === '' || currentText?.reasoningUpdate === null)) {
+        if (currentText?.text === '...' && (currentText?.reasoningUpdate === '' || currentText?.reasoningUpdate === null) && (currentText?.searchResults && currentText?.searchResults.length === 0)) {
             return <Spin />
         }
 
         return <>
+            {currentText?.searchResults?.length > 0 && (
+                <Collapse
+                    ghost
+                    style={{ marginBottom: 8 }}
+                >
+                    <Collapse.Panel
+                        header={`搜索结果 (${currentText?.searchResults.length})`}
+                        key="1"
+                    >
+                        {currentText?.searchResults.map((result: any) => (
+                            <Flexbox
+                                onClick={() => {
+                                    window.open(result.url, '_blank');
+                                }}
+                                key={result.id} style={{ marginBottom: 8,
+                                background: token.colorFillAlter,
+                                borderRadius: token.borderRadiusLG,
+                                padding: '8px 12px',
+                                cursor: 'pointer',
+                                gap: 4,
+                                fontSize: 12
+                             }}>
+                                <Text 
+                                    style={{
+                                        fontSize: 13
+                                    }}
+                                    strong>{result.title}</Text>
+                                <Text style={{
+                                    fontSize: 12
+                                }} type="secondary">{result.snippet}</Text>
+                            </Flexbox>
+                        ))}
+                    </Collapse.Panel>
+                </Collapse>
+            )}
+
             {currentText?.reasoningUpdate && (
                 <>
                     <Button
@@ -289,6 +324,11 @@ export default function ChatList() {
                 content: isEditing ? (
                     <Input.TextArea
                         value={editingText}
+                        style={{
+                            fontSize: 14,
+                            width: '100%',
+                            minWidth: '50vw',
+                        }}
                         onChange={(e) => setEditingText(e.target.value)}
                         onBlur={() => handleSaveEdit(chatMessage.id)}
                         autoSize={{ minRows: 3, maxRows: 10 }}

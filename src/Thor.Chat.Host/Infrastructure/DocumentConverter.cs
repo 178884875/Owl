@@ -1,26 +1,19 @@
-﻿using UglyToad.PdfPig;
-using UglyToad.PdfPig.Content;
-using UglyToad.PdfPig.Images;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using System;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Linq;
-using System.IO;
-using System.Collections.Generic;
-using DocumentFormat.OpenXml.Drawing.Wordprocessing;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
 using A = DocumentFormat.OpenXml.Drawing;
 using IOPath = System.IO.Path;
 using WordParagraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
-using WordText = DocumentFormat.OpenXml.Wordprocessing.Text;
 
 namespace DocumentConverter
 {
     public class DocumentToMarkdown
     {
         private string _imageOutputPath;
-        private bool _useBase64;
+        private readonly bool _useBase64;
 
         public DocumentToMarkdown(string imageOutputPath = null, bool useBase64 = false)
         {

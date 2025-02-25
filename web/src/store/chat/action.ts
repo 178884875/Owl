@@ -315,7 +315,7 @@ export const createChatSlice: StateCreator<
         const tempAiMessage = {
             sessionId: input.sessionId,
             role: ChatRole.Assistant,
-            texts: [{ text: '...', id: 0, reasoningUpdate: '' }],
+            texts: [{ text: '...', id: 0, reasoningUpdate: '', searchResults: [] }],
             isLoading: true,
             id: 0,
             modelUsages: null
@@ -360,6 +360,13 @@ export const createChatSlice: StateCreator<
                     set({ messages: [...get().messages] });
                     lastUpdateTime = currentTime;
                 }
+            } else if (type === 'search') {
+                const items = data as any[];
+                items.forEach(item => {
+                    // @ts-ignore
+                    tempAiMessage.texts[tempAiMessage.texts.length - 1].searchResults.push(item)
+                });
+                set({ messages: [...get().messages] });
             } else if (type === 'model_usage') {
                 tempAiMessage.modelUsages = data;
             }
@@ -398,7 +405,7 @@ export const createChatSlice: StateCreator<
         const tempAiMessage = {
             sessionId: sessionId,
             role: ChatRole.Assistant,
-            texts: [{ text: '...', id: 0, reasoningUpdate: '' }],
+            texts: [{ text: '...', id: 0, reasoningUpdate: '', searchResults: [] }],
             isLoading: true,
             id: 0,
             modelUsages: null
@@ -457,6 +464,13 @@ export const createChatSlice: StateCreator<
                         set({ messages: [...messages] });
                         lastUpdateTime = currentTime;
                     }
+                } else if (type === 'search') {
+                    const items = data as any[];
+                    items.forEach(item => {
+                        // @ts-ignore
+                        tempAiMessage.texts[tempAiMessage.texts.length - 1].searchResults.push(item)
+                    });
+                    set({ messages: [...messages] });
                 } else if (type === 'model_usage') {
                     tempAiMessage.modelUsages = data;
                 }
@@ -514,7 +528,7 @@ export const createChatSlice: StateCreator<
         const tempAiMessage = {
             sessionId: get().currentSession.id,
             role: ChatRole.Assistant,
-            texts: [{ text: '...', id: 0, reasoningUpdate: '' }],
+            texts: [{ text: '...', id: 0, reasoningUpdate: '', searchResults: [] }],
             isLoading: true,
             id: 0,
             modelUsages: null
@@ -569,7 +583,15 @@ export const createChatSlice: StateCreator<
                         set({ messages: [...messages] });
                         lastUpdateTime = currentTime;
                     }
-                } else if (type === 'model_usage') {
+                } else if (type === 'search') {
+                    const items = data as any[];
+                    items.forEach(item => {
+                        // @ts-ignore
+                        tempAiMessage.texts[tempAiMessage.texts.length - 1].searchResults.push(item)
+                    });
+                    set({ messages: [...messages] });
+                }
+                else if (type === 'model_usage') {
                     tempAiMessage.modelUsages = data;
                 }
             }

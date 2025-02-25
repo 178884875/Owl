@@ -10,6 +10,16 @@ public class MessageTextDto : EntityDto<long>
     /// 推理更新
     /// </summary>
     public string? ReasoningUpdate { get; set; } 
+    
+    /// <summary>
+    /// 搜索结果
+    /// </summary>
+    public List<SearchResultDto> SearchResults { get; set; } = new();
+
+    /// <summary>
+    /// 扩展数据
+    /// </summary>
+    public Dictionary<string, string> ExtraData { get; set; } = new();
 
     public string Text { get; set; } = null!;
 }
