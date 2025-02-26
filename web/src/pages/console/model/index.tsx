@@ -292,9 +292,6 @@ export default function Model() {
                     >
                         <Table
                             columns={columns}
-                            scroll={{
-                                x: true,
-                            }}
                             dataSource={chatModelData}
                             rowKey="id"
                             pagination={{ pageSize: 10 }}

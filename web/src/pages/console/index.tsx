@@ -56,11 +56,6 @@ export default function ConsoleLayout() {
                     key: '/console',
                 },
                 {
-                    icon: <Settings />,
-                    label: '模型管理',
-                    key: '/console/model',
-                },
-                {
                     icon: <Webhook />,
                     label: '渠道管理',
                     key: '/console/channel',

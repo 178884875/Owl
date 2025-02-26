@@ -36,7 +36,7 @@ export default function Title() {
                     fontSize: 14,
                 }}>
                     <Tooltip title={model?.description}>
-                        {model?.displayName}
+                        {model?.modelId}
                     </Tooltip>
                 </Flexbox>
                 <Flexbox style={{

@@ -117,7 +117,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
 
         // 校验密码长度和复杂度至少六位
         if (createUserDto.PasswordHash.Length < 6 ||
-            !Regex.IsMatch(createUserDto.PasswordHash,  @"^(?=.*[0-9])(?=.*[a-zA-Z]).*$"))
+            !Regex.IsMatch(createUserDto.PasswordHash, @"^(?=.*[0-9])(?=.*[a-zA-Z]).*$"))
         {
             throw new BusinessException("密码长度至少6位，且必须包含字母和数字");
         }
@@ -128,6 +128,16 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
             throw new BusinessException("用户名已存在");
         }
 
+        if (await dbContext.Users.AnyAsync(x => x.Email == createUserDto.Email))
+        {
+            throw new BusinessException("邮箱已存在");
+        }
+
+        if (await dbContext.Users.AnyAsync(x => x.Phone == createUserDto.Phone))
+        {
+            throw new BusinessException("手机号已存在");
+        }
+
         // 如果头像为空，设置默认头像
         if (string.IsNullOrEmpty(createUserDto.Avatar))
         {
@@ -136,6 +146,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
 
         var newUser = mapper.Map<Core.Entities.User>(createUserDto);
         newUser.Enabled = true;
+        newUser.PasswordHash = EncryptionHelper.Md5(newUser.PasswordHash);
         await dbContext.Users.AddAsync(newUser);
         await dbContext.SaveChangesAsync();
         return mapper.Map<UserDto>(newUser);
@@ -185,7 +196,8 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
         }
 
         // 校验密码长度和复杂度至少六位,包含字母和数字
-        if (updateUserDto.PasswordHash.Length < 6 || !Regex.IsMatch(updateUserDto.PasswordHash, @"^(?=.*[0-9])(?=.*[a-zA-Z]).*$"))
+        if (updateUserDto.PasswordHash.Length < 6 ||
+            !Regex.IsMatch(updateUserDto.PasswordHash, @"^(?=.*[0-9])(?=.*[a-zA-Z]).*$"))
         {
             throw new BusinessException("密码长度至少6位，且必须包含字母和数字");
         }
@@ -281,7 +293,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
             throw new BusinessException("不能重置自己的密码");
         }
 
-        user.PasswordHash = input.Password;
+        user.PasswordHash = EncryptionHelper.Md5(input.Password);
         dbContext.Users.Update(user);
         await dbContext.SaveChangesAsync();
     }

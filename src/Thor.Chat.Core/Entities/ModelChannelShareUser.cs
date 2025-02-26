@@ -10,9 +10,20 @@ public sealed class ModelChannelShareUser : Entity<long>
     public string UserId { get; set; } = null!;
 
     /// <summary>
-    /// 是否启用 这个由用户自己控制
+    /// 是否启用
     /// </summary>
     public bool Enabled { get; set; }
+    
+    /// <summary>
+    /// token消耗数量
+    /// </summary>
+    /// <returns></returns>
+    public long TokenCount { get; set; }
+    
+    /// <summary>
+    /// 请求数量
+    /// </summary>
+    public long? RequestCount { get; set; }
 
     /// <summary>
     /// 模型渠道

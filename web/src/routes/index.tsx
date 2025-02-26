@@ -13,6 +13,7 @@ import Profile from "@/pages/main/profile";
 import About from "@/pages/about";
 import Help from "@/pages/help";
 import Model from "@/pages/console/model";
+import Invite from "@/pages/invite";
 
 const routes = [
     {
@@ -37,6 +38,10 @@ const routes = [
             {
                 path: '/help',
                 element: <Help />
+            },
+            {
+                path:'/invite/:id',
+                element: <Invite />
             },
             {
                 element: <MainLayout />,
