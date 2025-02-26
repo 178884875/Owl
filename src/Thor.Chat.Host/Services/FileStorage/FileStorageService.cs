@@ -1,4 +1,5 @@
-﻿using FastService;
+﻿using System.Web;
+using FastService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.StaticFiles;
@@ -81,6 +82,9 @@ public sealed class FileStorageService(
         var type = GetContentType(id);
 
         context.Response.ContentType = type;
+        // 文件名
+        // 文件名称乱码
+        context.Response.Headers["Content-Disposition"] = $"attachment; filename={HttpUtility.UrlEncode(file.FileName)}";
 
         await stream.stream!.CopyToAsync(context.Response.Body);
     }

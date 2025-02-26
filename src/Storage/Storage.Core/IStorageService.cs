@@ -1,6 +1,6 @@
 ﻿namespace Storage.Core;
 
-public interface IStorageService
+public interface IStorageService: IDisposable
 {
     /// <summary>
     /// 上传文件

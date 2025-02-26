@@ -14,8 +14,8 @@ export default function Model() {
     const loadModelList = async () => {
         setLoading(true);
         const res = await getModelList();
-        setModelData(res);
-        getModelsForProvider();
+        setModelData(res.data);
+        getModelsForProvider(res.data);
         setLoading(false);
     }
 
@@ -34,7 +34,7 @@ export default function Model() {
     const [availableProviders, setAvailableProviders] = useState(['OpenAI', 'DeepSeek']);
 
     // 获取选中提供商的模型
-    const getModelsForProvider = () => {
+    const getModelsForProvider = (modelData: any) => {
         const provider = modelData.find((p: any) => p.provider === selectedProvider);
         if (!provider) return [];
 
@@ -51,7 +51,7 @@ export default function Model() {
     };
 
     useEffect(() => {
-        getModelsForProvider();
+        getModelsForProvider(modelData);
     }, [searchText, selectedProvider]);
 
 
@@ -166,7 +166,13 @@ export default function Model() {
 
     const handleEnableModel = (modelId: string) => {
         enableModel(modelId).then((res: any) => {
-            loadModelList();
+            if (res.success) {
+                message.success('模型状态更新成功');
+                // 更新模型状态后刷新整个列表
+                loadModelList();
+            } else {
+                message.error('模型状态更新失败');
+            }
         });
     }
 
@@ -250,12 +256,15 @@ export default function Model() {
                 >
                     <Card title="提供商" style={{
                         width: 250,
-                        height: 'auto',
-                        overflow: 'auto',
+                        maxWidth: 250,
                     }}>
                         <Menu
                             selectedKeys={[selectedProvider]}
                             mode="vertical"
+                            style={{
+                                overflow: 'auto',
+                                height: 'calc(100vh - 290px)'
+                            }}
                             onClick={({ key }) => handleProviderSelect(key)}
                         >
                             {modelData.map((provider: any) => (
@@ -283,6 +292,9 @@ export default function Model() {
                     >
                         <Table
                             columns={columns}
+                            scroll={{
+                                x: true,
+                            }}
                             dataSource={chatModelData}
                             rowKey="id"
                             pagination={{ pageSize: 10 }}

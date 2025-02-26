@@ -9,6 +9,7 @@ using Thor.Chat.Host.Services.Chat.Dto;
 
 namespace Thor.Chat.Host.Services.Chat;
 
+[Filter(typeof(ResultFilter))]
 public class ModelService(IDbContext context, IMapper mapper) : FastApi
 {
     /// <summary>

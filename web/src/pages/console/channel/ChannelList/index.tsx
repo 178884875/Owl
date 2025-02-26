@@ -129,14 +129,14 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                                 }}
                                 size="small"
                                 bodyStyle={{
-                                    padding: '12px',
+                                    padding: '8px',
                                     cursor: 'pointer',
                                     borderRadius: '8px',
                                     backgroundColor: channel?.id === item.id ? token.colorPrimaryBorderHover : token.colorBgElevated,
                                     transition: 'background-color 0.3s ease',
                                 }}
                             >
-                                <Flexbox gap={8}>
+                                <Flexbox gap={2}>
                                     <Flexbox horizontal justify="space-between" align="center">
                                         {getIconByName(item.provider)}
                                         <Typography.Text style={{
@@ -146,6 +146,15 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                                             <Tag style={{
                                                 fontSize: '10px',
                                             }} color={item.available ? "green" : "red"}>{item.available ? "可用" : "不可用"}</Tag>
+                                            {/* 显示可用模型列表数 */}
+                                            {item.available && item.modelIds && (
+                                                <Tag style={{
+                                                    fontSize: '10px',
+                                                }} color="purple">
+                                                    {item.modelIds.length}个模型
+                                                </Tag>
+                                            )}
+                                            
                                             {item.available && <Tag style={{
                                                 fontSize: '10px',
                                             }} color="blue">

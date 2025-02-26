@@ -6,9 +6,20 @@ namespace Storage.LiteDB.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddLiteDB(this IServiceCollection services)
+    public static IServiceCollection AddLiteDb(this IServiceCollection services)
     {
-        services.AddSingleton<ILiteDatabase>((_ => new LiteDatabase("Filename=storage.db;connection=shared")));
+        services.AddSingleton<ILiteDatabase>((_ =>
+        {
+            var directory = new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "Storage"));
+
+            if (directory.Exists == false)
+            {
+                directory.Create();
+            }
+
+            return new LiteDatabase(
+                $"Filename={Path.Combine(directory.FullName, "fileStorage")}.db;Mode=Shared;Async=true");
+        }));
         services.AddSingleton<IStorageService, LiteDBStorage>();
         return services;
     }

@@ -31,4 +31,9 @@ public sealed class LiteDBStorage(ILiteDatabase database) : IStorageService
 
         return (file.Filename, stream);
     }
+
+    public void Dispose()
+    {
+        database.Dispose();
+    }
 }

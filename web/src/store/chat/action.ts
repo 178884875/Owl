@@ -252,8 +252,8 @@ export const createChatSlice: StateCreator<
             return get().models;
         }
         const value = await getModels()
-        set({ models: value });
-        return value;
+        set({ models: value.data });
+        return value.data;
     },
     createSession: async ({
         modelId,

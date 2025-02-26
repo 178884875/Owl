@@ -21,6 +21,13 @@ export default function SelectModel({  modelIds, onSelect }: SelectModelProps) {
         loadModels();
     }, []);
 
+    // 过滤掉不存在于models中的modelIds
+    const validModelIds = modelIds.filter(id => {
+        return models?.some(model => 
+            model.chatModels?.some((chatModel: any) => chatModel.id === id)
+        );
+    });
+
     return (
         <div style={{
             width: "100%",
@@ -35,7 +42,7 @@ export default function SelectModel({  modelIds, onSelect }: SelectModelProps) {
                 }}
                 placeholder="请选择模型"
                 mode='tags'
-                value={modelIds}
+                value={validModelIds}
                 allowClear
                 onChange={(value: string[]) => {
                     value = value.filter(x => x !== '' && x !== undefined);

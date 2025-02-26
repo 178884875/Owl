@@ -82,7 +82,7 @@ public static class ServiceExtensions
     {
         if (configuration["Storage:Type"].Equals("LiteDB", StringComparison.OrdinalIgnoreCase))
         {
-            services.AddLiteDB();
+            services.AddLiteDb();
         }
 
         return services;
