@@ -74,6 +74,7 @@ export default function ConsoleLayout() {
     >
         <Flexbox style={{
             width: 220,
+            minWidth: 220,
             height: 'auto',
             backgroundColor: token.colorBgContainer,
             padding: 10,

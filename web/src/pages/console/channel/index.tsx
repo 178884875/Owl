@@ -91,7 +91,9 @@ export default function ConsoleChannel() {
                     {channel?.createdBy === user?.id && (
                         <>
                             <Tabs.TabPane tab="渠道成员" key="channelMember">
-                                <ChannelMember channel={channel} />
+                                <ChannelMember
+                                    onUpdateChannel={fetchChannelList}
+                                    channel={channel} />
                             </Tabs.TabPane>
                             <Tabs.TabPane tab="渠道邀请码" key="channelInviteCode">
                                 <ChannelInviteCode channel={channel} />

@@ -139,3 +139,14 @@ export const testChannel = async (id: number) => {
     return res;
 }
 
+
+/**
+ * 禁用指定渠道的分享用户
+ * @param id 
+ * @returns 
+ */
+export const enableShareUser = async (id: number) => {
+    const res = await post(`/api/modelChannel/enableShareUser?id=${id}`);
+    return res;
+}
+

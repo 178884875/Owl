@@ -433,6 +433,11 @@ public class ModelChannelService(
             throw new BusinessException("没有权限操作");
         }
         
+        shared.Enabled = !shared.Enabled;
+
+        dbContext.ModelChannelShareUsers.Update(shared);
+        
+        await dbContext.SaveChangesAsync();
         
     }
 }
