@@ -31,6 +31,7 @@ public class KernelFactory
                     case "deepseek":
                     case "grok":
                     case "custom":
+                    case "siliconcloud":    
                         kernelBuilder.AddOpenAIChatCompletion(model, new Uri(endpoint), apiKey, "Thor-Chat");
                         break;
                     case "azure":
