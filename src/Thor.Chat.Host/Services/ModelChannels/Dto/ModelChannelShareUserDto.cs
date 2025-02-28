@@ -14,6 +14,17 @@ public class ModelChannelShareUserDto : EntityDto<long>
     public bool Enabled { get; set; }
 
     /// <summary>
+    /// token消耗数量
+    /// </summary>
+    /// <returns></returns>
+    public long TokenCount { get; set; }
+    
+    /// <summary>
+    /// 请求数量
+    /// </summary>
+    public long RequestCount { get; set; }
+
+    /// <summary>
     /// 模型渠道
     /// </summary>
     public ModelChannelDto Channel { get; set; } = null!;

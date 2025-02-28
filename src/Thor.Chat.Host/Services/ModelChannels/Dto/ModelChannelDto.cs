@@ -69,6 +69,11 @@ public class ModelChannelDto : EntityDto<long>
     /// 请求数量
     /// </summary>
     public long? RequestCount { get; set; }
+    
+    /// <summary>
+    /// 是否是共享渠道
+    /// </summary>
+    public bool IsShare { get; set; }
 
     /// <summary>
     /// 密钥列表

@@ -88,16 +88,20 @@ export default function ConsoleChannel() {
                     <Tabs.TabPane tab="渠道配置" key="channelConfig">
                         <ChannelConfig channel={channel} />
                     </Tabs.TabPane>
-                    <Tabs.TabPane tab="渠道成员" key="channelMember">
-                        <ChannelMember channel={channel} />
-                    </Tabs.TabPane>
-                    <Tabs.TabPane tab="渠道邀请码" key="channelInviteCode">
-                        <ChannelInviteCode />
-                    </Tabs.TabPane>
                     {channel?.createdBy === user?.id && (
-                        <Tabs.TabPane tab="渠道密钥管理" key="channelKey">
-                            <ChannelKey channel={channel} />
-                        </Tabs.TabPane>
+                        <>
+                            <Tabs.TabPane tab="渠道成员" key="channelMember">
+                                <ChannelMember
+                                    onUpdateChannel={fetchChannelList}
+                                    channel={channel} />
+                            </Tabs.TabPane>
+                            <Tabs.TabPane tab="渠道邀请码" key="channelInviteCode">
+                                <ChannelInviteCode channel={channel} />
+                            </Tabs.TabPane>
+                            <Tabs.TabPane tab="渠道密钥管理" key="channelKey">
+                                <ChannelKey channel={channel} />
+                            </Tabs.TabPane>
+                        </>
                     )}
                 </Tabs>
             )}

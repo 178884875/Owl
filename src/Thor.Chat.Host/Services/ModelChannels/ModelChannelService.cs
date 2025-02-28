@@ -29,12 +29,30 @@ public class ModelChannelService(
     [Authorize]
     public async Task<List<ModelChannelDto>> GetListAsync(string keyword)
     {
+        var channelIds = await dbContext.ModelChannelShareUsers
+            .Where(x => x.UserId == userContext.UserId)
+            .Select(x => x.ChannelId)
+            .ToListAsync();
+
         var result = await dbContext.ModelChannels.Where(x =>
-                (x.CreatedBy == userContext.UserId || x.ShareUsers.Any(x => x.UserId == userContext.UserId)) &&
+                (x.CreatedBy == userContext.UserId || channelIds.Contains(x.Id)) &&
                 (string.IsNullOrEmpty(keyword) || x.Name.Contains(keyword) || x.Description.Contains(keyword)))
             .ToListAsync();
 
         var dto = mapper.Map<List<ModelChannelDto>>(result);
+
+        foreach (var item in dto)
+        {
+            item.IsShare = channelIds.Contains(item.Id);
+
+            if (!item.IsShare) continue;
+            item.Keys = [];
+            item.Endpoint = string.Empty;
+            item.ShareUsers = [];
+            item.RequestCount = 0;
+            item.ResponseTime = 0;
+            item.TokenCost = 0;
+        }
 
         return dto;
     }
@@ -59,18 +77,30 @@ public class ModelChannelService(
             result.ShareUsers = shareUsers;
         }
 
+        var dto = mapper.Map<ModelChannelDto>(result);
         // 如果不是创建人，但是属于共享列表，则清空敏感数据
-        if (userContext.UserId != result.CreatedBy && result.ShareUsers.Any(x => x.UserId == userContext.UserId))
+        if (userContext.UserId != result.CreatedBy)
         {
-            result.Keys = [];
-            result.Endpoint = string.Empty;
+            var isShare =
+                await dbContext.ModelChannelShareUsers.AnyAsync(
+                    x => x.ChannelId == id && x.UserId == userContext.UserId);
+
+            if (isShare)
+            {
+                dto.Keys = [];
+                dto.Endpoint = string.Empty;
+                dto.IsShare = true;
+            }
+            else
+            {
+                throw new UnauthorizedAccessException("当前用户没有权限访问");
+            }
         }
         else if (userContext.UserId != result.CreatedBy)
         {
             throw new UnauthorizedAccessException("当前用户没有权限访问");
         }
 
-        var dto = mapper.Map<ModelChannelDto>(result);
 
         return dto;
     }
@@ -241,7 +271,7 @@ public class ModelChannelService(
             .Where(x => x.Id == input.ChannelId && x.CreatedBy == userContext.UserId)
             .AnyAsync();
 
-        if (entity)
+        if (!entity)
         {
             throw new BusinessException("渠道不存在");
         }
@@ -252,8 +282,10 @@ public class ModelChannelService(
             Code = Guid.NewGuid().ToString("N"),
             CreatedAt = DateTime.Now,
             CreatedBy = userContext.UserId,
+            Inviter = userContext.UserId,
             MaxUseCount = input.MaxUseCount,
-            ExpireTime = input.ExpireTime
+            ExpireTime = input.ExpireTime,
+            Enabled = true,
         };
 
         await dbContext.ModelChannelInviteCodes.AddAsync(inviteCode);
@@ -309,6 +341,28 @@ public class ModelChannelService(
             throw new BusinessException("邀请码无效");
         }
 
+        if (await dbContext.ModelChannelShareUsers.AnyAsync(x =>
+                x.ChannelId == inviteCode.ChannelId && x.UserId == userContext.UserId))
+        {
+            throw new BusinessException("已经加入过该渠道");
+        }
+
+        if (inviteCode.MaxUseCount > 0)
+        {
+            if (await dbContext.ModelChannelShareUsers
+                    .Where(x => x.ChannelId == inviteCode.ChannelId)
+                    .CountAsync() >= inviteCode.MaxUseCount)
+            {
+                throw new BusinessException("邀请码已达到最大使用次数");
+            }
+        }
+
+        // 不能邀请自己
+        if (inviteCode.Inviter == userContext.UserId)
+        {
+            throw new BusinessException("不能邀请自己");
+        }
+
         var entity = new ModelChannelShareUser()
         {
             ChannelId = inviteCode.ChannelId,
@@ -358,5 +412,32 @@ public class ModelChannelService(
         var dto = mapper.Map<List<ModelChannelShareUserDto>>(result);
 
         return dto;
+    }
+
+    /// <summary>
+    /// 禁用/启用渠道分享指定成员
+    /// </summary>
+    public async Task EnableShareUserAsync(long id)
+    {
+        var shared = await dbContext.ModelChannelShareUsers
+            .Where(x => x.Id == id)
+            .FirstOrDefaultAsync();
+
+        if (shared == null)
+        {
+            throw new BusinessException("共享用户不存在");
+        }
+
+        if (await dbContext.ModelChannels.AnyAsync(x => x.Id == shared.ChannelId && x.CreatedBy != userContext.UserId))
+        {
+            throw new BusinessException("没有权限操作");
+        }
+        
+        shared.Enabled = !shared.Enabled;
+
+        dbContext.ModelChannelShareUsers.Update(shared);
+        
+        await dbContext.SaveChangesAsync();
+        
     }
 }

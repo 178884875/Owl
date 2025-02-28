@@ -22,7 +22,7 @@ export default function ChannelConfig({ channel }: ChannelConfigProps) {
             form.setFieldsValue(channel);
             setModelIds(channel.modelIds);
             setSelectedIcon(channel.avatar || 'OpenAI');
-        }else{
+        } else {
             form.setFieldsValue({
                 enabled: true,
             });
@@ -65,6 +65,7 @@ export default function ChannelConfig({ channel }: ChannelConfigProps) {
             </Flexbox>
 
             <Form form={form}
+                disabled={channel.isShare}
                 layout="vertical" onFinish={handleSubmit}>
                 <Form.Item name='avatar' label='渠道头像'>
                     <Popover
@@ -125,16 +126,17 @@ export default function ChannelConfig({ channel }: ChannelConfigProps) {
                     >
                     </Select>
                 </Form.Item>
-                <Form.Item name="endpoint" label="提供商地址" rules={[{ required: true }, {
-                    validator(rule, value, callback) {
-                        if (value && !value.startsWith('http')) {
-                            callback('请输入正确的URL');
+                {!channel.isShare && (
+                    <Form.Item name="endpoint" label="提供商地址" rules={[{ required: true }, {
+                        validator(rule, value, callback) {
+                            if (value && !value.startsWith('http')) {
+                                callback('请输入正确的URL');
+                            }
+                            callback();
                         }
-                        callback();
-                    }
-                }]}>
-                    <Input />
-                </Form.Item>
+                    }]}>
+                        <Input />
+                    </Form.Item>)}
                 <Form.Item name="modelIds" label="模型列表">
                     <SelectModel modelIds={modelIds} onSelect={(modelIds) => {
                         setModelIds([...modelIds]);
@@ -151,16 +153,20 @@ export default function ChannelConfig({ channel }: ChannelConfigProps) {
                 <Form.Item name="description" label="渠道描述">
                     <Input.TextArea />
                 </Form.Item>
-                <Form.Item name="enabled" label="是否启用" valuePropName="checked">
-                    <Switch />
-                </Form.Item>
-                <Form.Item>
-                    <Button 
-                        block
-                        type="primary" htmlType="submit">
-                        保存
-                    </Button>
-                </Form.Item>
+                {
+                    !channel.isShare && (<>
+                        <Form.Item name="enabled" label="是否启用" valuePropName="checked">
+                            <Switch />
+                        </Form.Item>
+                        <Form.Item>
+                            <Button
+                                block
+                                type="primary" htmlType="submit">
+                                保存
+                            </Button>
+                        </Form.Item>
+                    </>)
+                }
             </Form>
         </Flexbox>
     );

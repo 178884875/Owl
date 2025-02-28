@@ -29,6 +29,7 @@ export interface ChannelItem {
     shareUsers?: any[];
     keys?: any[];
     available: boolean;
+    isShare: boolean;
 }
 
 interface ChannelListProps {
@@ -98,7 +99,7 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                     <Dropdown
                         trigger={['contextMenu']}
                         menu={{
-                            items: [
+                            items: item.isShare ? [] : [
                                 {
                                     label: '测试渠道',
                                     key: 'test',
@@ -143,23 +144,32 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                                             flex: 1,
                                         }} strong>{item.name}</Typography.Text>
                                         <Flexbox gap={2}>
-                                            <Tag style={{
-                                                fontSize: '10px',
-                                            }} color={item.available ? "green" : "red"}>{item.available ? "可用" : "不可用"}</Tag>
-                                            {/* 显示可用模型列表数 */}
-                                            {item.available && item.modelIds && (
+                                            {!item.isShare && (
+                                                <>
+                                                    <Tag style={{
+                                                        fontSize: '10px',
+                                                    }} color={item.available ? "green" : "red"}>{item.available ? "可用" : "不可用"}</Tag>
+                                                    {item.available && item.modelIds && (
+                                                        <Tag style={{
+                                                            fontSize: '10px',
+                                                        }} color="purple">
+                                                            {item.modelIds.length}个模型
+                                                        </Tag>
+                                                    )}
+                                                    {item.available && item.responseTime && (
+                                                        <Tag style={{
+                                                            fontSize: '10px',
+                                                        }} color="blue">
+                                                            {msToSeconds(item.responseTime)}s
+                                                        </Tag>
+                                                    )}
+                                                </>
+                                            )}
+                                            {item.isShare && (
                                                 <Tag style={{
                                                     fontSize: '10px',
-                                                }} color="purple">
-                                                    {item.modelIds.length}个模型
-                                                </Tag>
+                                                }} color="orange">共享</Tag>
                                             )}
-                                            
-                                            {item.available && <Tag style={{
-                                                fontSize: '10px',
-                                            }} color="blue">
-                                                {msToSeconds(item.responseTime || 0)}s
-                                            </Tag>}
                                         </Flexbox>
                                     </Flexbox>
                                     <div>

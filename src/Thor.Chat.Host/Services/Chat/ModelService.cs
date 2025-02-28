@@ -42,7 +42,6 @@ public class ModelService(IDbContext context, IMapper mapper) : FastApi
     {
         var models = await context.Models
             .ToListAsync();
-
         
         // 根据provider分组
         var group = models.GroupBy(x => x.Provider);

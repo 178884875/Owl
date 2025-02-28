@@ -42,13 +42,13 @@ export default function SessionItem({
                 items: [
                     {
                         key: 'rename',
-                        label: '重命名',
+                        label: '智能重命名',
                         onClick: async () => {
                             await renameSession(id);
                         }
                     },
                     {
-                        key: 'clearHistory',    
+                        key: 'clearHistory',
                         label: '清空历史',
                         style: {
                             color: 'red'
@@ -107,7 +107,16 @@ export default function SessionItem({
                         <Flexbox
                             distribution={'space-between'}
                         >
-                            <span>{session?.name}</span>
+                            <span style={{
+                                width: '100%',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                display: 'inline-block',
+                                maxWidth: '100%',
+                                fontSize: 14,
+                                fontWeight: 500
+                            }}>{session?.name}</span>
                             <span className={cx(styles.time)}>
                                 {session?.createdAtName}
                             </span>

@@ -60,6 +60,15 @@ export const createChannelInviteCode = async (data: any) => {
 }
 
 /**
+ * 获取邀请码列表
+ * @returns 邀请码列表的响应数据
+ */
+export const getInviteCodeList = async (channelId: number) => {
+    const res = await get(`/api/modelChannel/inviteCodeList?channelId=${channelId}`);
+    return res;
+}
+
+/**
  * 删除渠道邀请码
  * @param id 邀请码ID
  * @returns 删除邀请码的响应数据
@@ -71,11 +80,11 @@ export const deleteChannelInviteCode = async (id: number) => {
 
 /**
  * 使用邀请码加入渠道
- * @param data 邀请码数据
+ * @param code 邀请码
  * @returns 加入渠道的响应数据
  */
-export const joinChannel = async (data: any) => {
-    const res = await postJson('/api/modelChannel/joinInviteCode', data);
+export const joinChannel = async (code: string) => {
+    const res = await post(`/api/modelChannel/joinInviteCode?code=${code}`);
     return res;
 }
 
@@ -127,6 +136,17 @@ export const getChannelKey = async (id: number) => {
  */
 export const testChannel = async (id: number) => {
     const res = await post(`/api/modelChannel/test?id=${id}`);
+    return res;
+}
+
+
+/**
+ * 禁用指定渠道的分享用户
+ * @param id 
+ * @returns 
+ */
+export const enableShareUser = async (id: number) => {
+    const res = await post(`/api/modelChannel/enableShareUser?id=${id}`);
     return res;
 }
 
