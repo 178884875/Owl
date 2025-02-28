@@ -2,10 +2,10 @@ using System.ComponentModel;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Thor.Chat.Host.Backstage;
 using Thor.Chat.Host.Converters;
 using Thor.Chat.Host.Extensions;
 using Thor.Chat.Host.Infrastructure;
-using Thor.Chat.Host.Service;
 
 namespace Thor.Chat.Host;
 

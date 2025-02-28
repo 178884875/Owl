@@ -4,12 +4,14 @@ using Thor.Chat.Core;
 using Thor.Chat.Core.Entities;
 using Thor.Chat.Host.Dto;
 
-namespace Thor.Chat.Host.Service;
+namespace Thor.Chat.Host.Backstage;
 
 /// <summary>
 /// 初始化模型列表
 /// </summary>
-public sealed class InitModelBackstageService(IServiceProvider serviceProvider) : BackgroundService
+public sealed class InitModelBackstageService(
+    IServiceProvider serviceProvider,
+    ILogger<InitModelBackstageService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -74,6 +76,10 @@ public sealed class InitModelBackstageService(IServiceProvider serviceProvider) 
             await HandleAsync(dbContext, items);
 
             await dbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error occurred while processing logs");
         }
         finally
         {
