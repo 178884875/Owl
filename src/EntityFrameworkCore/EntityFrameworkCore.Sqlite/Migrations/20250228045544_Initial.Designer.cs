@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EntityFrameworkCore.Sqlite.Migrations
 {
     [DbContext(typeof(SqliteDbContext))]
-    [Migration("20250222154721_AddModelName")]
-    partial class AddModelName
+    [Migration("20250228045544_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
 
             modelBuilder.Entity("Thor.Chat.Core.Entities.FileStorage", b =>
                 {
@@ -197,8 +197,19 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ExtraData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("MessageId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ReasoningUpdate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SearchResults")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -427,6 +438,12 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("ModelChannelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("RequestCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TokenCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("UserId")

@@ -1,0 +1,6 @@
+﻿services:
+  thor.chat.host:
+    image: thor.chat.host
+    build:
+      context: .
+      dockerfile: src/Thor.Chat.Host/Dockerfile

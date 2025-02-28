@@ -4,7 +4,6 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
-using A = DocumentFormat.OpenXml.Drawing;
 using IOPath = System.IO.Path;
 using WordParagraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
 
@@ -198,7 +197,7 @@ namespace DocumentConverter
                         {
                             foreach (var drawing in drawings)
                             {
-                                var blip = drawing.Descendants<A.Blip>().FirstOrDefault();
+                                var blip = drawing.Descendants<DocumentFormat.OpenXml.Drawing.Blip>().FirstOrDefault();
                                 if (blip != null)
                                 {
                                     var imageId = blip.Embed.Value;

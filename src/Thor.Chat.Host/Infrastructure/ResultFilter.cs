@@ -18,7 +18,7 @@ public sealed class ResultFilter(ILogger<ResultFilter> logger) : IEndpointFilter
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error occurred while processing the request");
+            logger.LogError("服务发送异常：" + e);
             return ResultDto.FailResult(e.Message);
         }
     }

@@ -1,5 +1,9 @@
 ﻿using System.Text;
+using EntityFrameworkCore.DaMeng.Extensions;
+using EntityFrameworkCore.MySql.Extensions;
+using EntityFrameworkCore.PostgreSQL.Extensions;
 using EntityFrameworkCore.Sqlite.Extensions;
+using EntityFrameworkCore.SqlServer.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -25,7 +29,7 @@ public static class ServiceExtensions
         services.Configure<JwtOptions>(option);
 
         services.Configure<ChatSessionOptions>(configuration.GetSection(ChatSessionOptions.Name));
-        
+
         services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Name));
 
         services.Configure<GoogelOption>(configuration.GetSection(GoogelOption.Name));
@@ -74,6 +78,22 @@ public static class ServiceExtensions
         {
             services.AddSqliteDbContext(configuration);
         }
+        else if (type.Equals("postgresql", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddPostgreSQLDbContext(configuration);
+        }
+        else if (type.Equals("sqlserver", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddSqlServerDbContext(configuration);
+        }
+        else if (type.Equals("mysql", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddMySqlDbContext(configuration);
+        }
+        else if (type.Equals("dm", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddDaMengDbContext(configuration);
+        }
 
         return services;
     }
@@ -97,7 +117,7 @@ public static class ServiceExtensions
         services.AddStorage(configuration);
 
         services.AddSingleton<BingScraper>();
-        
+
         return services;
     }
 

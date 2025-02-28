@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Thor.Chat.Core.Entities.Configurations;
@@ -12,6 +13,10 @@ public class ModelChannelInviteCodeEntityConfigurations : IEntityTypeConfigurati
         builder.Property(x => x.Code).IsRequired().HasMaxLength(32);
 
         builder.Property(x => x.Inviter).IsRequired();
+
+        builder.Property(x => x.UsedUsers).HasConversion(
+            v => JsonSerializer.Serialize(v, JsonOptions.DefaultJsonSerializerOptions),
+            v => JsonSerializer.Deserialize<List<string>>(v, JsonOptions.DefaultJsonSerializerOptions));
 
         builder.HasIndex(x => new
         {

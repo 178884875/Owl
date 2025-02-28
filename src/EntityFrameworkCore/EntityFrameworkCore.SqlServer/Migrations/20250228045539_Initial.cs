@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace EntityFrameworkCore.Sqlite.Migrations
+namespace EntityFrameworkCore.SqlServer.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -15,14 +15,13 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "FileStorages",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    FileName = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    ContentType = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    Size = table.Column<int>(type: "INTEGER", nullable: false),
-                    ProviderId = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Size = table.Column<int>(type: "int", nullable: false),
+                    ProviderId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -33,15 +32,15 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "Messages",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    SessionId = table.Column<long>(type: "INTEGER", nullable: true),
-                    Role = table.Column<string>(type: "TEXT", nullable: false),
-                    ParentId = table.Column<long>(type: "INTEGER", nullable: true),
-                    ShareId = table.Column<long>(type: "INTEGER", nullable: true),
-                    Error = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SessionId = table.Column<long>(type: "bigint", nullable: true),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ParentId = table.Column<long>(type: "bigint", nullable: true),
+                    ShareId = table.Column<long>(type: "bigint", nullable: true),
+                    Error = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -52,24 +51,24 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "ModelChannels",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Provider = table.Column<string>(type: "TEXT", nullable: false),
-                    Endpoint = table.Column<string>(type: "TEXT", nullable: false),
-                    ModelIds = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    Avatar = table.Column<string>(type: "TEXT", nullable: true),
-                    Tags = table.Column<string>(type: "TEXT", nullable: false),
-                    Favorite = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ResponseTime = table.Column<long>(type: "INTEGER", nullable: true),
-                    TokenCost = table.Column<long>(type: "INTEGER", nullable: true),
-                    RequestCount = table.Column<long>(type: "INTEGER", nullable: true),
-                    Available = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Keys = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Provider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Endpoint = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ModelIds = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Avatar = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Tags = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Favorite = table.Column<bool>(type: "bit", nullable: false),
+                    Enabled = table.Column<bool>(type: "bit", nullable: false),
+                    ResponseTime = table.Column<long>(type: "bigint", nullable: true),
+                    TokenCost = table.Column<long>(type: "bigint", nullable: true),
+                    RequestCount = table.Column<long>(type: "bigint", nullable: true),
+                    Available = table.Column<bool>(type: "bit", nullable: false),
+                    Keys = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -80,21 +79,21 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "Models",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Provider = table.Column<string>(type: "TEXT", nullable: false),
-                    ModelId = table.Column<string>(type: "TEXT", nullable: false),
-                    DisplayName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
-                    Type = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    ContextWindowTokens = table.Column<int>(type: "INTEGER", nullable: true),
-                    MaxOutput = table.Column<int>(type: "INTEGER", nullable: true),
-                    Pricing = table.Column<string>(type: "TEXT", nullable: false),
-                    ReleasedAt = table.Column<string>(type: "TEXT", nullable: true),
-                    Abilities = table.Column<string>(type: "TEXT", nullable: false),
-                    Resolutions = table.Column<string>(type: "TEXT", nullable: false),
-                    Enabled = table.Column<bool>(type: "INTEGER", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Provider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ModelId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DisplayName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ContextWindowTokens = table.Column<int>(type: "int", nullable: true),
+                    MaxOutput = table.Column<int>(type: "int", nullable: true),
+                    Pricing = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ReleasedAt = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Abilities = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Resolutions = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Enabled = table.Column<bool>(type: "bit", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -105,11 +104,11 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "SessionGroups",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -120,12 +119,12 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "UserOAuths",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    UserId = table.Column<string>(type: "TEXT", maxLength: 36, nullable: false),
-                    Provider = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    ProviderUserId = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Provider = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ProviderUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -136,17 +135,17 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Avatar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
-                    UserName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    DisplayName = table.Column<string>(type: "TEXT", nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
-                    Phone = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: true),
-                    Role = table.Column<string>(type: "TEXT", nullable: false),
-                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Avatar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Phone = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Enabled = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -157,16 +156,16 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "MessageFiles",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    MessageId = table.Column<long>(type: "INTEGER", nullable: false),
-                    FileId = table.Column<long>(type: "INTEGER", nullable: false),
-                    FileName = table.Column<string>(type: "TEXT", nullable: false),
-                    FileSize = table.Column<long>(type: "INTEGER", nullable: false),
-                    FileUrl = table.Column<string>(type: "TEXT", nullable: false),
-                    FileStorageId = table.Column<long>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MessageId = table.Column<long>(type: "bigint", nullable: false),
+                    FileId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileSize = table.Column<long>(type: "bigint", nullable: false),
+                    FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileStorageId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -189,15 +188,15 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "MessageModelUsages",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    SessionId = table.Column<long>(type: "INTEGER", nullable: true),
-                    MessageId = table.Column<long>(type: "INTEGER", nullable: true),
-                    PromptTokens = table.Column<int>(type: "INTEGER", nullable: false),
-                    CompleteTokens = table.Column<int>(type: "INTEGER", nullable: false),
-                    ResponseTime = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SessionId = table.Column<long>(type: "bigint", nullable: true),
+                    MessageId = table.Column<long>(type: "bigint", nullable: true),
+                    PromptTokens = table.Column<int>(type: "int", nullable: false),
+                    CompleteTokens = table.Column<int>(type: "int", nullable: false),
+                    ResponseTime = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -213,12 +212,15 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "MessageTexts",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    MessageId = table.Column<long>(type: "INTEGER", nullable: false),
-                    Text = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MessageId = table.Column<long>(type: "bigint", nullable: false),
+                    ReasoningUpdate = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SearchResults = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExtraData = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -235,19 +237,19 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "ModelChannelInviteCodes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ChannelId = table.Column<long>(type: "INTEGER", nullable: false),
-                    Code = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
-                    ExpireTime = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    IsUsed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    UsedCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    MaxUseCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    UsedUsers = table.Column<string>(type: "TEXT", nullable: false),
-                    Inviter = table.Column<string>(type: "TEXT", nullable: false),
-                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ChannelId = table.Column<long>(type: "bigint", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
+                    ExpireTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false),
+                    UsedCount = table.Column<int>(type: "int", nullable: false),
+                    MaxUseCount = table.Column<int>(type: "int", nullable: false),
+                    UsedUsers = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Inviter = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Enabled = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -264,23 +266,24 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "Sessions",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    Avatar = table.Column<string>(type: "TEXT", nullable: false),
-                    Tags = table.Column<string>(type: "TEXT", nullable: false),
-                    Model = table.Column<string>(type: "TEXT", nullable: false),
-                    Temperature = table.Column<double>(type: "REAL", nullable: true),
-                    MaxTokens = table.Column<int>(type: "INTEGER", nullable: true),
-                    TopP = table.Column<int>(type: "INTEGER", nullable: true),
-                    FrequencyPenalty = table.Column<int>(type: "INTEGER", nullable: true),
-                    PresencePenalty = table.Column<int>(type: "INTEGER", nullable: true),
-                    Favorite = table.Column<bool>(type: "INTEGER", nullable: false),
-                    HistoryMessagesCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    SessionGroupId = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Avatar = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Tags = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Model = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RenameModel = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Temperature = table.Column<double>(type: "float", nullable: true),
+                    MaxTokens = table.Column<int>(type: "int", nullable: true),
+                    TopP = table.Column<int>(type: "int", nullable: true),
+                    FrequencyPenalty = table.Column<int>(type: "int", nullable: true),
+                    PresencePenalty = table.Column<int>(type: "int", nullable: true),
+                    Favorite = table.Column<bool>(type: "bit", nullable: false),
+                    HistoryMessagesCount = table.Column<int>(type: "int", nullable: false),
+                    SessionGroupId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -296,14 +299,16 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "ModelChannelShareUsers",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ChannelId = table.Column<long>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<string>(type: "TEXT", nullable: false),
-                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ModelChannelId = table.Column<long>(type: "INTEGER", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ChannelId = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Enabled = table.Column<bool>(type: "bit", nullable: false),
+                    TokenCount = table.Column<long>(type: "bigint", nullable: false),
+                    RequestCount = table.Column<long>(type: "bigint", nullable: true),
+                    ModelChannelId = table.Column<long>(type: "bigint", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -366,7 +371,8 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                 name: "IX_MessageModelUsages_MessageId",
                 table: "MessageModelUsages",
                 column: "MessageId",
-                unique: true);
+                unique: true,
+                filter: "[MessageId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_CreatedBy",

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Thor.Chat.Core.Entities.Configurations;
@@ -14,6 +15,10 @@ public class SessionEntityConfigurations : IEntityTypeConfiguration<Session>
         builder.HasIndex(x => x.SessionGroupId);
 
         builder.HasIndex(x => x.Name);
+
+        builder.Property(x => x.Tags).HasConversion(
+            v => JsonSerializer.Serialize(v, JsonOptions.DefaultJsonSerializerOptions),
+            v => JsonSerializer.Deserialize<string[]>(v, JsonOptions.DefaultJsonSerializerOptions));
 
         builder.UseEntityConfiguration();
     }
