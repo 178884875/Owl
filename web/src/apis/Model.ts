@@ -1,4 +1,4 @@
-import { get, post } from "@/utils/fetch";
+import { get, post, postJson, putJson } from "@/utils/fetch";
 
 
 /**
@@ -20,4 +20,21 @@ export function enableModel(modelId: string){
 }
 
 
+/**
+ * 创建模型
+ * @param model 模型数据对象，包含provider、modelId、displayName等必要信息
+ * @returns 服务器响应
+ */
+export function createModel(model: any){
+    return postJson('/api/Model', model)
+}
 
+
+/**
+ * 更新模型
+ * @param model 
+ * @returns 
+ */
+export function updateModel(model: any){
+    return putJson('/api/Model', model)
+}

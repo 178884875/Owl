@@ -19,6 +19,69 @@ namespace EntityFrameworkCore.MySql.Migrations
                 .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("Thor.Chat.Core.Entities.ChatMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("ChannelId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("CompleteTokens")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(-1)
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Files")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ModelId")
+                        .HasColumnType("varchar(95)");
+
+                    b.Property<int>("PromptTokens")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ResponseTime")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<long?>("SessionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("ShareId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("ModelId");
+
+                    b.HasIndex("SessionId");
+
+                    b.HasIndex("ShareId");
+
+                    b.ToTable("ChatMessages");
+                });
+
             modelBuilder.Entity("Thor.Chat.Core.Entities.FileStorage", b =>
                 {
                     b.Property<string>("Id")
@@ -514,6 +577,10 @@ namespace EntityFrameworkCore.MySql.Migrations
 
                     b.Property<string>("SessionGroupId")
                         .HasColumnType("varchar(95)");
+
+                    b.Property<string>("System")
+                        .HasMaxLength(-1)
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Tags")
                         .IsRequired()

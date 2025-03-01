@@ -6,6 +6,8 @@ import { clearHistoryMessages } from '@/apis/Session';
 import { useStyles } from './style';
 import { Dropdown, Popconfirm, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { StarFilled, StarOutlined } from '@ant-design/icons';
+
 export interface SessionItemProps {
     id: number;
     classNames?: {
@@ -23,7 +25,8 @@ export default function SessionItem({
         selectSession,
         deleteSession,
         renameSession,
-        sideBarExpanded
+        sideBarExpanded,
+        toggleFavorite
     ] =
         useChatStore(state => [
             chatSelectors.getSessionById(state, id),
@@ -31,7 +34,8 @@ export default function SessionItem({
             state.selectSession,
             state.deleteSession,
             state.renameSession,
-            state.sideBarExpanded]);
+            state.sideBarExpanded,
+            state.toggleFavorite]);
 
     const { styles, cx } = useStyles();
 
@@ -40,6 +44,15 @@ export default function SessionItem({
             trigger={['contextMenu']}
             menu={{
                 items: [
+                    {
+                        key: 'favorite',
+                        label: session?.favorite ? '取消收藏' : '收藏会话',
+                        icon: session?.favorite ? <StarFilled /> : <StarOutlined />,
+                        onClick: async () => {
+                            await toggleFavorite(id);
+                            message.success(session?.favorite ? '已取消收藏' : '已收藏');
+                        }
+                    },
                     {
                         key: 'rename',
                         label: '智能重命名',
@@ -85,14 +98,18 @@ export default function SessionItem({
             {sideBarExpanded &&
                 <Flexbox
                     distribution={'space-between'}
-                    gap={8}
                     key={id}
-                    className={cx(styles.container, isCurrentSession && styles.active)}
+                    className={cx(
+                        styles.container, 
+                        isCurrentSession && styles.active,
+                        session?.favorite && styles.favorite
+                    )}
                     padding={12}
                     style={{
                         cursor: 'pointer',
                         width: 'auto',
                         borderRadius: 8,
+                        position: 'relative',
                     }}
                     onClick={() => {
                         selectSession(id);
@@ -101,6 +118,11 @@ export default function SessionItem({
                     horizontal
                     align={'flex-start'}
                 >
+                    {session?.favorite && (
+                        <div className={styles.favoriteMarker}>
+                            <StarFilled style={{ fontSize: 12, color: '#fadb14' }} />
+                        </div>
+                    )}
                     <Flexbox
                         className={styles.content}
                     >
@@ -116,7 +138,7 @@ export default function SessionItem({
                                 maxWidth: '100%',
                                 fontSize: 14,
                                 fontWeight: 500
-                            }}>{session?.name}</span>
+                            }}>{session?.name}{session?.favorite && <StarFilled style={{ marginLeft: 4, color: '#fadb14' }} />}</span>
                             <span className={cx(styles.time)}>
                                 {session?.createdAtName}
                             </span>

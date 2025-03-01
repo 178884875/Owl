@@ -56,5 +56,5 @@ public sealed class ChatMessage : Entity<long>
     /// <summary>
     /// 使用模型id
     /// </summary>
-    public long? ModelId { get; set; }
+    public string? ModelId { get; set; }
 }

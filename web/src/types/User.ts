@@ -10,3 +10,9 @@ export interface UserDto extends EntityDto<string> {
     role: string;
     enabled: boolean;
 }
+
+export interface ChangePasswordDto {
+    oldPassword: string;
+    newPassword: string;
+}
+

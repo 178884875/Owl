@@ -1,3 +1,4 @@
+import { ChangePasswordDto } from "@/types/User";
 import { get, del, postJson, post } from "../utils/fetch";
 
 /**
@@ -56,3 +57,11 @@ export const disableUser = (id: string) => {
 export const resetPassword = (data: any) => {
   return postJson('/api/User/ResetPassword', data)
 }
+
+/**
+ * 修改当前用户密码
+ */
+export const ChangePassword = (data: ChangePasswordDto) => {
+  return postJson('/api/User/ChangePassword', data)
+}
+

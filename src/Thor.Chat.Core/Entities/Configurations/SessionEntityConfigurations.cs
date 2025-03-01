@@ -16,6 +16,8 @@ public class SessionEntityConfigurations : IEntityTypeConfiguration<Session>
 
         builder.HasIndex(x => x.Name);
 
+        builder.Property(x => x.System).HasMaxLength(-1);
+
         builder.Property(x => x.Tags).HasConversion(
             v => JsonSerializer.Serialize(v, JsonOptions.DefaultJsonSerializerOptions),
             v => JsonSerializer.Deserialize<string[]>(v, JsonOptions.DefaultJsonSerializerOptions));

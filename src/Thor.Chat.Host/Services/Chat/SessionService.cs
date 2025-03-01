@@ -30,12 +30,25 @@ public class SessionService(
     {
         var sessions = await dbContext.Sessions
             .Where(x => x.CreatedBy == userContext.UserId && (string.IsNullOrEmpty(search) || x.Name.Contains(search)))
-            .OrderBy(x => x.CreatedAt)
+            .OrderByDescending(x=>x.Favorite)
+            .ThenBy(x => x.CreatedAt)
             .ToListAsync();
 
         var dto = mapper.Map<IEnumerable<SessionDto>>(sessions);
 
         return dto;
+    }
+    
+    /// <summary>
+    /// 取消或者收藏会话
+    /// </summary>
+    /// <returns></returns>
+    [EndpointSummary("取消或者收藏会话")]
+    public async Task ToggleFavoriteAsync(long sessionId)
+    {
+        await dbContext.Sessions
+            .Where(x => x.Id == sessionId && x.CreatedBy == userContext.UserId)
+            .ExecuteUpdateAsync(x => x.SetProperty(a => a.Favorite, a => !a.Favorite));
     }
 
     /// <summary>
@@ -194,6 +207,7 @@ public class SessionService(
                     .SetProperty(a => a.Favorite, sessionInput.Favorite)
                     .SetProperty(a => a.RenameModel, sessionInput.RenameModel)
                     .SetProperty(a => a.Temperature, sessionInput.Temperature)
+                    .SetProperty(a=>a.System, sessionInput.System)
                     .SetProperty(a => a.MaxTokens, sessionInput.MaxTokens)
                     .SetProperty(a => a.TopP, sessionInput.TopP)
                     .SetProperty(a => a.FrequencyPenalty, sessionInput.FrequencyPenalty)

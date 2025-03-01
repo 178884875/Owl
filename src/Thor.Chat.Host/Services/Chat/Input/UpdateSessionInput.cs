@@ -8,6 +8,11 @@ public class UpdateSessionInput : EntityDto<long>
     /// 会话描述
     /// </summary>
     public string? Description { get; set; }
+    
+    /// <summary>
+    /// 会话系统提示词
+    /// </summary>
+    public string? System { get; set; }
 
     /// <summary>
     /// 会话图标

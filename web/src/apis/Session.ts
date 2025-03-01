@@ -8,6 +8,16 @@ export const getSessionLite = (search?: string) => {
     return get('/api/Session/List?search=' + search);
 }
 
+
+/**
+ * 切换收藏状态
+ */
+export const toggleFavorite = (sessionId: number) => {
+    return post(`/api/Session/ToggleFavorite?sessionId=${sessionId}`);
+}
+
+
+
 /**
  * 创建session
  * @param value 

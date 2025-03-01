@@ -24,6 +24,8 @@ public interface IDbContext
     DbSet<FileStorage> FileStorages { get; set; }
 
     DbSet<Model> Models { get; set; }
+    
+    DbSet<ChatMessage> ChatMessages { get; set; }
 
     /// <summary>
     /// 模型渠道

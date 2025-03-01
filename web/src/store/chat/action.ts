@@ -1,7 +1,7 @@
 import { StateCreator } from "zustand";
 import { ChatStore } from "./store";
 import getModels from "@/apis/Model";
-import { createSession, deleteSession, getSessionLite, switchSessionModel, updateSession } from "@/apis/Session";
+import { createSession, deleteSession, getSessionLite, switchSessionModel, toggleFavorite, updateSession } from "@/apis/Session";
 import { createMessage, deleteMessage } from "@/apis/Message";
 import { ChatCompleteParams, ChatRole } from "@/types/Chat";
 import { message } from "antd";
@@ -150,6 +150,11 @@ export interface ChatAction {
      * @returns 
      */
     switchNetworking: () => void;
+
+    /**
+     * 切换收藏状态
+     */
+    toggleFavorite: (id: number) => Promise<void>;
 }
 
 
@@ -163,6 +168,17 @@ export const createChatSlice: StateCreator<
         set({
             networking: !get().networking
         })
+    },
+    toggleFavorite: async (id: number) => {
+        const result = await toggleFavorite(id);
+        if (result.success) {
+            // 更新session列表
+            await get().loadSessions('');
+
+            message.success(result.data ? '已收藏' : '已取消收藏');
+        } else {
+            message.error(result.message);
+        }
     },
     updateSession: async (value: any) => {
         value.avatar = value.avatar ?? '🤖';
@@ -414,20 +430,17 @@ export const createChatSlice: StateCreator<
         const messageResponse = await createMessage(tempAiMessage);
         tempAiMessage.id = messageResponse.data.id;
         tempAiMessage.texts[0].id = messageResponse.data.id;
-        const messages = get().messages;
 
-        messages.push(userMessage);
+        // 创建新的消息数组副本，而不是修改原数组
+        const updatedMessages = [...get().messages, userMessage, tempAiMessage];
 
-        messages.push(tempAiMessage);
-
-
-        set((state) => ({
-            messages: [...state.messages],
+        // 使用新数组更新状态
+        set({
+            messages: updatedMessages,
             generateLoading: true
-        }))
+        });
 
         try {
-
             const chatCompleteParams = {
                 sessionId: sessionId,
                 parentId: 0,
@@ -435,25 +448,23 @@ export const createChatSlice: StateCreator<
                 fileIds: userMessage.files.map(file => file.fileId),
                 functionCalls: [],
                 networking: get().networking,
-                // @ts-ignore
                 assistantMessageId: tempAiMessage.texts[tempAiMessage.texts.length - 1].id
             } as ChatCompleteParams;
 
             let accumulatedText = '';
-
             let lastUpdateTime = Date.now();
             let reasoningUpdate = '';
-            debugger;
+
             for await (const chunk of chatComplete(chatCompleteParams)) {
                 const { data, type } = chunk;
                 if (type === 'chat') {
                     accumulatedText += data;
                     tempAiMessage.texts[tempAiMessage.texts.length - 1].text = accumulatedText;
 
-                    // 每100ms更新一次
+                    // 每100ms更新一次，创建全新数组
                     const currentTime = Date.now();
                     if (currentTime - lastUpdateTime >= 100) {
-                        set({ messages: [...messages] });
+                        set({ messages: [...get().messages] });
                         lastUpdateTime = currentTime;
                     }
                 } else if (type === 'reasoning') {
@@ -461,21 +472,21 @@ export const createChatSlice: StateCreator<
                     tempAiMessage.texts[tempAiMessage.texts.length - 1].reasoningUpdate = reasoningUpdate;
                     const currentTime = Date.now();
                     if (currentTime - lastUpdateTime >= 100) {
-                        set({ messages: [...messages] });
+                        set({ messages: [...get().messages] });
                         lastUpdateTime = currentTime;
                     }
                 } else if (type === 'search') {
                     const items = data as any[];
                     items.forEach(item => {
-                        // @ts-ignore
                         tempAiMessage.texts[tempAiMessage.texts.length - 1].searchResults.push(item)
                     });
-                    set({ messages: [...messages] });
+                    set({ messages: [...get().messages] });
                 } else if (type === 'model_usage') {
                     tempAiMessage.modelUsages = data;
+                    set({ messages: [...get().messages] });
                 }
             }
-            set({ messages: [...messages], generateLoading: false });
+            set({ messages: [...get().messages], generateLoading: false });
 
             await get().renameSession(sessionId);
 

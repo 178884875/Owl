@@ -37,11 +37,11 @@ export default function SessionConfig() {
                 temperature: currentSession.temperature,
                 maxTokens: currentSession.maxTokens,
                 topP: currentSession.topP,
-            frequencyPenalty: currentSession.frequencyPenalty,
-            presencePenalty: currentSession.presencePenalty,
-            historyMessagesCount: currentSession.historyMessagesCount,
-            favorite: currentSession.favorite,
-            modelId: currentSession.modelId,
+                frequencyPenalty: currentSession.frequencyPenalty,
+                presencePenalty: currentSession.presencePenalty,
+                historyMessagesCount: currentSession.historyMessagesCount,
+                favorite: currentSession.favorite,
+                modelId: currentSession.modelId,
             });
             setRenameModel(currentSession.renameModel);
         }
@@ -57,15 +57,15 @@ export default function SessionConfig() {
     const renderModel = () => {
         const item = models?.find(item => item.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel) !== undefined)?.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel);
         return <Flexbox
-          horizontal
-          style={{
-            fontSize: 16,
-          }}
+            horizontal
+            style={{
+                fontSize: 16,
+            }}
         >
-          {getIconByName(item?.provider, 26)}
-          {item?.displayName}
+            {getIconByName(item?.provider, 26)}
+            {item?.displayName}
         </Flexbox>;
-      }
+    }
 
 
     return <Flexbox style={{
@@ -97,6 +97,14 @@ export default function SessionConfig() {
                     >
                         <Form.Item label="会话描述" name="description">
                             <Input.TextArea placeholder="请输入会话描述" />
+                        </Form.Item>
+                        <Form.Item label='会话系统提示词'
+                            name='system'>
+                            <Input.TextArea
+                                style={{
+                                    height: 100,
+                                }}
+                                placeholder="请输入会话系统提示词" />
                         </Form.Item>
 
                         <Form.Item label="会话标签" name="tags">

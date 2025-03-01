@@ -3,6 +3,7 @@ using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Thor.Chat.Core;
+using Thor.Chat.Core.Entities;
 using Thor.Chat.Host.Dto;
 using Thor.Chat.Host.Infrastructure;
 using Thor.Chat.Host.Services.Chat.Dto;
@@ -42,12 +43,12 @@ public class ModelService(IDbContext context, IMapper mapper) : FastApi
     {
         var models = await context.Models
             .ToListAsync();
-        
+
         // 根据provider分组
         var group = models.GroupBy(x => x.Provider);
-        
+
         var result = new List<object>();
-        
+
         foreach (var item in group)
         {
             var provider = new
@@ -68,10 +69,10 @@ public class ModelService(IDbContext context, IMapper mapper) : FastApi
                     x.Pricing,
                 })
             };
-            
+
             result.Add(provider);
         }
-        
+
         return result;
     }
 
@@ -81,12 +82,50 @@ public class ModelService(IDbContext context, IMapper mapper) : FastApi
     [Authorize(Roles = "Admin")]
     public async Task UpdateAsync(ModelDto dto)
     {
+        if (await context.Models.AnyAsync(x =>
+                x.Id != dto.Id && x.Provider == dto.Provider && x.ModelId == dto.ModelId))
+        {
+            throw new BusinessException("模型已存在");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.ModelId))
+        {
+            throw new BusinessException("ModelId不能为空");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.DisplayName))
+        {
+            throw new BusinessException("DisplayName不能为空");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Description))
+        {
+            throw new BusinessException("Description不能为空");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Type))
+        {
+            throw new BusinessException("Type不能为空");
+        }
+
+        if (dto.ContextWindowTokens <= 0)
+        {
+            throw new BusinessException("ContextWindowTokens必须大于0");
+        }
+
+        if (dto.MaxOutput <= 0)
+        {
+            throw new BusinessException("MaxOutput必须大于0");
+        }
+
         var model = await context.Models.FirstOrDefaultAsync(x => x.Id == dto.Id);
 
         if (model == null)
         {
             throw new BusinessException("模型不存在");
         }
+
+        dto.Provider = model.Provider;
 
         mapper.Map(dto, model);
 
@@ -96,7 +135,7 @@ public class ModelService(IDbContext context, IMapper mapper) : FastApi
     }
 
     /// <summary>
-    /// 修改模型
+    /// 获取可用模型列表
     /// </summary>
     public async Task<List<InitModelsDto>> GetModelsAsync()
     {
@@ -144,13 +183,67 @@ public class ModelService(IDbContext context, IMapper mapper) : FastApi
 
         // 将OpenAI排在第一个
         var openAi = modelsDto.FirstOrDefault(x => x.Provider == "OpenAI");
-        
+
         if (openAi != null)
         {
             modelsDto.Remove(openAi);
             modelsDto.Insert(0, openAi);
         }
-        
+
         return modelsDto;
+    }
+
+    [Authorize(Roles = "Admin")]
+    public async Task CreateAsync(ModelDto dto)
+    {
+        if (await context.Models.AnyAsync(x => x.Provider == dto.Provider && x.ModelId == dto.ModelId))
+        {
+            throw new BusinessException("模型已存在");
+        }
+
+        // 校验数据
+        if (string.IsNullOrWhiteSpace(dto.Provider))
+        {
+            throw new BusinessException("Provider不能为空");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.ModelId))
+        {
+            throw new BusinessException("ModelId不能为空");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.DisplayName))
+        {
+            throw new BusinessException("DisplayName不能为空");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Description))
+        {
+            throw new BusinessException("Description不能为空");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Type))
+        {
+            throw new BusinessException("Type不能为空");
+        }
+
+        if (dto.ContextWindowTokens <= 0)
+        {
+            throw new BusinessException("ContextWindowTokens必须大于0");
+        }
+
+        if (dto.MaxOutput <= 0)
+        {
+            throw new BusinessException("MaxOutput必须大于0");
+        }
+
+
+        var model = mapper.Map<Model>(dto);
+
+        model.Id = Guid.NewGuid().ToString();
+
+        await context.Models.AddAsync(model);
+
+        await context.SaveChangesAsync();
     }
 }

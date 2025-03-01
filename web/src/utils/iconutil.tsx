@@ -155,6 +155,16 @@ const iconMap: { [key: string]: React.LazyExoticComponent<any> } = {
 
 // 根据名称获取对应的图标
 export function getIconByName(name: string, size: number = 36) {
+  if (name === 'AI') {
+    return (
+      <Suspense fallback={<div>Loading...</div>}>
+        <IconAvatar
+          size={size}
+          color="var(--color-primary)" />
+      </Suspense>
+    );
+  }
+  
   const IconComponent = iconMap[name] || OpenAI;
 
   return (

@@ -19,6 +19,11 @@ public sealed class Session : Entity<long>
     /// 会话图标
     /// </summary>
     public required string Avatar { get; set; }
+    
+    /// <summary>
+    /// 会话系统提示词
+    /// </summary>
+    public string? System { get; set; }
 
     /// <summary>
     /// 会话标签

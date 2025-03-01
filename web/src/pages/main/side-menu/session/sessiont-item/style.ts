@@ -82,5 +82,14 @@ export const useStyles = createStyles(({ css, token }) => {
       clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
       border-radius: 2px;
     `,
+    favorite: css`
+      border-left: 3px solid ${token.colorWarning};
+      background-color: ${token.colorWarningBg};
+    `,
+    favoriteMarker: css`
+      position: absolute;
+      top: 4px;
+      right: 4px;
+    `,
   };
 });

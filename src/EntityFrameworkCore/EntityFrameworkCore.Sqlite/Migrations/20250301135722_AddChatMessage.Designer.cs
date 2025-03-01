@@ -3,6 +3,7 @@ using System;
 using EntityFrameworkCore.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EntityFrameworkCore.Sqlite.Migrations
 {
     [DbContext(typeof(SqliteDbContext))]
-    partial class SqliteDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250301135722_AddChatMessage")]
+    partial class AddChatMessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
@@ -574,10 +577,6 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SessionGroupId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("System")
-                        .HasMaxLength(-1)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Tags")

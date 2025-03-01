@@ -14,4 +14,5 @@ export interface ChatCompleteParams {
     fileIds: string[];
     assistantMessageId: number;
     functionCalls: string[];
+    networking: boolean;
   }

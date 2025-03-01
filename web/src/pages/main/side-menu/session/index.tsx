@@ -13,6 +13,7 @@ export default function Session() {
             padding: 5,
             marginTop: 10,
             width: 'auto',
+            gap: 5,
             flex: 1,
         }}>
             {sessionIds?.length === 0 && <DefaultSession />}

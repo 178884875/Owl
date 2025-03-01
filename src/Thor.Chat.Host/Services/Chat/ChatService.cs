@@ -366,7 +366,43 @@ public sealed class ChatService(
                 .ExecuteUpdateAsync(x => x.SetProperty(a => a.RequestCount, a => a.RequestCount + 1)
                     .SetProperty(a => a.TokenCost, a => a.TokenCost + requestToken + completeTokens));
 
+            var userChatMessage = new ChatMessage
+            {
+                ChannelId = channel.Id,
+                SessionId = input.SessionId,
+                Role = "user",
+                Content = messages.Last(x => x.Role == "user").Texts.Last(x => !string.IsNullOrEmpty(x.Text)).Text,
+                PromptTokens = requestToken,
+                Files = messages.Last(x => x.Role == "user").Files.Select(x => x.FileId).ToList(),
+                CompleteTokens = completeTokens,
+                ResponseTime = (int)sw.ElapsedMilliseconds,
+                ModelId = model.Id
+            };
+
             // 创建记录
+            var chatMessage = new ChatMessage
+            {
+                ChannelId = channel.Id,
+                SessionId = input.SessionId,
+                Role = "assistant",
+                Content = sb.ToString(),
+                PromptTokens = requestToken,
+                CompleteTokens = completeTokens,
+                ResponseTime = (int)sw.ElapsedMilliseconds,
+                ModelId = model.Id
+            };
+            if (channelShareUsers.Any(x => x == channel.Id))
+            {
+                chatMessage.ShareId = channel.Id;
+                userChatMessage.ShareId = channel.Id;
+            }
+
+
+            await dbContext.ChatMessages.AddAsync(chatMessage);
+
+            await dbContext.ChatMessages.AddAsync(userChatMessage);
+
+            await dbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {

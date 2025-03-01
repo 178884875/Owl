@@ -28,6 +28,8 @@ public abstract class DbContextBase<TDbContext>(DbContextOptions<TDbContext> opt
     public DbSet<FileStorage> FileStorages { get; set; }
 
     public DbSet<Model> Models { get; set; }
+    
+    public DbSet<ChatMessage> ChatMessages { get; set; }
 
     public DbSet<ModelChannel> ModelChannels { get; set; }
 

@@ -562,7 +562,6 @@ export default function WelcomePage() {
               </div>
             </motion.div>
 
-            {/* Google Docs banner */}
             {showGoogleDocs && (
               <motion.div
                 initial={{ opacity: 0, x: -20 }}

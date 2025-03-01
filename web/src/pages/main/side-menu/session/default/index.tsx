@@ -1,12 +1,15 @@
 import { useChatStore } from "@/store/chat";
 import { Flexbox } from "react-layout-kit";
 import {
-    theme
+    theme,
+    Typography
 } from "antd";
+import { MessageOutlined } from '@ant-design/icons';
 
 const {
     useToken
 } = theme;
+const { Text } = Typography;
 
 export default function DefaultSession() {
     const { token } = useToken();
@@ -17,20 +20,26 @@ export default function DefaultSession() {
 
     return (
         <>
-            {sideBarExpanded && (<Flexbox
-                style={{
-                    padding: 5,
-                    width: '100%',
-                    height: 50,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    fontSize: 16,
-                    color: token.colorTextDescription,
-                    userSelect: 'none',
-                }}
+            {sideBarExpanded && (
+                <Flexbox
+                    style={{
+                        padding: 16,
+                        width: '100%',
+                        height: 'auto',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        color: token.colorTextDescription,
+                        userSelect: 'none',
+                    }}
+                    gap={16}
                 >
-                暂无会话
-            </Flexbox>)}
+                    <MessageOutlined style={{ fontSize: 32, opacity: 0.8 }} />
+                    <Text style={{ fontSize: 16, textAlign: 'center' }}>暂无聊天会话</Text>
+                    <Text type="secondary" style={{ fontSize: 14, textAlign: 'center', padding: '0 10px' }}>
+                        在右侧面板开始一个新的对话
+                    </Text>
+                </Flexbox>
+            )}
         </>
     )
 }

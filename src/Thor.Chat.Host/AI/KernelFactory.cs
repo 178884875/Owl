@@ -43,6 +43,9 @@ public class KernelFactory
                     case "ollama":
                         kernelBuilder.AddOllamaChatCompletion(model, new Uri(endpoint));
                         break;
+                    default:
+                        kernelBuilder.AddOpenAIChatCompletion(model, new Uri(endpoint), apiKey, "Thor-Chat");
+                        break;
                 }
 
                 return kernelBuilder.Build();

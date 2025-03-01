@@ -297,4 +297,27 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
         dbContext.Users.Update(user);
         await dbContext.SaveChangesAsync();
     }
+    
+    /// <summary>
+    /// 修改用户密码
+    /// </summary>
+    /// <returns></returns>
+    [Authorize]
+    public async Task ChangePasswordAsync(ChangePasswordInput input)
+    {
+        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == userContext.UserId);
+        if (user == null)
+        {
+            throw new BusinessException("用户不存在");
+        }
+
+        if (user.PasswordHash != EncryptionHelper.Md5(input.OldPassword))
+        {
+            throw new BusinessException("原密码错误");
+        }
+
+        user.PasswordHash = EncryptionHelper.Md5(input.NewPassword);
+        dbContext.Users.Update(user);
+        await dbContext.SaveChangesAsync();
+    }
 }

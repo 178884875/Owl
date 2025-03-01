@@ -21,6 +21,70 @@ namespace EntityFrameworkCore.DaMeng.Migrations
                 .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
+            modelBuilder.Entity("Thor.Chat.Core.Entities.ChatMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("BIGINT")
+                        .HasAnnotation("Dm:ValueGenerationStrategy", DmValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long?>("ChannelId")
+                        .HasColumnType("BIGINT");
+
+                    b.Property<int>("CompleteTokens")
+                        .HasColumnType("INT");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(-1)
+                        .HasColumnType("NVARCHAR2(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<string>("Files")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(32767)");
+
+                    b.Property<string>("ModelId")
+                        .HasColumnType("NVARCHAR2(450)");
+
+                    b.Property<int>("PromptTokens")
+                        .HasColumnType("INT");
+
+                    b.Property<int>("ResponseTime")
+                        .HasColumnType("INT");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)");
+
+                    b.Property<long?>("SessionId")
+                        .HasColumnType("BIGINT");
+
+                    b.Property<long?>("ShareId")
+                        .HasColumnType("BIGINT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("ModelId");
+
+                    b.HasIndex("SessionId");
+
+                    b.HasIndex("ShareId");
+
+                    b.ToTable("ChatMessages");
+                });
+
             modelBuilder.Entity("Thor.Chat.Core.Entities.FileStorage", b =>
                 {
                     b.Property<string>("Id")
@@ -524,6 +588,10 @@ namespace EntityFrameworkCore.DaMeng.Migrations
 
                     b.Property<string>("SessionGroupId")
                         .HasColumnType("NVARCHAR2(450)");
+
+                    b.Property<string>("System")
+                        .HasMaxLength(-1)
+                        .HasColumnType("NVARCHAR2(max)");
 
                     b.Property<string>("Tags")
                         .IsRequired()

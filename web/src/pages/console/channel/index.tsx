@@ -81,7 +81,7 @@ export default function ConsoleChannel() {
                     style={{
                         flex: 1,
                         marginRight: '16px',
-                        height: '100%',
+                               height: '100%',
                         overflow: 'auto',
                     }}
                     defaultActiveKey="channelConfig" >
