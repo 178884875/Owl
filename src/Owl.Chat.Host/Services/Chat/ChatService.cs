@@ -19,8 +19,8 @@ using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Prompts;
 using Owl.Chat.Host.Services.Chat.Input;
 using Storage.Core;
-using .Chat.Core;
-using .Chat.Core.Entities;
+using Owl.Chat.Core;
+using Owl.Chat.Core.Entities;
 using AudioContent = Microsoft.SemanticKernel.AudioContent;
 using ImageContent = Microsoft.SemanticKernel.ImageContent;
 

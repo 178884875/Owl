@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Services.Chat.Dto;
-using .Chat.Core;
-using .Chat.Core.Dto;
+using Owl.Chat.Core;
+using Owl.Chat.Core.Dto;
 
 namespace Owl.Chat.Host.Services.Chat;
 

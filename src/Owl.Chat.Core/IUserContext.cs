@@ -1,4 +1,4 @@
-﻿namespace .Chat.Core;
+﻿namespace Owl.Chat.Core;
 
 public interface IUserContext
 {

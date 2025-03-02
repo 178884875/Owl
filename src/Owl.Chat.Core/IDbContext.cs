@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using .Chat.Core.Entities;
+using Owl.Chat.Core.Entities;
 
-namespace .Chat.Core;
+namespace Owl.Chat.Core;
 
 public interface IDbContext
 {

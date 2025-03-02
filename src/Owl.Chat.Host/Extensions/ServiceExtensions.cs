@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Options;
 using Storage.LiteDB.Extensions;
-using .Chat.Core;
+using Owl.Chat.Core;
 
 namespace Owl.Chat.Host.Extensions;
 

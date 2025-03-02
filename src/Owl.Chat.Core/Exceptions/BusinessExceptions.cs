@@ -1,4 +1,4 @@
-﻿namespace .Chat.Core.Exceptions;
+﻿namespace Owl.Chat.Core.Exceptions;
 
 public class BusinessExceptions : Exception
 {

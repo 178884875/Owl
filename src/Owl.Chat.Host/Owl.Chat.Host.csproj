@@ -40,7 +40,7 @@
       <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.SqlServer\EntityFrameworkCore.SqlServer.csproj" />
       <ProjectReference Include="..\Storage\Storage.Core\Storage.Core.csproj" />
       <ProjectReference Include="..\Storage\Storage.LiteDB\Storage.LiteDB.csproj" />
-      <ProjectReference Include="..\Owl.Chat.Core\Owl.Chat.Core.csproj" />
+      <ProjectReference Include="..\OwlOwl.Chat.Core\OwlOwl.Chat.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>

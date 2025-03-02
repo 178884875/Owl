@@ -10,8 +10,8 @@ using Owl.Chat.Host.Options;
 using Owl.Chat.Host.Services.Auth.Dto;
 using Owl.Chat.Host.Services.Auth.Input;
 using Owl.Chat.Host.Services.User;
-using .Chat.Core;
-using .Chat.Core.Entities;
+using Owl.Chat.Core;
+using Owl.Chat.Core.Entities;
 using Owl.Chat.Host.Dto;
 using Owl.Chat.Host.Services.User.Dto;
 
@@ -113,7 +113,7 @@ public class AuthService(
             throw new BusinessException("邮箱已存在");
         }
 
-        var userEntity = new .Chat.Core.Entities.User()
+        var userEntity = new Owl.Chat.Core.Entities.User()
         {
             UserName = input.UserName,
             DisplayName = input.DisplayName,
@@ -252,7 +252,7 @@ public class AuthService(
         var oauth = await dbContext.UserOAuths.FirstOrDefaultAsync(x =>
             x.Provider == provider && x.ProviderUserId == userDto.Id.ToString());
 
-        .Chat.Core.Entities.User user;
+        Owl.Chat.Core.Entities.User user;
 
         if (oauth == null)
         {
@@ -264,7 +264,7 @@ public class AuthService(
 
 
             // 创建一个新的用户
-            user = new .Chat.Core.Entities.User()
+            user = new Owl.Chat.Core.Entities.User()
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Avatar = userDto.AvatarUrl ?? "/logo.png",

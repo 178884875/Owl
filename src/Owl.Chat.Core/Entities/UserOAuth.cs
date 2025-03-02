@@ -1,4 +1,4 @@
-﻿namespace .Chat.Core.Entities;
+﻿namespace Owl.Chat.Core.Entities;
 
 /// <summary>
 /// 用户绑定的第三方平台

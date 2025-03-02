@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
-using .Chat.Core;
+using Owl.Chat.Core;
 
 namespace Owl.Chat.Host.Infrastructure;
 

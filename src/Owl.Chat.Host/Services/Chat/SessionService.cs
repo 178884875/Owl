@@ -8,8 +8,8 @@ using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Options;
 using Owl.Chat.Host.Services.Chat.Dto;
 using Owl.Chat.Host.Services.Chat.Input;
-using .Chat.Core;
-using .Chat.Core.Entities;
+using Owl.Chat.Core;
+using Owl.Chat.Core.Entities;
 
 namespace Owl.Chat.Host.Services.Chat;
 

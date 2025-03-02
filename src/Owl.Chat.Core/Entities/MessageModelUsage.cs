@@ -1,4 +1,4 @@
-﻿namespace .Chat.Core.Entities;
+﻿namespace Owl.Chat.Core.Entities;
 
 /// <summary>
 /// 对话消息使用情况

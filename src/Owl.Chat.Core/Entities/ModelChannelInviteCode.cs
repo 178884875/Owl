@@ -1,4 +1,4 @@
-﻿namespace .Chat.Core.Entities;
+﻿namespace Owl.Chat.Core.Entities;
 
 /// <summary>
 /// 模型渠道邀请码

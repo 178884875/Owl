@@ -1,1 +1,1 @@
-﻿global using .Chat.Core.Extensions;
+﻿global using Owl.Chat.Core.Extensions;

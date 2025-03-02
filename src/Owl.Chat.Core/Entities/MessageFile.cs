@@ -1,4 +1,4 @@
-﻿namespace .Chat.Core.Entities;
+﻿namespace Owl.Chat.Core.Entities;
 
 /// <summary>
 /// 消息中包含的文件

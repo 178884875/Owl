@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using .Chat.Core.Entities;
+using Owl.Chat.Core.Entities;
 
-namespace .Chat.Core.Extensions;
+namespace Owl.Chat.Core.Extensions;
 
 public static class EntityConfigurationExtensions
 {

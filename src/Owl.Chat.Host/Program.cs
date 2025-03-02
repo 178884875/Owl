@@ -5,7 +5,7 @@ using Owl.Chat.Host.Backstage;
 using Owl.Chat.Host.Converters;
 using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Extensions;
-using .Chat.Core;
+using Owl.Chat.Core;
 
 namespace Owl.Chat.Host;
 

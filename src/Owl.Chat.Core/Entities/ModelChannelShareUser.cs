@@ -1,4 +1,4 @@
-﻿namespace .Chat.Core.Entities;
+﻿namespace Owl.Chat.Core.Entities;
 
 /// <summary>
 /// 模型渠道分享可用用户

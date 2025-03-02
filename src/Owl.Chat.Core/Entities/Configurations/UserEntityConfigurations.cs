@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace .Chat.Core.Entities.Configurations;
+namespace Owl.Chat.Core.Entities.Configurations;
 
 /// <summary>
 /// 用户实体配置

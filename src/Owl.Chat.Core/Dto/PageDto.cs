@@ -1,4 +1,4 @@
-﻿namespace .Chat.Core.Dto;
+﻿namespace Owl.Chat.Core.Dto;
 
 public class PageDto<T>(int totalCount, List<T> data)
 {

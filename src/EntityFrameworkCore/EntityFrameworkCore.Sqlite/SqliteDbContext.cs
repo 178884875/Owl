@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using .Chat.Core;
+using Owl.Chat.Core;
 
 namespace EntityFrameworkCore.Sqlite;
 

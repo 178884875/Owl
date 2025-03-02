@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\.Chat.Core\.Chat.Core.csproj" />
+      <ProjectReference Include="..\..\Owl.Chat.Core\Owl.Chat.Core.csproj" />
       <ProjectReference Include="..\Storage.Core\Storage.Core.csproj" />
     </ItemGroup>
 

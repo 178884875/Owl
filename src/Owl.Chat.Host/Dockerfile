@@ -9,7 +9,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/.Chat.Host/.Chat.Host.csproj", "src/.Chat.Host/"]
 COPY ["src/EntityFrameworkCore/EntityFrameworkCore.Sqlite/EntityFrameworkCore.Sqlite.csproj", "src/EntityFrameworkCore/EntityFrameworkCore.Sqlite/"]
-COPY ["src/.Chat.Core/.Chat.Core.csproj", "src/.Chat.Core/"]
+COPY ["src/Owl.Chat.Core/Owl.Chat.Core.csproj", "src/Owl.Chat.Core/"]
 COPY ["src/Storage/Storage.Core/Storage.Core.csproj", "src/Storage/Storage.Core/"]
 COPY ["src/Storage/Storage.LiteDB/Storage.LiteDB.csproj", "src/Storage/Storage.LiteDB/"]
 COPY ["src/EntityFrameworkCore/EntityFrameworkCore.PostgreSQL/EntityFrameworkCore.PostgreSQL.csproj", "src/EntityFrameworkCore/EntityFrameworkCore.PostgreSQL/"]

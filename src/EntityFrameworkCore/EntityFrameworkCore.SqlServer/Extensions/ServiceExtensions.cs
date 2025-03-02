@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using .Chat.Core;
+using Owl.Chat.Core;
 
 namespace EntityFrameworkCore.SqlServer.Extensions;
 
