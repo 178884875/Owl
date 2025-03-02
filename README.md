@@ -75,7 +75,50 @@ Owl是一款智能AI对话客户端，如同猫头鹰般带着敏锐的洞察力
 
 ### 使用Docker
 
+默认账号密码 `admin` `Aa123456.`
+ 
+默认的Sqlite版本数据库文件路径为 `/app/data/Owl.Chat.db`，如果需要使用其他数据库，请修改环境变量 `ConnectionStrings:Type` 和 `ConnectionStrings:Default`。
 
+```yaml
+services:
+  owl.chat:
+    image: registry.cn-shenzhen.aliyuncs.com/token-ai/owl
+    environment:
+      - RunMigration=true
+      - ConnectionStrings:Type=sqlite
+      - ConnectionStrings:Default=Data Source=/app/data/Owl.Chat.db
+      - Chat:App=您的外部可访问地址 # 例如：http://localhost:5000
+    volumes:
+      - ./wwwroot/images:/app/wwwroot/images
+      - ./data:/app/data
+```
+
+如果写入到现有的Postgres数据库，修改环境变量 `ConnectionStrings:Type` 和 `ConnectionStrings:Default`。
+
+```yaml 
+
+services:
+  owl.chat:
+    image: registry.cn-shenzhen.aliyuncs.com/token-ai/owl
+    environment:
+      - RunMigration=true
+      - ConnectionStrings:Type=postgresql
+      - ConnectionStrings:Default=Host=postgres;Port=5432;Database=Owl-Chat;Username=postgres;Password=postgres
+      - Chat:App=您的外部可访问地址 # 例如：http://localhost:5000
+    volumes:
+      - ./wwwroot/images:/app/wwwroot/images
+```
+
+```bash
+docker-compose up -d
+```
+
+数据库支持：
+- Sqlite
+- Postgres
+- SqlServer
+- Dameng （达梦）
+- MySql
 
 ## 使用指南
 
