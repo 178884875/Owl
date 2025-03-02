@@ -1,6 +1,14 @@
 ﻿services:
   thor.chat.host:
-    image: thor.chat.host
+    image: registry.cn-shenzhen.aliyuncs.com/token-ai/owl
     build:
       context: .
-      dockerfile: src/Thor.Chat.Host/Dockerfile
+      dockerfile: src/Owl.Chat.Host/Dockerfile
+    environment:
+      - RunMigration=true
+      - ConnectionStrings:Type=sqlite
+      - ConnectionStrings:Default=Data Source=/app/data/Owl.Chat.db
+      - Chat:App=您的外部可访问地址 # 例如：http://localhost:5000
+    volumes:
+      - ./wwwroot/images:/app/wwwroot/images
+      - ./data:/app/data

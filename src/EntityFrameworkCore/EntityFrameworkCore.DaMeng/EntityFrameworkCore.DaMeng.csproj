@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Thor.Chat.Core\Thor.Chat.Core.csproj" />
+      <ProjectReference Include="..\..\Owl.Chat.Core\Owl.Chat.Core.csproj" />
     </ItemGroup>
 
 </Project>
