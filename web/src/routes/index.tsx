@@ -1,19 +1,22 @@
-import Chat from "@/pages/main/chat";
+import { lazy, Suspense } from "react";
 import GlobalLayout from "../layouts/GlobalLayout";
-import Login from "../pages/auth/login";
 import MainLayout from "../pages/main";
-import Welcome from "@/pages/main/welcome";
 import ConsoleLayout from "@/pages/console";
-import ConsoleWelcome from "@/pages/console/welcome";
-import ConsoleChannel from "@/pages/console/channel";
-import User from "@/pages/console/user";
-import Register from "@/pages/auth/register";
-import OAuth from "@/pages/auth/oauth";
-import Profile from "@/pages/main/profile";
-import About from "@/pages/about";
-import Help from "@/pages/help";
-import Model from "@/pages/console/model";
-import Invite from "@/pages/invite";
+import LoadingSpinner from "@/components/LoadingSpinner";
+// 懒加载所有页面组件
+const Chat = lazy(() => import("@/pages/main/chat"));
+const Login = lazy(() => import("../pages/auth/login"));
+const Welcome = lazy(() => import("@/pages/main/welcome"));
+const ConsoleWelcome = lazy(() => import("@/pages/console/welcome"));
+const ConsoleChannel = lazy(() => import("@/pages/console/channel"));
+const User = lazy(() => import("@/pages/console/user"));
+const Register = lazy(() => import("@/pages/auth/register"));
+const OAuth = lazy(() => import("@/pages/auth/oauth"));
+const Profile = lazy(() => import("@/pages/main/profile"));
+const About = lazy(() => import("@/pages/about"));
+const Help = lazy(() => import("@/pages/help"));
+const Model = lazy(() => import("@/pages/console/model"));
+const Invite = lazy(() => import("@/pages/invite"));
 
 const routes = [
     {
@@ -21,42 +24,42 @@ const routes = [
         children: [
             {
                 path: '/auth/login',
-                element: <Login />
+                element: <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
             },
             {
                 path: '/auth/register',
-                element: <Register />
+                element: <Suspense fallback={<LoadingSpinner />}><Register /></Suspense>
             },
             {
                 path: '/auth/oauth',
-                element: <OAuth />
+                element: <Suspense fallback={<LoadingSpinner />}><OAuth /></Suspense>
             },
             {
                 path: '/about',
-                element: <About />
+                element: <Suspense fallback={<LoadingSpinner />}><About /></Suspense>
             },
             {
                 path: '/help',
-                element: <Help />
+                element: <Suspense fallback={<LoadingSpinner />}><Help /></Suspense>
             },
             {
                 path:'/invite/:id',
-                element: <Invite />
+                element: <Suspense fallback={<LoadingSpinner />}><Invite /></Suspense>
             },
             {
                 element: <MainLayout />,
                 children: [
                     {
                         path: '/',
-                        element: <Welcome />
+                        element: <Suspense fallback={<LoadingSpinner />}><Welcome /></Suspense>
                     },
                     {
                         path: '/chat',
-                        element: <Chat />
+                        element: <Suspense fallback={<LoadingSpinner />}><Chat /></Suspense>
                     },
                     {
                         path: '/profile',
-                        element: <Profile />
+                        element: <Suspense fallback={<LoadingSpinner />}><Profile /></Suspense>
                     }
                 ]
             },
@@ -66,25 +69,24 @@ const routes = [
                 children: [
                     {
                         path: "",
-                        element: <ConsoleWelcome />
+                        element: <Suspense fallback={<LoadingSpinner />}><ConsoleWelcome /></Suspense>
                     },
                     {
                         path: "/console/channel",
-                        element: <ConsoleChannel />
+                        element: <Suspense fallback={<LoadingSpinner />}><ConsoleChannel /></Suspense>
                     },
                     {
                         path: "/console/user",
-                        element: <User />
+                        element: <Suspense fallback={<LoadingSpinner />}><User /></Suspense>
                     },
                     {
                         path: "/console/model",
-                        element: <Model />
+                        element: <Suspense fallback={<LoadingSpinner />}><Model /></Suspense>
                     }
                 ]
             }
         ]
     }
 ] as any[];
-
 
 export default routes;

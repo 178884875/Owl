@@ -8,11 +8,15 @@ const { Title, Text, Paragraph } = Typography;
 export default function Invite() {
     const [showEasterEgg, setShowEasterEgg] = useState(false);
     const [particles, setParticles] = useState<any[]>([]);
-    const { inviteCode } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
 
     const handleJoinClick = async () => {
-        const result = await joinChannel(inviteCode);
+        if (!id) {
+            message.error('邀请码不能为空');
+            return;
+        }
+        const result = await joinChannel(id);
 
         if (!result.success) {
             message.error(result.message);
@@ -53,7 +57,11 @@ export default function Invite() {
     };
 
     const copyInviteCode = () => {
-        navigator.clipboard.writeText(inviteCode).then(
+        if (!id) {
+            message.error('邀请码不能为空');
+            return;
+        }
+        navigator.clipboard.writeText(id).then(
             () => {
                 message.info('已复制邀请码');
             },
@@ -116,7 +124,7 @@ export default function Invite() {
                                 <Input.Group compact>
                                     <Input
                                         style={{ width: 'calc(100% - 32px)' }}
-                                        value={inviteCode}
+                                        value={id}
                                         readOnly
                                     />
                                     <Button icon={<CopyOutlined />} onClick={copyInviteCode} />
