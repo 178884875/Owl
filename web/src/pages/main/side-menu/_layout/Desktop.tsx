@@ -1,46 +1,49 @@
 import { Flexbox } from "react-layout-kit";
-import { useChatStore } from "../../../store/chat";
+import { useChatStore } from "@/store/chat";
 import { Button, Divider, Input, Tooltip } from "antd";
 import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
-import Session from "./session";
+import Session from "../session";
 import { useEffect, useCallback } from "react";
-import UserInfo from "./user-info";
-import CreateSession from "./create-session";
+import UserInfo from "../user-info";
+import CreateSession from "../create-session";
 
 const styles = {
-  container: {
-    transition: 'width 0.3s ease',
-    padding: 5,
-  },
-  header: {
-    width: '100%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  searchWrapper: {
-    opacity: 1,
-    transition: 'opacity 0.3s ease, width 0.3s ease',
-    marginRight: 8,
-  },
-  searchCollapsed: {
-    opacity: 0,
-    width: 0,
-    overflow: 'hidden',
-    margin: 0,
-  },
-  toggleButton: {
-    width: 36,
-    height: 36,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: '50%',
-  },
-  divider: {
-    height: '100%',
-    margin: 0,
-  }
+    container: {
+        transition: 'width 0.3s ease',
+        padding: 5,
+    },
+    header: {
+        width: '100%',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    searchWrapper: {
+        opacity: 1,
+        transition: 'opacity 0.3s ease, width 0.3s ease',
+        marginRight: 8,
+    },
+    searchCollapsed: {
+        opacity: 0,
+        width: 0,
+        overflow: 'hidden',
+        margin: 0,
+    },
+    toggleButton: {
+        width: 48,
+        height: 48,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: '50%',
+        backgroundColor: 'transparent',
+        border: 'none',
+
+    },
+    divider: {
+        height: '100%',
+        margin: 0,
+    }
 };
 
 export default function SideMenu() {
@@ -62,7 +65,7 @@ export default function SideMenu() {
     return (<>
         <Flexbox style={{
             ...styles.container,
-            width: expanded ? 240 : 50,
+            width: expanded ? 280 : 50,
         }}>
             <Flexbox horizontal style={styles.header}>
                 <Flexbox style={{

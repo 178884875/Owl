@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Flexbox } from "react-layout-kit";
 import { Outlet, useNavigate } from 'react-router-dom'
-import SideMenu from "./side-menu";
+import SideMenu from "./side-menu/layout";
 
 export default function Chat() {
     const navigate = useNavigate()

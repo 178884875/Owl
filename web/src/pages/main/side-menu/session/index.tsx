@@ -13,13 +13,14 @@ export default function Session() {
             padding: 5,
             marginTop: 10,
             width: 'auto',
+            overflow: 'hidden',
             gap: 5,
             flex: 1,
         }}>
             {sessionIds?.length === 0 && <DefaultSession />}
             {
                 sessionIds?.map((session: any) => {
-                    return (<SessionItem 
+                    return (<SessionItem
                         key={session}
                         id={session} />);
                 })

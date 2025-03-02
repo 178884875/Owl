@@ -310,7 +310,12 @@ export default function ChatList() {
 
     return <Bubble.List
         autoScroll
-        items={messages?.map((chatMessage: any, index: number) => {
+        items={messages
+            // 过滤相同id
+            .filter((chatMessage: any, index: number) => {
+                return index === 0 || chatMessage.id !== messages[index - 1].id;
+            })
+            ?.map((chatMessage: any, index: number) => {
             const isEditing = chatMessage.id === editingMessageId;
             return {
                 role: chatMessage.role,
