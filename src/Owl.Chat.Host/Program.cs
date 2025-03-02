@@ -17,6 +17,8 @@ public static class Program
 
         builder.Services.AddServices(builder.Configuration);
 
+        builder.Services.AddSingleton<FileStaticMiddleware>();
+        
         builder.Services.AddHttpClient();
 
         builder.Services.AddHttpClient("Authorize")
@@ -91,6 +93,8 @@ public static class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseMiddleware<FileStaticMiddleware>();
 
         app.UseStaticFiles();
 

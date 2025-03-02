@@ -4,6 +4,14 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+FROM node:20.18-alpine3.21 as lobe
+WORKDIR /src
+COPY web .
+RUN yarn
+RUN npm i
+RUN yarn run build
+
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
@@ -28,4 +36,5 @@ RUN dotnet publish ".Chat.Host.csproj" -c $BUILD_CONFIGURATION -o /app/publish /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=lobe /src/dist ./wwwroot
 ENTRYPOINT ["dotnet", ".Chat.Host.dll"]
