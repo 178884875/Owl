@@ -51,7 +51,7 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
         <Content Include="..\..\.dockerignore">
-            <Link>.dockerignore</Link>
+          <Link>.dockerignore</Link>
         </Content>
     </ItemGroup>
 
