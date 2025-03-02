@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -18,8 +17,9 @@ public static class Program
         builder.Services.AddServices(builder.Configuration);
 
         builder.Services.AddHttpClient();
+        
         builder.Services.AddHttpClient("Authorize")
-            .ConfigureHttpClient(((provider, client) =>
+            .ConfigureHttpClient(((_, client) =>
             {
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
                 client.DefaultRequestHeaders.Add("User-Agent", "ThorChat");
@@ -90,6 +90,8 @@ public static class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseStaticFiles();
 
         app.MapMiniApis();
 

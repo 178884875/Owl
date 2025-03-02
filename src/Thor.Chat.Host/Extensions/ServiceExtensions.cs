@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using DocumentConverter;
 using EntityFrameworkCore.DaMeng.Extensions;
 using EntityFrameworkCore.MySql.Extensions;
 using EntityFrameworkCore.PostgreSQL.Extensions;
@@ -6,6 +7,7 @@ using EntityFrameworkCore.Sqlite.Extensions;
 using EntityFrameworkCore.SqlServer.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Storage.LiteDB.Extensions;
 using Thor.Chat.Core;
@@ -117,6 +119,14 @@ public static class ServiceExtensions
         services.AddStorage(configuration);
 
         services.AddSingleton<BingScraper>();
+
+        services.AddSingleton<DocumentToMarkdown>((provider =>
+        {
+            var env = provider.GetRequiredService<IWebHostEnvironment>();
+            var chatOptions = provider.GetRequiredService<IOptions<ChatOptions>>().Value;
+
+            return new DocumentToMarkdown(chatOptions, Path.Combine(env.WebRootPath, "images"));
+        }));
 
         return services;
     }

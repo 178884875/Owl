@@ -28,12 +28,14 @@ using ImageContent = Microsoft.SemanticKernel.ImageContent;
 
 namespace Thor.Chat.Host.Services.Chat;
 
+[Tags("Chat")]
 public sealed class ChatService(
     IDbContext dbContext,
     IUserContext userContext,
     IStorageService storageService,
     IMapper mapper,
     BingScraper bingScraper,
+    DocumentToMarkdown converter,
     ILogger<ChatService> logger)
     : FastApi
 {
@@ -42,8 +44,6 @@ public sealed class ChatService(
     {
         try
         {
-            var converter = new DocumentToMarkdown(imageOutputPath: "output/images");
-
             var session = await dbContext.Sessions.Where(x => x.Id == input.SessionId)
                 .FirstOrDefaultAsync();
 
@@ -202,16 +202,7 @@ public sealed class ChatService(
                                     using var pdf = new MemoryStream();
                                     await stream.CopyToAsync(pdf);
                                     pdf.Position = 0;
-                                    string markdownFromPdf = converter.ConvertPdfToMarkdown(pdf);
-
-                                    markdownFromPdf = $"""
-                                                       ```markdown {file.FileName}
-                                                       {markdownFromPdf}
-                                                       ```
-                                                       """;
-
-                                    requestToken += TokenHelper.GetTokens(markdownFromPdf);
-                                    history.AddUserMessage(markdownFromPdf);
+                                    history.AddUserMessage(converter.ConvertPdfToMarkdown(pdf, ref requestToken, file.FileName));
                                 }
 
                                 break;

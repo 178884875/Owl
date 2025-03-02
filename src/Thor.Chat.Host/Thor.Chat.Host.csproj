@@ -63,6 +63,7 @@
 
     <ItemGroup>
       <Folder Include="Functions\" />
+      <Folder Include="wwwroot\images\" />
     </ItemGroup>
 
 </Project>

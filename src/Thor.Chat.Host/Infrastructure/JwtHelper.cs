@@ -16,22 +16,14 @@ public class JwtHelper(IOptions<JwtOptions> options)
             new(ClaimTypes.Role, string.Join(',', roles)),
             new(ClaimTypes.Sid, userId)
         };
+        claims.AddRange(dist.Select(item => new Claim(item.Key, item.Value)));
 
-        foreach (var item in dist)
-        {
-            claims.Add(new Claim(item.Key, item.Value));
-        }
-
-        // 2. 从 appsettings.json 中读取SecretKey
         var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.Secret));
 
-        // 3. 选择加密算法
         var algorithm = SecurityAlgorithms.HmacSha256;
 
-        // 4. 生成Credentials
         var signingCredentials = new SigningCredentials(secretKey, algorithm);
 
-        // 5. 根据以上，生成token
         var jwtSecurityToken = new JwtSecurityToken(
             options.Value.Issuer, //Issuer
             options.Value.Audience, //Audience

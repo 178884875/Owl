@@ -1,28 +1,31 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
+using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Thor.Chat.Host.Infrastructure;
+using Thor.Chat.Host.Options;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 using IOPath = System.IO.Path;
+using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
 using WordParagraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
+
+#pragma warning disable SKEXP0001
 
 namespace DocumentConverter
 {
-    public class DocumentToMarkdown
+    public class DocumentToMarkdown(
+        ChatOptions chatOptions,
+        string imageOutputPath = null,
+        bool useBase64 = false)
     {
-        private string _imageOutputPath;
-        private readonly bool _useBase64;
-
-        public DocumentToMarkdown(string imageOutputPath = null, bool useBase64 = false)
-        {
-            _imageOutputPath = imageOutputPath;
-            _useBase64 = useBase64;
-        }
+        private string _imageOutputPath = imageOutputPath;
 
         public string ConvertPdfToMarkdown(Stream stream)
         {
-            
             StringBuilder markdown = new StringBuilder();
 
             using (PdfDocument document = PdfDocument.Open(stream))
@@ -40,7 +43,7 @@ namespace DocumentConverter
                     markdown.Append(pageText);
 
                     // 处理图片
-                    if (_imageOutputPath != null || _useBase64)
+                    if (_imageOutputPath != null || useBase64)
                     {
                         ExtractImages(page, markdown);
                     }
@@ -50,33 +53,100 @@ namespace DocumentConverter
             return markdown.ToString();
         }
 
-        public string ConvertPdfToMarkdown(string pdfPath)
+        /// <summary>
+        /// 将PDF文件转换为Markdown格式
+        /// </summary>
+        /// <param name="pdfPath"></param>
+        /// <param name="chatHistory"></param>
+        /// <returns></returns>
+        /// <summary>
+        /// Extracts images from the page and returns a list of image data
+        /// </summary>
+        private List<(byte[] ImageData, string FileName, string MimeType)> ExtractImagesData(Page page)
         {
-            StringBuilder markdown = new StringBuilder();
+            var result = new List<(byte[] ImageData, string FileName, string MimeType)>();
+            var images = page.GetImages();
 
-            using (PdfDocument document = PdfDocument.Open(pdfPath))
+            foreach (var image in images)
+            {
+                string filename = IOPath.GetRandomFileName();
+                filename = IOPath.ChangeExtension(filename, ".png");
+                byte[] bytes = image.RawBytes.ToArray();
+
+                // Determine MIME type based on image data
+                string mimeType = "image/png"; // Default
+                if (bytes.Length > 2 && bytes[0] == 0xFF && bytes[1] == 0xD8)
+                {
+                    mimeType = "image/jpeg";
+                }
+
+                // Save file if not using base64
+                if (!useBase64 && !string.IsNullOrEmpty(_imageOutputPath))
+                {
+                    Directory.CreateDirectory(_imageOutputPath);
+                    string imagePath = IOPath.Combine(_imageOutputPath, filename);
+                    File.WriteAllBytes(imagePath, bytes);
+                    filename = chatOptions.App + "/images/" + filename;
+                }
+
+                result.Add((bytes, filename, mimeType));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 将PDF文件转换为Markdown格式并添加到聊天历史
+        /// </summary>
+        public ChatMessageContentItemCollection ConvertPdfToMarkdown(Stream stream, ref int requestToken,
+            string docFileName)
+        {
+            StringBuilder textContent = new StringBuilder();
+            List<(byte[] ImageData, string FileName, string MimeType)> allImages = new();
+
+            var chatMessageContentItemCollection = new ChatMessageContentItemCollection();
+
+            using (PdfDocument document = PdfDocument.Open(stream))
             {
                 foreach (var page in document.GetPages())
                 {
                     // 提取文本
                     string pageText = ExtractText(page);
-
-                    // 处理文本格式
                     pageText = ProcessHeadings(pageText);
                     pageText = ProcessLists(pageText);
                     pageText = ProcessParagraphs(pageText);
+                    textContent.Append(pageText);
 
-                    markdown.Append(pageText);
-
-                    // 处理图片
-                    if (_imageOutputPath != null || _useBase64)
+                    // 提取图片
+                    if (_imageOutputPath != null || useBase64)
                     {
-                        ExtractImages(page, markdown);
+                        var pageImages = ExtractImagesData(page);
+                        allImages.AddRange(pageImages);
+                        foreach (var image in pageImages)
+                        {
+                            textContent.Append("![image](" + image.FileName + ")\n");
+                        }
                     }
                 }
             }
 
-            return markdown.ToString();
+            // 首先添加文本内容
+            if (textContent.Length > 0)
+            {
+                var text = new TextContent()
+                {
+                    Text = $@"
+```markdown {textContent} {docFileName}
+{textContent}
+```
+"
+                };
+                requestToken += TokenHelper.GetTokens(text.Text);
+                chatMessageContentItemCollection.Add(text);
+            }
+
+
+            return chatMessageContentItemCollection;
         }
 
         private string ExtractText(Page page)
@@ -114,7 +184,7 @@ namespace DocumentConverter
                 string filename = IOPath.GetRandomFileName();
                 filename = IOPath.ChangeExtension(filename, ".png");
 
-                if (_useBase64)
+                if (useBase64)
                 {
                     byte[] bytes = image.RawBytes.ToArray();
                     string base64 = Convert.ToBase64String(bytes);
@@ -139,7 +209,7 @@ namespace DocumentConverter
                     string imagePath = IOPath.Combine(_imageOutputPath, filename);
 
                     File.WriteAllBytes(imagePath, image.RawBytes.ToArray());
-                    markdown.AppendLine($"![image]({imagePath.Replace("\\", "/")})\n");
+                    markdown.AppendLine($"![image]({chatOptions.App + "/images/" + filename})\n");
                 }
             }
         }
@@ -197,7 +267,7 @@ namespace DocumentConverter
                         {
                             foreach (var drawing in drawings)
                             {
-                                var blip = drawing.Descendants<DocumentFormat.OpenXml.Drawing.Blip>().FirstOrDefault();
+                                var blip = drawing.Descendants<Blip>().FirstOrDefault();
                                 if (blip != null)
                                 {
                                     var imageId = blip.Embed.Value;
@@ -300,7 +370,7 @@ namespace DocumentConverter
             string extension = imagePart.Uri.ToString().Split('.').Last();
             filename = IOPath.ChangeExtension(filename, extension);
 
-            if (_useBase64)
+            if (useBase64)
             {
                 using (Stream stream = imagePart.GetStream())
                 using (MemoryStream ms = new MemoryStream())
