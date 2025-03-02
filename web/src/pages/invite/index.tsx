@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { Card, Typography, Button, Space, Input, Divider, message } from 'antd';
 import { UserAddOutlined, CopyOutlined, CheckOutlined, FireOutlined } from '@ant-design/icons';
 import { joinChannel } from '@/apis/ModelaChannel';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 const { Title, Text, Paragraph } = Typography;
 
 export default function Invite() {
     const [showEasterEgg, setShowEasterEgg] = useState(false);
     const [particles, setParticles] = useState<any[]>([]);
-    const inviteCode = "8ac21ff296b94f228425b0289f15fb64";
+    const { inviteCode } = useParams();
     const navigate = useNavigate();
 
     const handleJoinClick = async () => {
