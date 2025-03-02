@@ -27,6 +27,7 @@ public class AuthService(
     UserService userService,
     JwtHelper jwtHelper,
     IDbContext dbContext,
+    ILogger<AuthService> logger,
     IOptions<GoogelOption> googenOptions,
     IHttpClientFactory httpClientFactory) : FastApi
 {
@@ -150,6 +151,7 @@ public class AuthService(
 
         if (googenOptions.Value.Enabled)
         {
+            logger.LogInformation("Google OAuth is enabled");
             result.Add(new AuthOauthDto()
             {
                 Provider = "Google",

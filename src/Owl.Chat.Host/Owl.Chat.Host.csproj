@@ -11,7 +11,7 @@
         <PackageReference Include="DocumentFormat.OpenXml" Version="3.2.0"/>
         <PackageReference Include="FastService" Version="0.1.2"/>
         <PackageReference Include="FastService.Analyzers" Version="0.1.2"/>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.73"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.74" />
         <PackageReference Include="Lazy.Captcha.Core" Version="2.1.0"/>
         <PackageReference Include="Mapster.DependencyInjection" Version="1.0.3-pre02"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12"/>
