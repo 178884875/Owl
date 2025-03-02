@@ -54,7 +54,7 @@ public class ModelChannelService(
             item.TokenCost = 0;
         }
 
-        return dto;
+        return dto.OrderByDescending(x => x.Enabled).ToList();
     }
 
     [Authorize]
