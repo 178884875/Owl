@@ -1,9 +1,9 @@
 
-# Thor Chat Web 前端项目
+#  Chat Web 前端项目
 
 ## 项目简介
 
-Thor Chat 是一个支持多模型、多渠道的 AI 聊天应用。本仓库包含了 Thor Chat 的前端部分代码。
+ Chat 是一个支持多模型、多渠道的 AI 聊天应用。本仓库包含了  Chat 的前端部分代码。
 
 ## 主要功能
 

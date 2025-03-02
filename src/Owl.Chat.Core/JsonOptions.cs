@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Thor.Chat.Core;
+namespace .Chat.Core;
 
 public class JsonOptions
 {

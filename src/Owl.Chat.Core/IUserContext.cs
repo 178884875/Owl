@@ -1,4 +1,4 @@
-﻿namespace Thor.Chat.Core;
+﻿namespace .Chat.Core;
 
 public interface IUserContext
 {

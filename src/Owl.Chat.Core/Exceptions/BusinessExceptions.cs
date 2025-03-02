@@ -1,4 +1,4 @@
-﻿namespace Thor.Chat.Core.Exceptions;
+﻿namespace .Chat.Core.Exceptions;
 
 public class BusinessExceptions : Exception
 {

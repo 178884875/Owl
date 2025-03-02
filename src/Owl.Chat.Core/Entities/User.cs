@@ -1,4 +1,4 @@
-﻿namespace Thor.Chat.Core.Entities;
+﻿namespace .Chat.Core.Entities;
 
 /// <summary>
 /// 系统用户

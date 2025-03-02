@@ -17,7 +17,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.ChatMessage", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.ChatMessage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -80,7 +80,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("ChatMessages");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.FileStorage", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.FileStorage", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -118,7 +118,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("FileStorages");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.Message", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.Message", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -158,7 +158,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.MessageFile", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.MessageFile", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -206,7 +206,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("MessageFiles");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.MessageModelUsage", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.MessageModelUsage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -244,7 +244,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("MessageModelUsages");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.MessageText", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.MessageText", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -284,7 +284,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("MessageTexts");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.Model", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.Model", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -353,7 +353,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("Models");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannel", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.ModelChannel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -425,7 +425,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("ModelChannels");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannelInviteCode", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.ModelChannelInviteCode", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -478,7 +478,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("ModelChannelInviteCodes");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannelShareUser", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.ModelChannelShareUser", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -526,7 +526,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("ModelChannelShareUsers");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.Session", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.Session", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -601,7 +601,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("Sessions");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.SessionGroup", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.SessionGroup", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -631,7 +631,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("SessionGroups");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.User", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.User", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -691,7 +691,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.UserOAuth", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.UserOAuth", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -728,15 +728,15 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("UserOAuths");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.MessageFile", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.MessageFile", b =>
                 {
-                    b.HasOne("Thor.Chat.Core.Entities.FileStorage", "FileStorage")
+                    b.HasOne(".Chat.Core.Entities.FileStorage", "FileStorage")
                         .WithMany()
                         .HasForeignKey("FileStorageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Thor.Chat.Core.Entities.Message", "Message")
+                    b.HasOne(".Chat.Core.Entities.Message", "Message")
                         .WithMany("Files")
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -747,16 +747,16 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Navigation("Message");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.MessageModelUsage", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.MessageModelUsage", b =>
                 {
-                    b.HasOne("Thor.Chat.Core.Entities.Message", null)
+                    b.HasOne(".Chat.Core.Entities.Message", null)
                         .WithOne("ModelUsages")
-                        .HasForeignKey("Thor.Chat.Core.Entities.MessageModelUsage", "MessageId");
+                        .HasForeignKey(".Chat.Core.Entities.MessageModelUsage", "MessageId");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.MessageText", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.MessageText", b =>
                 {
-                    b.HasOne("Thor.Chat.Core.Entities.Message", "Message")
+                    b.HasOne(".Chat.Core.Entities.Message", "Message")
                         .WithMany("Texts")
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -765,9 +765,9 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Navigation("Message");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannelInviteCode", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.ModelChannelInviteCode", b =>
                 {
-                    b.HasOne("Thor.Chat.Core.Entities.ModelChannel", "Channel")
+                    b.HasOne(".Chat.Core.Entities.ModelChannel", "Channel")
                         .WithMany()
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -776,19 +776,19 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Navigation("Channel");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannelShareUser", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.ModelChannelShareUser", b =>
                 {
-                    b.HasOne("Thor.Chat.Core.Entities.ModelChannel", "Channel")
+                    b.HasOne(".Chat.Core.Entities.ModelChannel", "Channel")
                         .WithMany()
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Thor.Chat.Core.Entities.ModelChannel", null)
+                    b.HasOne(".Chat.Core.Entities.ModelChannel", null)
                         .WithMany("ShareUsers")
                         .HasForeignKey("ModelChannelId");
 
-                    b.HasOne("Thor.Chat.Core.Entities.User", "User")
+                    b.HasOne(".Chat.Core.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -799,16 +799,16 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.Session", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.Session", b =>
                 {
-                    b.HasOne("Thor.Chat.Core.Entities.SessionGroup", "SessionGroup")
+                    b.HasOne(".Chat.Core.Entities.SessionGroup", "SessionGroup")
                         .WithMany()
                         .HasForeignKey("SessionGroupId");
 
                     b.Navigation("SessionGroup");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.Message", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.Message", b =>
                 {
                     b.Navigation("Files");
 
@@ -817,7 +817,7 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Navigation("Texts");
                 });
 
-            modelBuilder.Entity("Thor.Chat.Core.Entities.ModelChannel", b =>
+            modelBuilder.Entity(".Chat.Core.Entities.ModelChannel", b =>
                 {
                     b.Navigation("ShareUsers");
                 });

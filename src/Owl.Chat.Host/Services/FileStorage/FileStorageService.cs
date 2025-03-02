@@ -10,7 +10,7 @@ using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Options;
 using Owl.Chat.Host.Services.FileStorage.Dto;
 using Storage.Core;
-using Thor.Chat.Core;
+using .Chat.Core;
 
 namespace Owl.Chat.Host.Services.FileStorage;
 
@@ -35,7 +35,7 @@ public sealed class FileStorageService(
 
         var path = await storageService.UploadFileAsync(fileName, file.OpenReadStream(), userContext.UserId);
 
-        var entity = dbContext.FileStorages.Add(new Thor.Chat.Core.Entities.FileStorage
+        var entity = dbContext.FileStorages.Add(new .Chat.Core.Entities.FileStorage
         {
             FileName = file.FileName,
             Size = (int)file.Length,

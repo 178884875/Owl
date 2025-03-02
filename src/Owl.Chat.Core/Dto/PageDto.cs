@@ -1,4 +1,4 @@
-﻿namespace Thor.Chat.Core.Dto;
+﻿namespace .Chat.Core.Dto;
 
 public class PageDto<T>(int totalCount, List<T> data)
 {

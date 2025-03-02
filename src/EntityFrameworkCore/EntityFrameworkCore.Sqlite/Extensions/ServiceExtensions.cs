@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Thor.Chat.Core;
+using .Chat.Core;
 
 namespace EntityFrameworkCore.Sqlite.Extensions;
 

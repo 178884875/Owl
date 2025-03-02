@@ -8,8 +8,8 @@ using Owl.Chat.Host.AI;
 using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Services.ModelChannels.Dto;
 using Owl.Chat.Host.Services.ModelChannels.Input;
-using Thor.Chat.Core;
-using Thor.Chat.Core.Entities;
+using .Chat.Core;
+using .Chat.Core.Entities;
 
 namespace Owl.Chat.Host.Services.ModelChannels;
 

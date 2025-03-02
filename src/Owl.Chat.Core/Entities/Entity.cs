@@ -1,4 +1,4 @@
-﻿namespace Thor.Chat.Core.Entities;
+﻿namespace .Chat.Core.Entities;
 
 public abstract class Entity<TKey> : ICreation
 {

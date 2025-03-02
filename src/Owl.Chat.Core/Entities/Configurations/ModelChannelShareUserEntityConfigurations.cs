@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Thor.Chat.Core.Entities.Configurations;
+namespace .Chat.Core.Entities.Configurations;
 
 public class ModelChannelShareUserEntityConfigurations : IEntityTypeConfiguration<ModelChannelShareUser>
 {

@@ -7,8 +7,8 @@ using Owl.Chat.Host.Dto;
 using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Services.User.Dto;
 using Owl.Chat.Host.Services.User.Input;
-using Thor.Chat.Core;
-using Thor.Chat.Core.Dto;
+using .Chat.Core;
+using .Chat.Core.Dto;
 
 namespace Owl.Chat.Host.Services.User;
 
@@ -144,7 +144,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
             createUserDto.Avatar = "/logo.png";
         }
 
-        var newUser = mapper.Map<Thor.Chat.Core.Entities.User>(createUserDto);
+        var newUser = mapper.Map<.Chat.Core.Entities.User>(createUserDto);
         newUser.Enabled = true;
         newUser.PasswordHash = EncryptionHelper.Md5(newUser.PasswordHash);
         await dbContext.Users.AddAsync(newUser);

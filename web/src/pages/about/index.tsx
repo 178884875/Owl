@@ -235,7 +235,7 @@ export default function About() {
                             </Paragraph>
                             <Flexbox gap={8}>
                                 <Text type="secondary">
-                                    Copyright © {new Date().getFullYear()} Thor Coffee. All rights reserved.
+                                    Copyright © {new Date().getFullYear()}  Coffee. All rights reserved.
                                 </Text>
                                 <Divider type="vertical" />
                                 <Text type="secondary">

@@ -1,4 +1,4 @@
-﻿using Thor.Chat.Core.Entities;
+﻿using .Chat.Core.Entities;
 
 namespace Owl.Chat.Host.Dto;
 

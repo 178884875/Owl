@@ -1,5 +1,5 @@
 ﻿services:
-  thor.chat.host:
+  owl.chat.host:
     image: registry.cn-shenzhen.aliyuncs.com/token-ai/owl
     build:
       context: .

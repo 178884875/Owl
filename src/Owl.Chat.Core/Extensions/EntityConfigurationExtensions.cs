@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Thor.Chat.Core.Entities;
+using .Chat.Core.Entities;
 
-namespace Thor.Chat.Core.Extensions;
+namespace .Chat.Core.Extensions;
 
 public static class EntityConfigurationExtensions
 {

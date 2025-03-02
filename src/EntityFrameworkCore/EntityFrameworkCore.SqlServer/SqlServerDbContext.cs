@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Thor.Chat.Core;
+using .Chat.Core;
 
 namespace EntityFrameworkCore.SqlServer;
 

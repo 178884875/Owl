@@ -10,9 +10,9 @@
              "request": "launch",
              "preLaunchTask": "build",
              // If you have changed target frameworks, make sure to update the program path.
-             "program": "${workspaceFolder}/src/Thor.Chat.Host/bin/Debug/net8.0/Thor.Chat.Host.dll",
+             "program": "${workspaceFolder}/src/Owl.Chat.Host/bin/Debug/net8.0/Owl.Chat.Host.dll",
              "args": [],
-             "cwd": "${workspaceFolder}/src/Thor.Chat.Host",
+             "cwd": "${workspaceFolder}/src/Owl.Chat.Host",
              // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
              "console": "internalConsole",
              "stopAtEntry": false,

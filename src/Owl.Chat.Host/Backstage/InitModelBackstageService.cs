@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Owl.Chat.Host.Dto;
-using Thor.Chat.Core;
-using Thor.Chat.Core.Entities;
+using .Chat.Core;
+using .Chat.Core.Entities;
 
 namespace Owl.Chat.Host.Backstage;
 

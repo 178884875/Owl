@@ -482,4 +482,4 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-/src/Thor.Chat.Host/*.db
+/src/Owl.Chat.Host/*.db

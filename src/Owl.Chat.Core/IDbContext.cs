@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Thor.Chat.Core.Entities;
+using .Chat.Core.Entities;
 
-namespace Thor.Chat.Core;
+namespace .Chat.Core;
 
 public interface IDbContext
 {
