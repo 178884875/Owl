@@ -1,0 +1,22 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "2.0" ]
+  pull_request:
+    branches: [ "2.0" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: 登录Docker Hub
+      run: docker login -u 小虎数据管理 -p ${{ secrets.ALIDOCKER }}  registry.cn-shenzhen.aliyuncs.com 
+    - name: 构建镜像
+      run: docker build . --file src/Owl.Chat.Host/Dockerfile --tag registry.cn-shenzhen.aliyuncs.com/token-ai/owl
+    - name: 发布Docker
+      run: docker push registry.cn-shenzhen.aliyuncs.com/token-ai/owl
