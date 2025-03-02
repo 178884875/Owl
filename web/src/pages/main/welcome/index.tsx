@@ -16,7 +16,8 @@ import {
   ApiOutlined,
   CodeOutlined,
   CloudOutlined,
-  DatabaseOutlined
+  DatabaseOutlined,
+  GithubOutlined
 } from '@ant-design/icons';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
@@ -25,7 +26,7 @@ import ModelFeatureTags from '@/features/ModelFeatureTags';
 import { useChatStore } from '@/store/chat';
 import { getIconByName } from '@/utils/iconutil';
 import { MenuItemGroupType } from 'antd/es/menu/interface';
-import { DEFAULT_MODEL, WEBSITE } from '@/consts/app';
+import { DEFAULT_MODEL, WEBSITE, GITHUB_URL } from '@/consts/app';
 import { useNavigate } from 'react-router-dom';
 import { uploadFile } from '@/apis/FileStorage';
 import { getRecentSessions } from '@/apis/Session';
@@ -301,9 +302,24 @@ export default function WelcomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Tag color="purple" style={{ borderRadius: 16, padding: '2px 12px' }}>
-              开源社区版
-            </Tag>
+            <Flexbox >
+              <Tag color="purple" style={{ borderRadius: 16, padding: '2px 12px' }}>
+                开源社区版
+              </Tag>
+              <Button
+                onClick={() => window.open(GITHUB_URL, '_blank')}
+                style={{
+                  marginTop: 8,
+
+                }}
+                type='text'
+              >
+                <GithubOutlined />
+                <Text>
+                  给个Star
+                </Text>
+              </Button>
+            </Flexbox>
           </motion.div>
 
           <motion.div
@@ -325,7 +341,7 @@ export default function WelcomePage() {
                 textAlign: 'center',
                 marginBottom: 24
               }}>
-                <TypewriterEffect 
+                <TypewriterEffect
                   text={`${getGreeting()}，欢迎您使用雷神咖啡。`}
                   speed={150}
                 />
