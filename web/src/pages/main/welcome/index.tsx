@@ -304,19 +304,29 @@ export default function WelcomePage() {
           >
             <Flexbox >
               <Tag color="purple" style={{ borderRadius: 16, padding: '2px 12px' }}>
-                开源社区版
+                开 源 社 区 版
               </Tag>
               <Button
                 onClick={() => window.open(GITHUB_URL, '_blank')}
                 style={{
                   marginTop: 8,
-
                 }}
                 type='text'
               >
                 <GithubOutlined />
                 <Text>
-                  给个Star
+                  Star
+                </Text>
+              </Button>
+              <Button
+                onClick={() => window.open('https://qm.qq.com/q/u8ClPTT3BC', '_blank')}
+                style={{
+                  marginTop: 8,
+                }}
+                type='text'
+              >
+                <Text>
+                  加入QQ
                 </Text>
               </Button>
             </Flexbox>
