@@ -13,6 +13,7 @@ using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Options;
 using Storage.LiteDB.Extensions;
 using Owl.Chat.Core;
+using Owl.Chat.Host.Services.Chat;
 
 namespace Owl.Chat.Host.Extensions;
 
@@ -69,7 +70,7 @@ public static class ServiceExtensions
 
     public static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
     {
-        var type = configuration.GetConnectionString("Type");
+        var type = configuration.GetConnectionString("Type")?.Trim();
 
         if (string.IsNullOrEmpty(type))
         {
@@ -82,6 +83,8 @@ public static class ServiceExtensions
         }
         else if (type.Equals("postgresql", StringComparison.OrdinalIgnoreCase))
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
             services.AddPostgreSQLDbContext(configuration);
         }
         else if (type.Equals("sqlserver", StringComparison.OrdinalIgnoreCase))
@@ -119,6 +122,8 @@ public static class ServiceExtensions
         services.AddStorage(configuration);
 
         services.AddSingleton<BingScraper>();
+
+        services.AddScoped<ImageService>();
 
         services.AddSingleton<DocumentToMarkdown>((provider =>
         {

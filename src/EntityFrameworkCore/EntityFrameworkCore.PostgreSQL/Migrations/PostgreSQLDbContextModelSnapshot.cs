@@ -42,7 +42,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -99,7 +99,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -134,7 +134,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -176,7 +176,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -229,7 +229,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -266,7 +266,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -312,7 +312,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -383,7 +383,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -459,7 +459,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("character varying(32)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -469,7 +469,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("ExpireTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Inviter")
                         .IsRequired()
@@ -479,6 +479,9 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<int>("MaxUseCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quota")
                         .HasColumnType("integer");
 
                     b.Property<int>("UsedCount")
@@ -509,7 +512,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -518,8 +521,14 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<long?>("ModelChannelId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("Quota")
+                        .HasColumnType("integer");
 
                     b.Property<long?>("RequestCount")
                         .HasColumnType("bigint");
@@ -560,7 +569,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -631,7 +640,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -665,7 +674,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("character varying(1000)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)
@@ -721,7 +730,7 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(50)

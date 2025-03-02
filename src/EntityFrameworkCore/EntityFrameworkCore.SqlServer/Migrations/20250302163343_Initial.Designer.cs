@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EntityFrameworkCore.SqlServer.Migrations
 {
     [DbContext(typeof(SqlServerDbContext))]
-    [Migration("20250301153001_AddSystem")]
-    partial class AddSystem
+    [Migration("20250302163343_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -485,6 +485,9 @@ namespace EntityFrameworkCore.SqlServer.Migrations
                     b.Property<int>("MaxUseCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("Quota")
+                        .HasColumnType("int");
+
                     b.Property<int>("UsedCount")
                         .HasColumnType("int");
 
@@ -522,8 +525,14 @@ namespace EntityFrameworkCore.SqlServer.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<long?>("ModelChannelId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("Quota")
+                        .HasColumnType("int");
 
                     b.Property<long?>("RequestCount")
                         .HasColumnType("bigint");

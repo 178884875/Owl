@@ -1,8 +1,8 @@
 @echo off
-set MIGRATION_NAME=AddSystem
+set MIGRATION_NAME=Initial
 
-set ConnectionStrings:Type=postgresql 
-dotnet ef migrations add --project src\EntityFrameworkCore\EntityFrameworkCore.PostgreSQL\EntityFrameworkCore.PostgreSQL.csproj --startup-project src\Owl.Chat.Host\Owl.Chat.Host.csproj --context EntityFrameworkCore.PostgreSQL.PostgreSQLDbContext --configuration Debug --verbose %MIGRATION_NAME% --output-dir Migrations\
+set ConnectionStrings:Type=postgresql
+dotnet ef migrations add --project src\EntityFrameworkCore\EntityFrameworkCore.PostgreSQL\EntityFrameworkCore.PostgreSQL.csproj --startup-project src\Owl.Chat.Host\Owl.Chat.Host.csproj --context EntityFrameworkCore.PostgreSQL.PostgreSQLDbContext --configuration Debug  %MIGRATION_NAME%  --output-dir Migrations\
 
 set ConnectionStrings:Type=sqlserver
 dotnet ef migrations add --project src\EntityFrameworkCore\EntityFrameworkCore.SqlServer\EntityFrameworkCore.SqlServer.csproj --startup-project src\Owl.Chat.Host\Owl.Chat.Host.csproj --context EntityFrameworkCore.SqlServer.SqlServerDbContext --configuration Debug --verbose %MIGRATION_NAME% --output-dir Migrations\

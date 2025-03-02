@@ -464,6 +464,9 @@ namespace EntityFrameworkCore.MySql.Migrations
                     b.Property<int>("MaxUseCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("Quota")
+                        .HasColumnType("int");
+
                     b.Property<int>("UsedCount")
                         .HasColumnType("int");
 
@@ -499,8 +502,14 @@ namespace EntityFrameworkCore.MySql.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("datetime");
+
                     b.Property<long?>("ModelChannelId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("Quota")
+                        .HasColumnType("int");
 
                     b.Property<long?>("RequestCount")
                         .HasColumnType("bigint");

@@ -462,6 +462,9 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Property<int>("MaxUseCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Quota")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("UsedCount")
                         .HasColumnType("INTEGER");
 
@@ -497,7 +500,13 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<long?>("ModelChannelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Quota")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("RequestCount")

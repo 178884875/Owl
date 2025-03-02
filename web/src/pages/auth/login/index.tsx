@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Button, Form, Input, Typography, theme, Divider, notification } from 'antd';
-import { GoogleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { LoginInput } from '@/types/Auth';
 import { AuthLogin, OAuths } from '../../../apis/Auth';
@@ -8,7 +7,7 @@ import TypewriterEffect from '@/features/TypewriterEffect';
 import { Flexbox } from 'react-layout-kit';
 import Verification from '../../../apis/Verification';
 import { getIconByName } from '@/utils/iconutil';
-const { Title, Text, Link } = Typography;
+const {  Text, Link } = Typography;
 
 export default function Login() {
     const [loading, setLoading] = useState(false);
@@ -65,7 +64,18 @@ export default function Login() {
                     description: '登录成功'
                 });
                 localStorage.setItem('token', result.data);
-                navigate('/');
+                
+                // 检查URL中是否存在redirect参数
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirectPath = urlParams.get('redirect');
+                
+                if (redirectPath) {
+                    // 如果存在redirect参数，则跳转到该参数指定的页面
+                    navigate(decodeURIComponent(redirectPath));
+                } else {
+                    // 否则跳转到首页
+                    navigate('/');
+                }
             } else {
                 notification.error({
                     message: '错误',

@@ -34,6 +34,11 @@ public sealed class ModelChannelInviteCode : Entity<long>
     /// 最大使用人数
     /// </summary>
     public int MaxUseCount { get; set; }
+    
+    /// <summary>
+    /// 可用额度
+    /// </summary>
+    public int Quota { get; set; }
 
     /// <summary>
     /// 使用人

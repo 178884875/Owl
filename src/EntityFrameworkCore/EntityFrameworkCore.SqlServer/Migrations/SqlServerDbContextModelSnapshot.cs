@@ -482,6 +482,9 @@ namespace EntityFrameworkCore.SqlServer.Migrations
                     b.Property<int>("MaxUseCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("Quota")
+                        .HasColumnType("int");
+
                     b.Property<int>("UsedCount")
                         .HasColumnType("int");
 
@@ -519,8 +522,14 @@ namespace EntityFrameworkCore.SqlServer.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<long?>("ModelChannelId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("Quota")
+                        .HasColumnType("int");
 
                     b.Property<long?>("RequestCount")
                         .HasColumnType("bigint");

@@ -13,6 +13,11 @@ public class CreateInviteCodeInput
     public DateTime? ExpireTime { get; set; }
 
     /// <summary>
+    /// 可用额度
+    /// </summary>
+    public int Quota { get; set; }
+
+    /// <summary>
     /// 最大使用人数
     /// </summary>
     public int MaxUseCount { get; set; }

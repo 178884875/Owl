@@ -12,6 +12,30 @@ namespace EntityFrameworkCore.DaMeng.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ChatMessages",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "BIGINT", nullable: false)
+                        .Annotation("Dm:Identity", "1, 1"),
+                    SessionId = table.Column<long>(type: "BIGINT", nullable: true),
+                    Role = table.Column<string>(type: "NVARCHAR2(255)", maxLength: 255, nullable: false),
+                    Content = table.Column<string>(type: "NVARCHAR2(max)", maxLength: -1, nullable: false),
+                    Files = table.Column<string>(type: "NVARCHAR2(32767)", nullable: false),
+                    PromptTokens = table.Column<int>(type: "INT", nullable: false),
+                    CompleteTokens = table.Column<int>(type: "INT", nullable: false),
+                    ResponseTime = table.Column<int>(type: "INT", nullable: false),
+                    ShareId = table.Column<long>(type: "BIGINT", nullable: true),
+                    ChannelId = table.Column<long>(type: "BIGINT", nullable: true),
+                    ModelId = table.Column<string>(type: "NVARCHAR2(450)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TIMESTAMP", nullable: false),
+                    CreatedBy = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatMessages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FileStorages",
                 columns: table => new
                 {
@@ -245,6 +269,7 @@ namespace EntityFrameworkCore.DaMeng.Migrations
                     IsUsed = table.Column<bool>(type: "BIT", nullable: false),
                     UsedCount = table.Column<int>(type: "INT", nullable: false),
                     MaxUseCount = table.Column<int>(type: "INT", nullable: false),
+                    Quota = table.Column<int>(type: "INT", nullable: false),
                     UsedUsers = table.Column<string>(type: "NVARCHAR2(32767)", nullable: false),
                     Inviter = table.Column<string>(type: "NVARCHAR2(450)", nullable: false),
                     Enabled = table.Column<bool>(type: "BIT", nullable: false),
@@ -271,6 +296,7 @@ namespace EntityFrameworkCore.DaMeng.Migrations
                     Name = table.Column<string>(type: "NVARCHAR2(450)", nullable: false),
                     Description = table.Column<string>(type: "NVARCHAR2(32767)", nullable: true),
                     Avatar = table.Column<string>(type: "NVARCHAR2(32767)", nullable: false),
+                    System = table.Column<string>(type: "NVARCHAR2(max)", maxLength: -1, nullable: true),
                     Tags = table.Column<string>(type: "NVARCHAR2(32767)", nullable: false),
                     Model = table.Column<string>(type: "NVARCHAR2(32767)", nullable: false),
                     RenameModel = table.Column<string>(type: "NVARCHAR2(32767)", nullable: false),
@@ -303,9 +329,11 @@ namespace EntityFrameworkCore.DaMeng.Migrations
                         .Annotation("Dm:Identity", "1, 1"),
                     ChannelId = table.Column<long>(type: "BIGINT", nullable: false),
                     UserId = table.Column<string>(type: "NVARCHAR2(450)", nullable: false),
+                    Quota = table.Column<int>(type: "INT", nullable: false),
                     Enabled = table.Column<bool>(type: "BIT", nullable: false),
                     TokenCount = table.Column<long>(type: "BIGINT", nullable: false),
                     RequestCount = table.Column<long>(type: "BIGINT", nullable: true),
+                    LastUsedAt = table.Column<DateTime>(type: "TIMESTAMP", nullable: false),
                     ModelChannelId = table.Column<long>(type: "BIGINT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TIMESTAMP", nullable: false),
                     CreatedBy = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true)
@@ -331,6 +359,31 @@ namespace EntityFrameworkCore.DaMeng.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_ChannelId",
+                table: "ChatMessages",
+                column: "ChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_CreatedBy",
+                table: "ChatMessages",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_ModelId",
+                table: "ChatMessages",
+                column: "ModelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_SessionId",
+                table: "ChatMessages",
+                column: "SessionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_ShareId",
+                table: "ChatMessages",
+                column: "ShareId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileStorages_CreatedBy",
@@ -524,6 +577,9 @@ namespace EntityFrameworkCore.DaMeng.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ChatMessages");
+
             migrationBuilder.DropTable(
                 name: "MessageFiles");
 

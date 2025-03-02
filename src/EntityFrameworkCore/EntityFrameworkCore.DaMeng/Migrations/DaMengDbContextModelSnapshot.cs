@@ -473,6 +473,9 @@ namespace EntityFrameworkCore.DaMeng.Migrations
                     b.Property<int>("MaxUseCount")
                         .HasColumnType("INT");
 
+                    b.Property<int>("Quota")
+                        .HasColumnType("INT");
+
                     b.Property<int>("UsedCount")
                         .HasColumnType("INT");
 
@@ -509,8 +512,14 @@ namespace EntityFrameworkCore.DaMeng.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("BIT");
 
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("TIMESTAMP");
+
                     b.Property<long?>("ModelChannelId")
                         .HasColumnType("BIGINT");
+
+                    b.Property<int>("Quota")
+                        .HasColumnType("INT");
 
                     b.Property<long?>("RequestCount")
                         .HasColumnType("BIGINT");

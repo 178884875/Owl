@@ -18,7 +18,7 @@ public static class Program
         builder.Services.AddServices(builder.Configuration);
 
         builder.Services.AddHttpClient();
-        
+
         builder.Services.AddHttpClient("Authorize")
             .ConfigureHttpClient(((_, client) =>
             {
@@ -61,7 +61,7 @@ public static class Program
                 client.DefaultRequestHeaders.Add("sec-fetch-dest", "document");
                 client.DefaultRequestHeaders.Add("sec-fetch-mode", "navigate");
                 client.DefaultRequestHeaders.Add("sec-fetch-site", "cross-site");
-                
+
                 // 默认启用h2
                 client.DefaultRequestVersion = HttpVersion.Version20;
                 client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
@@ -95,12 +95,16 @@ public static class Program
         app.UseStaticFiles();
 
         app.MapMiniApis();
-        
+
         // RunMigration
-        if(builder.Configuration["RunMigration"] == "true")
+        var runMigration = builder.Configuration.GetValue<bool>("RunMigration");
+        if (runMigration)
         {
             using var scope = app.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
+
+            await dbContext.MigrateAsync();
+            
         }
 
         await app.RunAsync();

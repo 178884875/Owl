@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createChannelInviteCode, deleteChannelInviteCode, getInviteCodeList } from "@/apis/ModelaChannel";
 import { ChannelItem } from "../ChannelList";
 import { EllipsisOutlined } from "@ant-design/icons";
-
+import dayjs from "dayjs";
 export interface ChannelInviteCodeProps {
     channel: ChannelItem;
 }
@@ -183,6 +183,7 @@ export default function ChannelInviteCode({ channel }: ChannelInviteCodeProps) {
                     <Form.Item
                         name="expireTime"
                         label="过期时间"
+                        initialValue={dayjs().add(14, 'day')}
                         rules={[{ required: true, message: '请选择过期时间' }]}
                     >
                         <DatePicker showTime style={{ width: '100%' }} />
@@ -190,9 +191,26 @@ export default function ChannelInviteCode({ channel }: ChannelInviteCodeProps) {
                     <Form.Item
                         name="maxUseCount"
                         label="最大使用次数"
+                        initialValue={100}
                         rules={[{ required: true, message: '请输入最大使用次数' }]}
                     >
                         <InputNumber min={1} style={{ width: '100%' }} />
+                    </Form.Item>
+                    <Form.Item
+                        name="quota"
+                        initialValue={-1}
+                        label="可使用额度（-1为不限制）"
+                        rules={[{ required: true, message: '请输入可使用额度' }]}
+                    >
+                        <InputNumber 
+                            min={-1} 
+                            style={{ width: '100%' }} 
+                            onChange={(value) => {
+                                if (value === -1) {
+                                    form.setFieldsValue({ quota: -1 });
+                                }
+                            }}
+                        />
                     </Form.Item>
                 </Form>
             </Modal>

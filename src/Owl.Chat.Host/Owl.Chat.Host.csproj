@@ -8,62 +8,62 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DocumentFormat.OpenXml" Version="3.2.0" />
-        <PackageReference Include="FastService" Version="0.1.2" />
-        <PackageReference Include="FastService.Analyzers" Version="0.1.2" />
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.73" />
-        <PackageReference Include="Lazy.Captcha.Core" Version="2.1.0" />
-        <PackageReference Include="Mapster.DependencyInjection" Version="1.0.3-pre02" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
+        <PackageReference Include="DocumentFormat.OpenXml" Version="3.2.0"/>
+        <PackageReference Include="FastService" Version="0.1.2"/>
+        <PackageReference Include="FastService.Analyzers" Version="0.1.2"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.73"/>
+        <PackageReference Include="Lazy.Captcha.Core" Version="2.1.0"/>
+        <PackageReference Include="Mapster.DependencyInjection" Version="1.0.3-pre02"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.11"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.SemanticKernel" Version="1.37.0" />
-        <PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.37.0-alpha" />
-        <PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.37.0-alpha" />
-        <PackageReference Include="SharpToken" Version="2.0.3" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
-        <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
+        <PackageReference Include="Microsoft.SemanticKernel" Version="1.37.0"/>
+        <PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.37.0-alpha"/>
+        <PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.37.0-alpha"/>
+        <PackageReference Include="SharpToken" Version="2.0.3"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0"/>
+        <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.DaMeng\EntityFrameworkCore.DaMeng.csproj" />
-      <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.MySql\EntityFrameworkCore.MySql.csproj" />
-      <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.PostgreSQL\EntityFrameworkCore.PostgreSQL.csproj" />
-      <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.Sqlite\EntityFrameworkCore.Sqlite.csproj" />
-      <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.SqlServer\EntityFrameworkCore.SqlServer.csproj" />
-      <ProjectReference Include="..\Storage\Storage.Core\Storage.Core.csproj" />
-      <ProjectReference Include="..\Storage\Storage.LiteDB\Storage.LiteDB.csproj" />
-      <ProjectReference Include="..\OwlOwl.Chat.Core\OwlOwl.Chat.Core.csproj" />
+        <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.DaMeng\EntityFrameworkCore.DaMeng.csproj"/>
+        <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.MySql\EntityFrameworkCore.MySql.csproj"/>
+        <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.PostgreSQL\EntityFrameworkCore.PostgreSQL.csproj"/>
+        <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.Sqlite\EntityFrameworkCore.Sqlite.csproj"/>
+        <ProjectReference Include="..\EntityFrameworkCore\EntityFrameworkCore.SqlServer\EntityFrameworkCore.SqlServer.csproj"/>
+        <ProjectReference Include="..\Storage\Storage.Core\Storage.Core.csproj"/>
+        <ProjectReference Include="..\Storage\Storage.LiteDB\Storage.LiteDB.csproj"/>
+        <ProjectReference Include="..\Owl.Chat.Core\Owl.Chat.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Content Update="Configs\Models.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Update="plugins\Chat\TopicNaming\config.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <Content Update="Configs\Models.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Update="plugins\Chat\TopicNaming\config.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="plugins\Chat\TopicNaming\skprompt.txt">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="plugins\Chat\TopicNaming\skprompt.txt">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Functions\" />
-      <Folder Include="wwwroot\images\" />
+        <Folder Include="Functions\"/>
+        <Folder Include="wwwroot\images\"/>
     </ItemGroup>
 
 </Project>

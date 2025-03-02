@@ -7,9 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\OwlOwl.Chat.Core\OwlOwl.Chat.Core.csproj" />
+        <ProjectReference Include="..\..\Owl.Chat.Core\Owl.Chat.Core.csproj" />
     </ItemGroup>
-
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
     </ItemGroup>

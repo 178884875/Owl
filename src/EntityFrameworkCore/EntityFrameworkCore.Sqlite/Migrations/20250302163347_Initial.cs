@@ -1,10 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace EntityFrameworkCore.PostgreSQL.Migrations
+namespace EntityFrameworkCore.Sqlite.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -16,20 +15,20 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "ChatMessages",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SessionId = table.Column<long>(type: "bigint", nullable: true),
-                    Role = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Content = table.Column<string>(type: "text", maxLength: -1, nullable: false),
-                    Files = table.Column<string>(type: "text", nullable: false),
-                    PromptTokens = table.Column<int>(type: "integer", nullable: false),
-                    CompleteTokens = table.Column<int>(type: "integer", nullable: false),
-                    ResponseTime = table.Column<int>(type: "integer", nullable: false),
-                    ShareId = table.Column<long>(type: "bigint", nullable: true),
-                    ChannelId = table.Column<long>(type: "bigint", nullable: true),
-                    ModelId = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SessionId = table.Column<long>(type: "INTEGER", nullable: true),
+                    Role = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                    Content = table.Column<string>(type: "TEXT", maxLength: -1, nullable: false),
+                    Files = table.Column<string>(type: "TEXT", nullable: false),
+                    PromptTokens = table.Column<int>(type: "INTEGER", nullable: false),
+                    CompleteTokens = table.Column<int>(type: "INTEGER", nullable: false),
+                    ResponseTime = table.Column<int>(type: "INTEGER", nullable: false),
+                    ShareId = table.Column<long>(type: "INTEGER", nullable: true),
+                    ChannelId = table.Column<long>(type: "INTEGER", nullable: true),
+                    ModelId = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -40,13 +39,13 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "FileStorages",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    FileName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    ContentType = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Size = table.Column<int>(type: "integer", nullable: false),
-                    ProviderId = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    FileName = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                    ContentType = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                    Size = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProviderId = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -57,15 +56,15 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "Messages",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SessionId = table.Column<long>(type: "bigint", nullable: true),
-                    Role = table.Column<string>(type: "text", nullable: false),
-                    ParentId = table.Column<long>(type: "bigint", nullable: true),
-                    ShareId = table.Column<long>(type: "bigint", nullable: true),
-                    Error = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SessionId = table.Column<long>(type: "INTEGER", nullable: true),
+                    Role = table.Column<string>(type: "TEXT", nullable: false),
+                    ParentId = table.Column<long>(type: "INTEGER", nullable: true),
+                    ShareId = table.Column<long>(type: "INTEGER", nullable: true),
+                    Error = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -76,24 +75,24 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "ModelChannels",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Provider = table.Column<string>(type: "text", nullable: false),
-                    Endpoint = table.Column<string>(type: "text", nullable: false),
-                    ModelIds = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Avatar = table.Column<string>(type: "text", nullable: true),
-                    Tags = table.Column<string>(type: "text", nullable: false),
-                    Favorite = table.Column<bool>(type: "boolean", nullable: false),
-                    Enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    ResponseTime = table.Column<long>(type: "bigint", nullable: true),
-                    TokenCost = table.Column<long>(type: "bigint", nullable: true),
-                    RequestCount = table.Column<long>(type: "bigint", nullable: true),
-                    Available = table.Column<bool>(type: "boolean", nullable: false),
-                    Keys = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Provider = table.Column<string>(type: "TEXT", nullable: false),
+                    Endpoint = table.Column<string>(type: "TEXT", nullable: false),
+                    ModelIds = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Avatar = table.Column<string>(type: "TEXT", nullable: true),
+                    Tags = table.Column<string>(type: "TEXT", nullable: false),
+                    Favorite = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ResponseTime = table.Column<long>(type: "INTEGER", nullable: true),
+                    TokenCost = table.Column<long>(type: "INTEGER", nullable: true),
+                    RequestCount = table.Column<long>(type: "INTEGER", nullable: true),
+                    Available = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Keys = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -104,21 +103,21 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "Models",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Provider = table.Column<string>(type: "text", nullable: false),
-                    ModelId = table.Column<string>(type: "text", nullable: false),
-                    DisplayName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    ContextWindowTokens = table.Column<int>(type: "integer", nullable: true),
-                    MaxOutput = table.Column<int>(type: "integer", nullable: true),
-                    Pricing = table.Column<string>(type: "text", nullable: false),
-                    ReleasedAt = table.Column<string>(type: "text", nullable: true),
-                    Abilities = table.Column<string>(type: "text", nullable: false),
-                    Resolutions = table.Column<string>(type: "text", nullable: false),
-                    Enabled = table.Column<bool>(type: "boolean", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Provider = table.Column<string>(type: "TEXT", nullable: false),
+                    ModelId = table.Column<string>(type: "TEXT", nullable: false),
+                    DisplayName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    ContextWindowTokens = table.Column<int>(type: "INTEGER", nullable: true),
+                    MaxOutput = table.Column<int>(type: "INTEGER", nullable: true),
+                    Pricing = table.Column<string>(type: "TEXT", nullable: false),
+                    ReleasedAt = table.Column<string>(type: "TEXT", nullable: true),
+                    Abilities = table.Column<string>(type: "TEXT", nullable: false),
+                    Resolutions = table.Column<string>(type: "TEXT", nullable: false),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -129,11 +128,11 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "SessionGroups",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -144,12 +143,12 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "UserOAuths",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    UserId = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: false),
-                    Provider = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    ProviderUserId = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", maxLength: 36, nullable: false),
+                    Provider = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    ProviderUserId = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -160,17 +159,17 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Avatar = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    UserName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    DisplayName = table.Column<string>(type: "text", nullable: false),
-                    PasswordHash = table.Column<string>(type: "text", nullable: true),
-                    Email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    Phone = table.Column<string>(type: "character varying(20)", unicode: false, maxLength: 20, nullable: true),
-                    Role = table.Column<string>(type: "text", nullable: false),
-                    Enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Avatar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    UserName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: false),
+                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    Phone = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: true),
+                    Role = table.Column<string>(type: "TEXT", nullable: false),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -181,16 +180,16 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "MessageFiles",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    MessageId = table.Column<long>(type: "bigint", nullable: false),
-                    FileId = table.Column<string>(type: "text", nullable: false),
-                    FileName = table.Column<string>(type: "text", nullable: false),
-                    FileSize = table.Column<long>(type: "bigint", nullable: false),
-                    FileUrl = table.Column<string>(type: "text", nullable: false),
-                    FileStorageId = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    MessageId = table.Column<long>(type: "INTEGER", nullable: false),
+                    FileId = table.Column<string>(type: "TEXT", nullable: false),
+                    FileName = table.Column<string>(type: "TEXT", nullable: false),
+                    FileSize = table.Column<long>(type: "INTEGER", nullable: false),
+                    FileUrl = table.Column<string>(type: "TEXT", nullable: false),
+                    FileStorageId = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -213,15 +212,15 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "MessageModelUsages",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SessionId = table.Column<long>(type: "bigint", nullable: true),
-                    MessageId = table.Column<long>(type: "bigint", nullable: true),
-                    PromptTokens = table.Column<int>(type: "integer", nullable: false),
-                    CompleteTokens = table.Column<int>(type: "integer", nullable: false),
-                    ResponseTime = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SessionId = table.Column<long>(type: "INTEGER", nullable: true),
+                    MessageId = table.Column<long>(type: "INTEGER", nullable: true),
+                    PromptTokens = table.Column<int>(type: "INTEGER", nullable: false),
+                    CompleteTokens = table.Column<int>(type: "INTEGER", nullable: false),
+                    ResponseTime = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -237,15 +236,15 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "MessageTexts",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    MessageId = table.Column<long>(type: "bigint", nullable: false),
-                    ReasoningUpdate = table.Column<string>(type: "text", nullable: true),
-                    Text = table.Column<string>(type: "text", nullable: false),
-                    SearchResults = table.Column<string>(type: "text", nullable: false),
-                    ExtraData = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    MessageId = table.Column<long>(type: "INTEGER", nullable: false),
+                    ReasoningUpdate = table.Column<string>(type: "TEXT", nullable: true),
+                    Text = table.Column<string>(type: "TEXT", nullable: false),
+                    SearchResults = table.Column<string>(type: "TEXT", nullable: false),
+                    ExtraData = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -262,19 +261,20 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "ModelChannelInviteCodes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ChannelId = table.Column<long>(type: "bigint", nullable: false),
-                    Code = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    ExpireTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    IsUsed = table.Column<bool>(type: "boolean", nullable: false),
-                    UsedCount = table.Column<int>(type: "integer", nullable: false),
-                    MaxUseCount = table.Column<int>(type: "integer", nullable: false),
-                    UsedUsers = table.Column<string>(type: "text", nullable: false),
-                    Inviter = table.Column<string>(type: "text", nullable: false),
-                    Enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ChannelId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Code = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
+                    ExpireTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    IsUsed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UsedCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    MaxUseCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    Quota = table.Column<int>(type: "INTEGER", nullable: false),
+                    UsedUsers = table.Column<string>(type: "TEXT", nullable: false),
+                    Inviter = table.Column<string>(type: "TEXT", nullable: false),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -291,24 +291,25 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "Sessions",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Avatar = table.Column<string>(type: "text", nullable: false),
-                    Tags = table.Column<string>(type: "text", nullable: false),
-                    Model = table.Column<string>(type: "text", nullable: false),
-                    RenameModel = table.Column<string>(type: "text", nullable: false),
-                    Temperature = table.Column<double>(type: "double precision", nullable: true),
-                    MaxTokens = table.Column<int>(type: "integer", nullable: true),
-                    TopP = table.Column<int>(type: "integer", nullable: true),
-                    FrequencyPenalty = table.Column<int>(type: "integer", nullable: true),
-                    PresencePenalty = table.Column<int>(type: "integer", nullable: true),
-                    Favorite = table.Column<bool>(type: "boolean", nullable: false),
-                    HistoryMessagesCount = table.Column<int>(type: "integer", nullable: false),
-                    SessionGroupId = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Avatar = table.Column<string>(type: "TEXT", nullable: false),
+                    System = table.Column<string>(type: "TEXT", maxLength: -1, nullable: true),
+                    Tags = table.Column<string>(type: "TEXT", nullable: false),
+                    Model = table.Column<string>(type: "TEXT", nullable: false),
+                    RenameModel = table.Column<string>(type: "TEXT", nullable: false),
+                    Temperature = table.Column<double>(type: "REAL", nullable: true),
+                    MaxTokens = table.Column<int>(type: "INTEGER", nullable: true),
+                    TopP = table.Column<int>(type: "INTEGER", nullable: true),
+                    FrequencyPenalty = table.Column<int>(type: "INTEGER", nullable: true),
+                    PresencePenalty = table.Column<int>(type: "INTEGER", nullable: true),
+                    Favorite = table.Column<bool>(type: "INTEGER", nullable: false),
+                    HistoryMessagesCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    SessionGroupId = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -324,16 +325,18 @@ namespace EntityFrameworkCore.PostgreSQL.Migrations
                 name: "ModelChannelShareUsers",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ChannelId = table.Column<long>(type: "bigint", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    Enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    TokenCount = table.Column<long>(type: "bigint", nullable: false),
-                    RequestCount = table.Column<long>(type: "bigint", nullable: true),
-                    ModelChannelId = table.Column<long>(type: "bigint", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ChannelId = table.Column<long>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    Quota = table.Column<int>(type: "INTEGER", nullable: false),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TokenCount = table.Column<long>(type: "INTEGER", nullable: false),
+                    RequestCount = table.Column<long>(type: "INTEGER", nullable: true),
+                    LastUsedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ModelChannelId = table.Column<long>(type: "INTEGER", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {

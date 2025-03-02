@@ -279,6 +279,7 @@ public class ModelChannelService(
         var inviteCode = new ModelChannelInviteCode()
         {
             ChannelId = input.ChannelId,
+            Quota = input.Quota,
             Code = Guid.NewGuid().ToString("N"),
             CreatedAt = DateTime.Now,
             CreatedBy = userContext.UserId,
@@ -369,6 +370,7 @@ public class ModelChannelService(
             UserId = userContext.UserId,
             CreatedAt = DateTime.Now,
             CreatedBy = userContext.UserId,
+            Quota = inviteCode.Quota,
             Enabled = true,
         };
 
@@ -432,12 +434,11 @@ public class ModelChannelService(
         {
             throw new BusinessException("没有权限操作");
         }
-        
+
         shared.Enabled = !shared.Enabled;
 
         dbContext.ModelChannelShareUsers.Update(shared);
-        
+
         await dbContext.SaveChangesAsync();
-        
     }
 }

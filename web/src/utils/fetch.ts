@@ -20,9 +20,13 @@ export async function fetch(url: string, options: any) {
       return null;
     }
 
-    // 如果是401，跳转到登录页
+    // 如果是401，跳转到登录页，并带上当前页面的URL
     if (response.status === 401) {
-      window.location.href = "/auth/login";
+      // 检查当前是否已经在登录页面
+      if (!window.location.pathname.includes('/auth/login')) {
+        const currentPath = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/auth/login?redirect=${currentPath}`;
+      }
     }
 
     if (response.status === 400) {

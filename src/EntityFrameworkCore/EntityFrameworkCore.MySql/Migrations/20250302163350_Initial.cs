@@ -16,6 +16,36 @@ namespace EntityFrameworkCore.MySql.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ChatMessages",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    SessionId = table.Column<long>(type: "bigint", nullable: true),
+                    Role = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Content = table.Column<string>(type: "longtext", maxLength: -1, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Files = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PromptTokens = table.Column<int>(type: "int", nullable: false),
+                    CompleteTokens = table.Column<int>(type: "int", nullable: false),
+                    ResponseTime = table.Column<int>(type: "int", nullable: false),
+                    ShareId = table.Column<long>(type: "bigint", nullable: true),
+                    ChannelId = table.Column<long>(type: "bigint", nullable: true),
+                    ModelId = table.Column<string>(type: "varchar(95)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    CreatedBy = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatMessages", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "FileStorages",
                 columns: table => new
                 {
@@ -317,6 +347,7 @@ namespace EntityFrameworkCore.MySql.Migrations
                     IsUsed = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     UsedCount = table.Column<int>(type: "int", nullable: false),
                     MaxUseCount = table.Column<int>(type: "int", nullable: false),
+                    Quota = table.Column<int>(type: "int", nullable: false),
                     UsedUsers = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Inviter = table.Column<string>(type: "varchar(95)", nullable: false)
@@ -349,6 +380,8 @@ namespace EntityFrameworkCore.MySql.Migrations
                     Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Avatar = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    System = table.Column<string>(type: "longtext", maxLength: -1, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Tags = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -389,9 +422,11 @@ namespace EntityFrameworkCore.MySql.Migrations
                     ChannelId = table.Column<long>(type: "bigint", nullable: false),
                     UserId = table.Column<string>(type: "varchar(95)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Quota = table.Column<int>(type: "int", nullable: false),
                     Enabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     TokenCount = table.Column<long>(type: "bigint", nullable: false),
                     RequestCount = table.Column<long>(type: "bigint", nullable: true),
+                    LastUsedAt = table.Column<DateTime>(type: "datetime", nullable: false),
                     ModelChannelId = table.Column<long>(type: "bigint", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
                     CreatedBy = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
@@ -419,6 +454,31 @@ namespace EntityFrameworkCore.MySql.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_ChannelId",
+                table: "ChatMessages",
+                column: "ChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_CreatedBy",
+                table: "ChatMessages",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_ModelId",
+                table: "ChatMessages",
+                column: "ModelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_SessionId",
+                table: "ChatMessages",
+                column: "SessionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_ShareId",
+                table: "ChatMessages",
+                column: "ShareId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileStorages_CreatedBy",
@@ -612,6 +672,9 @@ namespace EntityFrameworkCore.MySql.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ChatMessages");
+
             migrationBuilder.DropTable(
                 name: "MessageFiles");
 

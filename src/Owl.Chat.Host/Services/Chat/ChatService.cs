@@ -35,10 +35,59 @@ public sealed class ChatService(
     IStorageService storageService,
     IMapper mapper,
     BingScraper bingScraper,
+    ImageService imageService,
     DocumentToMarkdown converter,
     ILogger<ChatService> logger)
     : FastApi
 {
+    private static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
+    {
+        {
+            "dall-e-2", new Dictionary<string, double>
+            {
+                { "256x256", 1 },
+                { "512x512", 1.125 },
+                { "1024x1024", 1.25 }
+            }
+        },
+        {
+            "dall-e-3", new Dictionary<string, double>
+            {
+                { "1024x1024", 1 },
+                { "1024x1792", 2 },
+                { "1792x1024", 2 }
+            }
+        },
+        {
+            "ali-stable-diffusion-xl", new Dictionary<string, double>
+            {
+                { "512x1024", 1 },
+                { "1024x768", 1 },
+                { "1024x1024", 1 },
+                { "576x1024", 1 },
+                { "1024x576", 1 }
+            }
+        },
+        {
+            "ali-stable-diffusion-v1.5", new Dictionary<string, double>
+            {
+                { "512x1024", 1 },
+                { "1024x768", 1 },
+                { "1024x1024", 1 },
+                { "576x1024", 1 },
+                { "1024x576", 1 }
+            }
+        },
+        {
+            "wanx-v1", new Dictionary<string, double>
+            {
+                { "1024x1024", 1 },
+                { "720x1280", 1 },
+                { "1280x720", 1 }
+            }
+        }
+    };
+
     [Authorize]
     public async Task ChatCompleteAsync(HttpContext context, ChatCompleteInput input)
     {
@@ -180,9 +229,12 @@ public sealed class ChatService(
                                 using var image = new MemoryStream();
                                 await stream.CopyToAsync(image);
                                 image.Position = 0;
+                                var imageContent = new ImageContent(image.ToArray(), "image/jpeg");
+                                var (token, error) = CountImageTokens(imageContent, "high");
+                                requestToken += token;
                                 history.AddMessage(new AuthorRole(message.Role), new ChatMessageContentItemCollection()
                                 {
-                                    new ImageContent(image.ToArray(), "image/jpeg")
+                                    imageContent
                                 });
                                 break;
                             }
@@ -202,7 +254,8 @@ public sealed class ChatService(
                                     using var pdf = new MemoryStream();
                                     await stream.CopyToAsync(pdf);
                                     pdf.Position = 0;
-                                    history.AddUserMessage(converter.ConvertPdfToMarkdown(pdf, ref requestToken, file.FileName));
+                                    history.AddUserMessage(
+                                        converter.ConvertPdfToMarkdown(pdf, ref requestToken, file.FileName));
                                 }
 
                                 break;
@@ -251,6 +304,33 @@ public sealed class ChatService(
                     var text = message.Texts.LastOrDefault();
                     requestToken += TokenHelper.GetTokens(text.Text);
                     history.AddMessage(new AuthorRole(message.Role), text.Text);
+                }
+            }
+
+            //计算输入额度
+
+            decimal quota = 0;
+            if (model.Pricing is { Input: not null })
+            {
+                quota = (decimal)(requestToken * model.Pricing.Input ?? 0);
+            }
+
+            if (channelShareUsers.Any(x => x == channel.Id))
+            {
+                var channelShareUser = await dbContext.ModelChannelShareUsers
+                    .AsNoTracking()
+                    .Where(x => x.ChannelId == channel.Id && x.UserId == userContext.UserId && x.Enabled)
+                    .FirstOrDefaultAsync();
+
+                if (channelShareUser == null)
+                {
+                    throw new BusinessException("当前用户不存在当前模型类型的渠道");
+                }
+
+                // 如果是-1 则不限制
+                if (channelShareUser.Quota != -1 && channelShareUser.Quota < quota)
+                {
+                    throw new NotSufficientFundsException("当前分享渠道账号余额不足");
                 }
             }
 
@@ -382,10 +462,28 @@ public sealed class ChatService(
                 ResponseTime = (int)sw.ElapsedMilliseconds,
                 ModelId = model.Id
             };
+
+            // 计算完成额度
+            if (model.Pricing is { Output: not null })
+            {
+                quota += (decimal)(completeTokens * model.Pricing.Output ?? 0);
+            }
+
+            quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+            
             if (channelShareUsers.Any(x => x == channel.Id))
             {
                 chatMessage.ShareId = channel.Id;
                 userChatMessage.ShareId = channel.Id;
+
+                // 更新渠道的最后使用时间
+                await dbContext.ModelChannelShareUsers
+                    .Where(x => x.ChannelId == channel.Id && x.UserId == userContext.UserId)
+                    .ExecuteUpdateAsync(x =>
+                        x.SetProperty(a => a.LastUsedAt, a => DateTime.Now)
+                            .SetProperty(a => a.RequestCount, a => a.RequestCount + 1)
+                            .SetProperty(a => a.TokenCount, a => a.TokenCount + requestToken + completeTokens)
+                            .SetProperty(a => a.Quota, a => a.Quota - quota));
             }
 
 
@@ -400,6 +498,75 @@ public sealed class ChatService(
             context.Response.StatusCode = 500;
             logger.LogError(e, "对话失败");
             await context.Response.WriteAsJsonAsync(ResultDto.FailResult("对话失败" + e.Message));
+        }
+    }
+
+
+    /// <summary>
+    /// 计算图片倍率
+    /// </summary>
+    /// <param name="model"></param>
+    /// <param name="size"></param>
+    /// <returns></returns>
+    private static decimal GetImageSizeRatio(string model, string size)
+    {
+        if (!ImageSizeRatios.TryGetValue(model, out var ratios)) return 1;
+
+        if (ratios.TryGetValue(size, out var ratio)) return (decimal)ratio;
+
+        return 1;
+    }
+
+    /// <summary>
+    /// 计算图片token
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="detail"></param>
+    /// <returns></returns>
+    private Tuple<int, Exception?> CountImageTokens(ImageContent image, string detail)
+    {
+        var fetchSize = true;
+        int width = 0, height = 0;
+        var lowDetailCost = 20; // Assuming lowDetailCost is 20
+        var highDetailCostPerTile = 100; // Assuming highDetailCostPerTile is 100
+        var additionalCost = 50; // Assuming additionalCost is 50
+
+        if (string.IsNullOrEmpty(detail) || detail == "auto") detail = "high";
+
+        switch (detail)
+        {
+            case "low":
+                return new Tuple<int, Exception>(lowDetailCost, null);
+            case "high":
+                if (fetchSize)
+                    try
+                    {
+                        (width, height) = imageService.GetImageSize(image.Data.Value);
+                    }
+                    catch (Exception e)
+                    {
+                        return new Tuple<int, Exception>(0, e);
+                    }
+
+                if (width > 2048 || height > 2048)
+                {
+                    var ratio = 2048.0 / Math.Max(width, height);
+                    width = (int)(width * ratio);
+                    height = (int)(height * ratio);
+                }
+
+                if (width > 768 && height > 768)
+                {
+                    var ratio = 768.0 / Math.Min(width, height);
+                    width = (int)(width * ratio);
+                    height = (int)(height * ratio);
+                }
+
+                var numSquares = (int)Math.Ceiling((double)width / 512) * (int)Math.Ceiling((double)height / 512);
+                var result = numSquares * highDetailCostPerTile + additionalCost;
+                return new Tuple<int, Exception>(result, null);
+            default:
+                return new Tuple<int, Exception>(0, new Exception("Invalid detail option"));
         }
     }
 
