@@ -105,7 +105,7 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
           </Select>
         </Form.Item>
         <Form.Item name="endpoint" label="提供商地址" rules={[{ required: true }, {
-          validator(rule, value, callback) {
+          validator(_, value, callback) {
             if (value && !value.startsWith('http')) {
               callback('请输入正确的URL');
             }

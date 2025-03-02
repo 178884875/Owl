@@ -1,7 +1,7 @@
 import { Layout, Typography, Card, Collapse, Space, Divider, Tag } from 'antd';
 import { ThunderboltOutlined, ApiOutlined, SafetyCertificateOutlined, RocketOutlined } from '@ant-design/icons';
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph } = Typography;
 const { Content } = Layout;
 const { Panel } = Collapse;
 

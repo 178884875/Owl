@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Flexbox } from "react-layout-kit";
 import { List, Card, Tag, Typography, Button, Dropdown, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { deleteChannel, getChannelList, testChannel } from "@/apis/ModelaChannel";
+import { deleteChannel, } from "@/apis/ModelaChannel";
 import { theme } from "antd";
 import CreateChannel from "../CreateChannel";
 import { getIconByName } from "@/utils/iconutil";
@@ -43,6 +43,7 @@ interface ChannelListProps {
     onTestChannel: (id: number) => Promise<void>;
 }
 
+// @ts-ignore
 export default function ChannelList({ channel, onChannelChange, onChannelListChange, onChannelCreateSuccess, channelList, loading, onDeleteChannel, onTestChannel }: ChannelListProps) {
     const { token } = useToken();
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);

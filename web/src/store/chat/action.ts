@@ -477,7 +477,8 @@ export const createChatSlice: StateCreator<
                     }
                 } else if (type === 'search') {
                     const items = data as any[];
-                    items.forEach(item => {
+                    items.forEach((item: any) => {
+                        // @ts-ignore
                         tempAiMessage.texts[tempAiMessage.texts.length - 1].searchResults.push(item)
                     });
                     set({ messages: [...get().messages] });

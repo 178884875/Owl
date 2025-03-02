@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Typography, Button, Space, Input, Divider, notification, message } from 'antd';
+import { useState, useEffect } from 'react';
+import { Card, Typography, Button, Space, Input, Divider, message } from 'antd';
 import { UserAddOutlined, CopyOutlined, CheckOutlined, FireOutlined } from '@ant-design/icons';
 import { joinChannel } from '@/apis/ModelaChannel';
 import { useNavigate } from 'react-router-dom';

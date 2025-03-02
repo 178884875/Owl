@@ -10,7 +10,6 @@ interface ChannelKeyProps {
 
 export default function ChannelKey({ channel }: ChannelKeyProps) {
     const [data, setData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const [form] = Form.useForm();
@@ -31,7 +30,7 @@ export default function ChannelKey({ channel }: ChannelKeyProps) {
         title: '操作',
         dataIndex: 'action',
         key: 'action',
-        render: (text: string, record: any) => (
+        render: (_: string, record: any) => (
             <Popconfirm
                 title="确定要删除这个密钥吗？"
                 onConfirm={() => handleDeleteKey(record.key)}

@@ -17,7 +17,6 @@ interface ChannelMemberProps {
 
 export default function ChannelMember({ channel, onUpdateChannel }: ChannelMemberProps) {
     const [memberList, setMemberList] = useState<any[]>([]);
-    const [refreshFlag, setRefreshFlag] = useState(0);
 
     useEffect(() => {
         if (channel?.shareUsers) {
@@ -78,7 +77,7 @@ export default function ChannelMember({ channel, onUpdateChannel }: ChannelMembe
         {
             title: '操作',
             key: 'action',
-            render: (text: string, record: any) => (
+            render: (_: string, record: any) => (
                 <Flexbox horizontal gap={5}>
                     <Dropdown overlay={
                         <Menu>

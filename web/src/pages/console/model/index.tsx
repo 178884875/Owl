@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
-import { Card, Table, Button, Input, Modal, Form, InputNumber, Switch, Select, Menu, Typography, Space, Popconfirm, Avatar, message, Slider, Tabs, Checkbox, Radio, Divider } from 'antd';
+import { Card, Table, Button, Input, Modal, Form, InputNumber, Switch, Select, Menu, Typography, Space, Popconfirm, message, Tabs, Checkbox, Radio, Divider } from 'antd';
 import { PlusOutlined, SearchOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getModelList, enableModel, createModel, updateModel } from '@/apis/Model';
 import { getIconByName } from '@/utils/iconutil';

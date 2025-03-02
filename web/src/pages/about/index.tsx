@@ -1,4 +1,3 @@
-import React from 'react';
 import { Layout, Typography, Card, Row, Col, Timeline, Divider, Tag, Space, Button } from 'antd';
 import {
     ThunderboltOutlined,

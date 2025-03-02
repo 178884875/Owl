@@ -10,7 +10,7 @@ export default function OAuth() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const type = searchParams.get('type');
-    const clientId = searchParams.get('clientId');
+    // const clientId = searchParams.get('clientId');
     const code = searchParams.get('code');
     const [loading, setLoading] = useState(true);
 
@@ -76,10 +76,11 @@ export default function OAuth() {
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
                     {icon}
                     <Title level={3}>登录跳转中</Title>
-                    <Spin size="large" />
                     <Text type="secondary">
                         正在跳转到{name}登录页面，请稍候...
                     </Text>
+
+                    {loading && <Spin size="large" />}
                 </Space>
             </Card>
         </div>

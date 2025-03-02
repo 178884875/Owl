@@ -51,7 +51,7 @@ export const formatSpeed = (byte: number, fractionDigits = 2) => {
 
 export const formatTime = (timeInSeconds: number): string => {
   if (!timeInSeconds && timeInSeconds !== 0) return '--';
-  if (!isNumber(timeInSeconds)) return timeInSeconds.toString();
+  if (!isNumber(timeInSeconds)) return '' + timeInSeconds;
 
   if (timeInSeconds < 60) {
     return `${timeInSeconds.toFixed(1)} s`;

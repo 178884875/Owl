@@ -10,11 +10,9 @@ export default function ChatInput() {
 
     const attachmentsRef = React.useRef<GetRef<typeof Attachments>>(null);
     const senderRef = React.useRef<GetRef<typeof Sender>>(null);
-    const [value, updateValue, files, setFiles, fileExpanded, setFileExpanded, createMessageAndSend, currentSession, generateLoading]
+    const [value, updateValue,  fileExpanded, setFileExpanded, createMessageAndSend, currentSession, generateLoading]
         = useChatStore(state => [state.value,
         state.updateValue,
-        state.files,
-        state.setFiles,
         state.fileExpanded,
         state.setFileExpanded,
         state.createMessageAndSend,

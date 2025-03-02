@@ -74,7 +74,7 @@ export default function SideMenu() {
         icon={<PanelLeftOpen size={20} />}
         onClick={showDrawer}
         style={styles.floatButton}
-        type="text"
+        type="default"
         tooltip="打开菜单"
         shape="circle"
       />

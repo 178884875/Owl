@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Input, Select, Switch, message, Button, Popover } from 'antd';
 import { Flexbox } from "react-layout-kit";
 import { Typography } from "antd";
@@ -128,7 +128,7 @@ export default function ChannelConfig({ channel }: ChannelConfigProps) {
                 </Form.Item>
                 {!channel.isShare && (
                     <Form.Item name="endpoint" label="提供商地址" rules={[{ required: true }, {
-                        validator(rule, value, callback) {
+                        validator(_, value, callback) {
                             if (value && !value.startsWith('http')) {
                                 callback('请输入正确的URL');
                             }

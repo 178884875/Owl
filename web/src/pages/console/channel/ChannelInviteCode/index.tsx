@@ -1,5 +1,5 @@
 import { Flexbox } from "react-layout-kit";
-import { Button, Table, Typography, Tag, Modal, Form, Input, DatePicker, InputNumber, message, Select, Dropdown } from "antd";
+import { Button, Table, Typography, Tag, Modal, Form, DatePicker, InputNumber, message, Dropdown } from "antd";
 import { useState, useEffect } from "react";
 import { createChannelInviteCode, deleteChannelInviteCode, getInviteCodeList } from "@/apis/ModelaChannel";
 import { ChannelItem } from "../ChannelList";
@@ -72,13 +72,13 @@ export default function ChannelInviteCode({ channel }: ChannelInviteCodeProps) {
                     menu={{
                         items: [
                             {
-                                label: '删除', 
+                                label: '删除',
                                 key: 'delete',
                                 danger: true,
                                 onClick: () => handleDeleteInviteCode(record.id)
                             },
                             {
-                                label: '复制邀请连接', 
+                                label: '复制邀请连接',
                                 key: 'copy',
                                 onClick: () => handleCopyInviteCode(record.id)
                             },
@@ -202,9 +202,9 @@ export default function ChannelInviteCode({ channel }: ChannelInviteCodeProps) {
                         label="可使用额度（-1为不限制）"
                         rules={[{ required: true, message: '请输入可使用额度' }]}
                     >
-                        <InputNumber 
-                            min={-1} 
-                            style={{ width: '100%' }} 
+                        <InputNumber
+                            min={-1}
+                            style={{ width: '100%' }}
                             onChange={(value) => {
                                 if (value === -1) {
                                     form.setFieldsValue({ quota: -1 });

@@ -15,6 +15,7 @@ export const createUserSlice: StateCreator<
     [['zustand/devtools', never]],
     [],
     UserAction
+    // @ts-ignore
 > = (set, get) => ({
     LogOut: () => {
         localStorage.removeItem('token');

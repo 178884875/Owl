@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Button, Form, Input, Typography, theme, Divider, notification } from 'antd';
-import { GoogleOutlined, UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Typography, theme, notification } from 'antd';
+import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { RegisterInput } from '@/types/Auth';
 import { AuthRegister } from '../../../apis/Auth';
@@ -8,7 +8,7 @@ import TypewriterEffect from '@/features/TypewriterEffect';
 import { Flexbox } from 'react-layout-kit';
 import Verification from '../../../apis/Verification';
 
-const { Title, Text, Link } = Typography;
+const { Text, Link } = Typography;
 
 export default function Register() {
     const [loading, setLoading] = useState(false);
@@ -247,22 +247,6 @@ export default function Register() {
                             </Link>
                         </span>
                     </Flexbox>
-
-                    {/* <Divider plain>或</Divider>
-
-                    <Button
-                        icon={<GoogleOutlined />}
-                        size="large"
-                        block
-                        style={{
-                            height: '48px',
-                            marginBottom: '24px',
-                            borderColor: token.colorBorder,
-                            color: token.colorText
-                        }}
-                    >
-                        继续使用Google
-                    </Button> */}
 
                     <Text style={{
                         fontSize: '14px',
