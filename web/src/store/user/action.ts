@@ -19,6 +19,8 @@ export const createUserSlice: StateCreator<
 > = (set, get) => ({
     LogOut: () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        set({ user: null });
     },
     SignIn: (token) => {
         localStorage.setItem('token', token);
