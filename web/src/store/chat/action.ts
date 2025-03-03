@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { ChatStore } from "./store";
-import getModels from "@/apis/Model";
+import getModels, { getCurrentUserModels } from "@/apis/Model";
 import { createSession, deleteSession, getSessionLite, switchSessionModel, toggleFavorite, updateSession } from "@/apis/Session";
 import { createMessage, deleteMessage } from "@/apis/Message";
 import { ChatCompleteParams, ChatRole } from "@/types/Chat";
@@ -96,6 +96,11 @@ export interface ChatAction {
      * 加载模型
      */
     loadModels: () => Promise<any[]>;
+
+    /**
+     * 清空缓存并且重新加载模型
+     */
+    clearCacheAndReloadModels: () => Promise<void>;
 
     /**
      * 创建会话
@@ -263,11 +268,15 @@ export const createChatSlice: StateCreator<
     setCreateSessionVisible: (visible: boolean) => {
         set({ createSessionVisible: visible });
     },
+    clearCacheAndReloadModels: async () => {
+        const result = await getCurrentUserModels();
+        set({ models: result.data });
+    },
     loadModels: async () => {
         if (get().models.length > 0) {
             return get().models;
         }
-        const value = await getModels()
+        const value = await getCurrentUserModels()
         set({ models: value.data });
         return value.data;
     },

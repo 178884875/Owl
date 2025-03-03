@@ -74,6 +74,24 @@ export default function WelcomePage() {
     loadModels().then((models) => {
       // 将所有 chatModels 扁平化为一个数组
       const allChatModels = models.flatMap(x => x.chatModels || []);
+
+      // 如果没有模型，则提示
+      if (allChatModels.length === 0) {
+        notification.error({
+          message: '没有可用模型',
+        });
+
+        setTimeout(() => {
+          navigate('/console/channel');
+
+          notification.info({
+            message: '请先添加您的渠道，然后添加模型',
+          });
+        }, 1000);
+
+        return;
+      }
+
       // 查找默认模型
       const defaultModel = allChatModels.find(x => x.modelId === DEFAULT_MODEL);
       if (defaultModel) {

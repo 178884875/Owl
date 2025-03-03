@@ -38,3 +38,11 @@ export function createModel(model: any){
 export function updateModel(model: any){
     return putJson('/api/Model', model)
 }
+
+/**
+ * 获取当前用户可用模型列表
+ */
+export function getCurrentUserModels(){
+    return get('/api/Model/CurrentUserModels')
+}
+
