@@ -74,6 +74,21 @@ public class ModelChannelDto : EntityDto<long>
     /// 是否是共享渠道
     /// </summary>
     public bool IsShare { get; set; }
+    
+    /// <summary>
+    /// 如果是共享渠道，那么需要有一个共享剩余额度
+    /// </summary>
+    public long? ShareQuota { get; set; }
+    
+    /// <summary>
+    /// 共享消费token数量
+    /// </summary>
+    public long? ShareTokenCostCount { get; set; }
+    
+    /// <summary>
+    /// 共享请求次数
+    /// </summary>
+    public long? ShareRequestCount { get; set; }
 
     /// <summary>
     /// 密钥列表

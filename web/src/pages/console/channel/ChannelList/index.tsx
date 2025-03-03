@@ -30,6 +30,9 @@ export interface ChannelItem {
     keys?: any[];
     available: boolean;
     isShare: boolean;
+    shareRequestCount?: number;
+    shareTokenCost?: number;
+    shareQuota?: number;
 }
 
 interface ChannelListProps {

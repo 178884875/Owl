@@ -7,7 +7,7 @@ import { updateChannel } from '@/apis/ModelaChannel'; // 假设有一个更新�
 import { iconMap, getIconByName } from '@/utils/iconutil';
 import SelectModel from '@/features/SelectModel';
 import Channel from '../Channel';
-
+import { renderNumber, renderQuota } from '@/utils/render';
 interface ChannelConfigProps {
     channel: ChannelItem | null;
 }
@@ -63,6 +63,34 @@ export default function ChannelConfig({ channel }: ChannelConfigProps) {
                     渠道配置
                 </Typography.Text>
             </Flexbox>
+
+            {
+                channel.isShare && (<>
+                    <Flexbox gap={16} padding={16} style={{ background: 'rgba(0, 0, 0, 0.02)', borderRadius: 8 }}>
+                        <Typography.Title level={5}>共享渠道信息</Typography.Title>
+                        <Flexbox horizontal gap={24} align="flex-start">
+                            <Flexbox>
+                                <Typography.Text type="secondary">共享请求数</Typography.Text>
+                                <Typography.Text strong style={{ fontSize: 20 }}>
+                                    {renderNumber(channel.shareRequestCount || 0)}
+                                </Typography.Text>
+                            </Flexbox>
+                            <Flexbox>
+                                <Typography.Text type="secondary">Token消耗</Typography.Text>
+                                <Typography.Text strong style={{ fontSize: 20 }}>
+                                    {renderNumber(channel.tokenCost || 0)}
+                                </Typography.Text>
+                            </Flexbox>
+                            <Flexbox>
+                                <Typography.Text type="secondary">共享配额</Typography.Text>
+                                <Typography.Text strong style={{ fontSize: 20 }}>
+                                    {renderQuota(channel.shareQuota || 0)}
+                                </Typography.Text>
+                            </Flexbox>
+                        </Flexbox>
+                    </Flexbox>
+                </>)
+            }
 
             <Form form={form}
                 disabled={channel.isShare}

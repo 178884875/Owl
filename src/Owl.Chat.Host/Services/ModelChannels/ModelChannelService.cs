@@ -29,10 +29,13 @@ public class ModelChannelService(
     [Authorize]
     public async Task<List<ModelChannelDto>> GetListAsync(string keyword)
     {
-        var channelIds = await dbContext.ModelChannelShareUsers
+        var channels = await dbContext.ModelChannelShareUsers
             .Where(x => x.UserId == userContext.UserId)
-            .Select(x => x.ChannelId)
             .ToListAsync();
+
+        var channelIds = channels
+            .Select(x => x.ChannelId)
+            .ToArray();
 
         var result = await dbContext.ModelChannels.Where(x =>
                 (x.CreatedBy == userContext.UserId || channelIds.Contains(x.Id)) &&
@@ -46,6 +49,12 @@ public class ModelChannelService(
             item.IsShare = channelIds.Contains(item.Id);
 
             if (!item.IsShare) continue;
+            var shareUser = channels.First(x => x.ChannelId == item.Id);
+
+            item.ShareRequestCount = shareUser.RequestCount;
+            item.TokenCost = shareUser.TokenCount;
+
+            item.ShareQuota = shareUser.Quota;
             item.Keys = [];
             item.Endpoint = string.Empty;
             item.ShareUsers = [];
@@ -81,14 +90,25 @@ public class ModelChannelService(
         // 如果不是创建人，但是属于共享列表，则清空敏感数据
         if (userContext.UserId != result.CreatedBy)
         {
-            var isShare =
-                await dbContext.ModelChannelShareUsers.AnyAsync(
-                    x => x.ChannelId == id && x.UserId == userContext.UserId);
+            var shareUser =
+                await dbContext.ModelChannelShareUsers
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        x => x.ChannelId == id && x.UserId == userContext.UserId);
 
-            if (isShare)
+            if (shareUser != null)
             {
+                dto.ShareRequestCount = shareUser.RequestCount;
+                dto.TokenCost = shareUser.TokenCount;
+
+                dto.ShareQuota = shareUser.Quota;
                 dto.Keys = [];
                 dto.Endpoint = string.Empty;
+                dto.ShareUsers = [];
+                dto.RequestCount = 0;
+                dto.ResponseTime = 0;
+                dto.TokenCost = 0;
+
                 dto.IsShare = true;
             }
             else
