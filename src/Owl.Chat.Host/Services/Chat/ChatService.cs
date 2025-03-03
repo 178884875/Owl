@@ -496,8 +496,12 @@ public sealed class ChatService(
         catch (Exception e)
         {
             context.Response.StatusCode = 500;
-            logger.LogError(e, "对话失败");
+            logger.LogError("对话失败" + e.ToString());
             await context.Response.WriteAsJsonAsync(ResultDto.FailResult("对话失败" + e.Message));
+
+            await dbContext.MessageTexts.Where(x => x.Id == input.AssistantMessageId)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(a => a.Text, x => "抱歉，服务发生异常，请稍后在试！"));
         }
     }
 

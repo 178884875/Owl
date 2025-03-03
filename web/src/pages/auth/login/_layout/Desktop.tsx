@@ -68,7 +68,6 @@ export default function Desktop() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirectPath = urlParams.get('redirect');
                 if (redirectPath) {
-                    // 如果存在redirect参数，则跳转到该参数指定的页面
                     navigate(decodeURIComponent(redirectPath));
                 } else {
                     // 否则跳转到首页
