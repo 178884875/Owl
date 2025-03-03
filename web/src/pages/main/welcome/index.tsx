@@ -90,6 +90,11 @@ export default function WelcomePage() {
     }
 
     getRecentSessions().then((res) => {
+      // 循环添加icon
+      res.data.forEach((item: any) => {
+        item.icon = getRandomIcon();
+      });
+
       setRecentChats(res.data);
     });
 
@@ -248,7 +253,6 @@ export default function WelcomePage() {
     }
   };
 
-  // 添加随机图标数组和获取随机图标的函数
   const chatIcons = [
     <BookOutlined />,
     <BulbOutlined />,
@@ -295,7 +299,7 @@ export default function WelcomePage() {
   return (
     <Layout style={{ height: '100vh' }}>
       <Layout style={{ background: token.colorBgLayout }}>
-        <Content style={{ padding: '0 16px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+        <Content style={{ padding: '0 16px', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
           <motion.div
             style={{ display: 'flex', justifyContent: 'center', marginTop: 24, marginBottom: 24 }}
             initial={{ opacity: 0, y: -20 }}
@@ -729,7 +733,7 @@ export default function WelcomePage() {
                             hoverable
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              {getRandomIcon()}
+                              {item.icon}
                               <Text>{item.name}</Text>
                             </div>
                             <Text type="secondary" style={{ marginLeft: 24, fontSize: 12 }}>

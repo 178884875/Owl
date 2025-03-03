@@ -65,7 +65,8 @@ export default function SideMenu() {
     return (<>
         <Flexbox style={{
             ...styles.container,
-            width: expanded ? 280 : 50,
+            width: expanded ? 220 : 50,
+            maxWidth: 220,
         }}>
             <Flexbox horizontal style={styles.header}>
                 <Flexbox style={{
