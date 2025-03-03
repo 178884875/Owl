@@ -35,7 +35,7 @@ public static class Program
                 client.DefaultRequestHeaders.Add("User-Agent",
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0");
                 client.DefaultRequestHeaders.Add("x-client-data",
-                    "eyIxIjoiMTgiLCIyIjoiMSIsIjMiOiIwIiwiNCI6Ii0yOTcxMDcwOTU3ODQ5MTk5MTY3IiwiNiI6InN0YWJsZSIsIjkiOiJkZXNrdG9wIn0=");
+                    "eyIxIjoiMSIsIjIiOiIxIiwiMyI6IjAiLCI0IjoiMjgwNDcxNzQzOTQ1Mzc1MjUwMCIsIjYiOiJzdGFibGUiLCI5IjoiZGVza3RvcCJ9");
                 client.DefaultRequestHeaders.Add("Accept",
                     "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
                 client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");

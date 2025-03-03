@@ -32,7 +32,7 @@ public class KernelFactory
                     case "grok":
                     case "custom":
                     case "siliconcloud":    
-                        kernelBuilder.AddOpenAIChatCompletion(model, new Uri(endpoint), apiKey, "-Chat");
+                        kernelBuilder.AddOpenAIChatCompletion(model, new Uri(endpoint), apiKey, "Owl-Chat");
                         break;
                     case "azure":
                         kernelBuilder.AddAzureOpenAIChatCompletion(model, endpoint, apiKey);
@@ -44,7 +44,7 @@ public class KernelFactory
                         kernelBuilder.AddOllamaChatCompletion(model, new Uri(endpoint));
                         break;
                     default:
-                        kernelBuilder.AddOpenAIChatCompletion(model, new Uri(endpoint), apiKey, "-Chat");
+                        kernelBuilder.AddOpenAIChatCompletion(model, new Uri(endpoint), apiKey, "Owl-Chat");
                         break;
                 }
 
