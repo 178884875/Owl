@@ -86,7 +86,18 @@ export default function SessionItem({
                                 okText="确认"
                                 cancelText="取消"
                             >
-                                删除
+                                <Flexbox style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'red',
+                                    fontSize: 12,
+                                    fontWeight: 500,
+                                    minWidth: 60,
+                                }}>
+                                    删除
+                                </Flexbox>
                             </Popconfirm>,
                         style: {
                             color: 'red'
@@ -104,7 +115,7 @@ export default function SessionItem({
                         isCurrentSession && styles.active,
                         session?.favorite && styles.favorite
                     )}
-                    padding={12}
+                    padding={5}
                     style={{
                         cursor: 'pointer',
                         width: 'auto',
@@ -136,9 +147,9 @@ export default function SessionItem({
                                 whiteSpace: 'nowrap',
                                 display: 'inline-block',
                                 maxWidth: '100%',
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: 500
-                            }}>{session?.name}{session?.favorite && <StarFilled style={{ marginLeft: 4, color: '#fadb14' }} />}</span>
+                            }}>{session?.name}</span>
                             <span className={cx(styles.time)}>
                                 {session?.createdAtName}
                             </span>

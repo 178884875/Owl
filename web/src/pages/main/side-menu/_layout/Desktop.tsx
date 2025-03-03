@@ -6,6 +6,7 @@ import Session from "../session";
 import { useEffect, useCallback } from "react";
 import UserInfo from "../user-info";
 import CreateSession from "../create-session";
+import Chat from "../chat";
 
 const styles = {
     container: {
@@ -91,6 +92,7 @@ export default function SideMenu() {
             </Flexbox>
             <Session />
             <Flexbox flex={1} />
+            <Chat />
             <UserInfo />
             <CreateSession />
         </Flexbox>
