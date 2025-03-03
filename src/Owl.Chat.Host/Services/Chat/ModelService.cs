@@ -143,7 +143,7 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
     {
         var sharedChannels = await context.ModelChannelShareUsers
             .Where(x => x.UserId == userContext.UserId)
-            .Select(x => x.Id)
+            .Select(x => x.ChannelId)
             .ToListAsync();
 
 
