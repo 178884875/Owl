@@ -65,10 +65,8 @@ export default function Desktop() {
                 });
                 localStorage.setItem('token', result.data);
                 
-                // 检查URL中是否存在redirect参数
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirectPath = urlParams.get('redirect');
-                
                 if (redirectPath) {
                     // 如果存在redirect参数，则跳转到该参数指定的页面
                     navigate(decodeURIComponent(redirectPath));

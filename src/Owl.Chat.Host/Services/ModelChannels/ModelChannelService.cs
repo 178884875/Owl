@@ -361,6 +361,12 @@ public class ModelChannelService(
         {
             throw new BusinessException("邀请码无效");
         }
+        
+        // 不能邀请自己
+        if (inviteCode.Inviter == userContext.UserId)
+        {
+            throw new BusinessException("不能邀请自己");
+        }
 
         if (await dbContext.ModelChannelShareUsers.AnyAsync(x =>
                 x.ChannelId == inviteCode.ChannelId && x.UserId == userContext.UserId))
@@ -368,20 +374,9 @@ public class ModelChannelService(
             throw new BusinessException("已经加入过该渠道");
         }
 
-        if (inviteCode.MaxUseCount > 0)
+        if (inviteCode.MaxUseCount <= 0)
         {
-            if (await dbContext.ModelChannelShareUsers
-                    .Where(x => x.ChannelId == inviteCode.ChannelId)
-                    .CountAsync() >= inviteCode.MaxUseCount)
-            {
-                throw new BusinessException("邀请码已达到最大使用次数");
-            }
-        }
-
-        // 不能邀请自己
-        if (inviteCode.Inviter == userContext.UserId)
-        {
-            throw new BusinessException("不能邀请自己");
+            throw new BusinessException("邀请码已达到最大使用次数");
         }
 
         var entity = new ModelChannelShareUser()

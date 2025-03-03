@@ -37,6 +37,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
     /// <summary>
     /// 获取当前用户信息
     /// </summary>
+    [Authorize]
     public async Task<UserDto> GetCurrentUserAsync()
     {
         var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == userContext.UserId);
