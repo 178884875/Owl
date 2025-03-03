@@ -11,7 +11,7 @@ using Owl.Chat.Core.Entities;
 namespace Owl.Chat.Host.Services.Chat;
 
 [Filter(typeof(ResultFilter))]
-public class ModelService(IDbContext context, IMapper mapper) : FastApi
+public class ModelService(IDbContext context, IMapper mapper, IUserContext userContext) : FastApi
 {
     /// <summary>
     /// 启用/禁用模型
@@ -135,8 +135,82 @@ public class ModelService(IDbContext context, IMapper mapper) : FastApi
     }
 
     /// <summary>
+    /// 获取当前用户可用模型列表
+    /// </summary>
+    /// <returns></returns>
+    [Authorize]
+    public async Task<List<InitModelsDto>> GetCurrentUserModelsAsync()
+    {
+        var sharedChannels = await context.ModelChannelShareUsers
+            .Where(x => x.UserId == userContext.UserId)
+            .Select(x => x.ChannelId)
+            .ToListAsync();
+
+
+        // 先获取用户所有渠道，包括共享的
+        var channels =( await context.ModelChannels
+            .Where(x => x.CreatedBy == userContext.UserId || sharedChannels.Contains(x.Id))
+            .Select(x => x.ModelIds)
+            .ToListAsync()).SelectMany(x=>x);
+
+        var models = await context.Models
+            .Where(x => x.Enabled == true && channels.Contains(x.Id))
+            .ToListAsync();
+
+        var modelsDto = new List<InitModelsDto>();
+
+        foreach (var model in models)
+        {
+            // 判断是否已经存在当前提供商
+            var modelDto = modelsDto.FirstOrDefault(x => x.Provider == model.Provider);
+            if (modelDto == null)
+            {
+                modelsDto.Add(modelDto = new InitModelsDto()
+                {
+                    Provider = model.Provider,
+                    ChatModels = new List<InitModelChatModels>()
+                });
+            }
+
+            modelDto.ChatModels.Add(new InitModelChatModels()
+            {
+                ContextWindowTokens = model.ContextWindowTokens,
+                Description = model.Description,
+                DisplayName = model.DisplayName,
+                Enabled = model.Enabled,
+                Id = model.Id,
+                ModelId = model.ModelId,
+                MaxOutput = model.MaxOutput,
+                Pricing = new InitModelPricing()
+                {
+                    CachedInput = model.Pricing.CachedInput,
+                    Input = model.Pricing.Input,
+                    Output = model.Pricing.Output,
+                    WriteCacheInput = model.Pricing.WriteCacheInput,
+                },
+                ReleasedAt = model.ReleasedAt,
+                Type = model.Type,
+                Vision = model.Abilities.Vision,
+                FunctionCall = model.Abilities.FunctionCall,
+            });
+        }
+
+        // 将OpenAI排在第一个
+        var openAi = modelsDto.FirstOrDefault(x => x.Provider == "OpenAI");
+
+        if (openAi != null)
+        {
+            modelsDto.Remove(openAi);
+            modelsDto.Insert(0, openAi);
+        }
+
+        return modelsDto;
+    }
+
+    /// <summary>
     /// 获取可用模型列表
     /// </summary>
+    [Authorize]
     public async Task<List<InitModelsDto>> GetModelsAsync()
     {
         var models = await context.Models

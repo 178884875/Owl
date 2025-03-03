@@ -74,7 +74,7 @@ export default function Profile() {
                             <Space>
                                 <CalendarOutlined style={{ color: token.colorPrimary }} />
                                 <Text strong>注册时间:</Text>
-                                <Text>{user?.registerTime || '2023-01-01'}</Text>
+                                <Text>{user?.createdAt || '2023-01-01'}</Text>
                             </Space>
                         </Space>
                     </Col>

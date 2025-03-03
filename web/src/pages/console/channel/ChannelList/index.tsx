@@ -7,7 +7,7 @@ import { theme } from "antd";
 import CreateChannel from "../CreateChannel";
 import { getIconByName } from "@/utils/iconutil";
 import { msToSeconds } from "@/utils/timutil";
-
+import { useChatStore } from "@/store/chat/store";
 const { useToken } = theme;
 
 // 定义 ChannelItem 接口
@@ -30,6 +30,9 @@ export interface ChannelItem {
     keys?: any[];
     available: boolean;
     isShare: boolean;
+    shareRequestCount?: number;
+    shareTokenCost?: number;
+    shareQuota?: number;
 }
 
 interface ChannelListProps {
@@ -47,6 +50,8 @@ interface ChannelListProps {
 export default function ChannelList({ channel, onChannelChange, onChannelListChange, onChannelCreateSuccess, channelList, loading, onDeleteChannel, onTestChannel }: ChannelListProps) {
     const { token } = useToken();
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+
+    const [clearCacheAndReloadModels] = useChatStore((state) => [state.clearCacheAndReloadModels]);
 
     const handleAddChannel = () => {
         setIsCreateModalVisible(true);
@@ -190,6 +195,7 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                 onSuccess={() => {
                     onChannelCreateSuccess();
                     setIsCreateModalVisible(false);
+                    clearCacheAndReloadModels();
                 }}
             />
         </Flexbox>

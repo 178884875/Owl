@@ -29,6 +29,10 @@ public class FileStaticMiddleware : IMiddleware
             {
                 context.Response.Headers.Append("Content-Encoding", "br");
                 context.Response.Headers.Append("Content-Type", "application/javascript");
+                
+                // 缓存6小时
+                context.Response.Headers.Append("Cache-Control", "public, max-age=21600");
+                context.Response.Headers.Append("Expires", DateTime.UtcNow.AddHours(6).ToString("R"));
 
                 await context.Response.SendFileAsync(brPath);
 
@@ -41,6 +45,8 @@ public class FileStaticMiddleware : IMiddleware
             {
                 context.Response.Headers.Append("Content-Encoding", "gzip");
                 context.Response.Headers.Append("Content-Type", "application/javascript");
+                context.Response.Headers.Append("Cache-Control", "public, max-age=21600");
+                context.Response.Headers.Append("Expires", DateTime.UtcNow.AddHours(6).ToString("R"));
                 await context.Response.SendFileAsync(gzPath);
                 return;
             }
@@ -53,6 +59,8 @@ public class FileStaticMiddleware : IMiddleware
             if (File.Exists(path))
             {
                 context.Response.Headers.Append("Content-Type", "text/css");
+                context.Response.Headers.Append("Cache-Control", "public, max-age=21600");
+                context.Response.Headers.Append("Expires", DateTime.UtcNow.AddHours(6).ToString("R"));
                 await context.Response.SendFileAsync(path);
                 return;
             }
@@ -71,6 +79,8 @@ public class FileStaticMiddleware : IMiddleware
                 context.Response.StatusCode = 200;
                 context.Response.Headers.Append("Content-Type",
                     GetContentType(Path.GetExtension(path)));
+                context.Response.Headers.Append("Cache-Control", "public, max-age=21600");
+                context.Response.Headers.Append("Expires", DateTime.UtcNow.AddHours(6).ToString("R"));
                 await context.Response.SendFileAsync(path);
                 return;
             }

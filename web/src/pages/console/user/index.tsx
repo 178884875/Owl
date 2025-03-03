@@ -24,7 +24,8 @@ export default function User() {
             setPagination({
                 ...pagination,
                 current: page,
-                total: response.total,
+                pageSize: pageSize,
+                total: response.data.totalCount || 0,
             });
         } catch (error) {
             message.error('获取用户列表失败');
@@ -188,7 +189,7 @@ export default function User() {
     ];
 
     return (
-        <div>
+        <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
             <h1>用户管理</h1>
             <Space style={{ marginBottom: 16 }}>
                 <Input
@@ -203,14 +204,26 @@ export default function User() {
                     添加用户
                 </Button>
             </Space>
-            <Table
-                columns={columns}
-                dataSource={users}
-                rowKey="id"
-                pagination={pagination}
-                loading={loading}
-                onChange={(newPagination) => fetchUsers(newPagination.current, newPagination.pageSize, searchText)}
-            />
+            <div style={{ flex: 1, overflow: 'auto' }}>
+                <Table
+                    columns={columns}
+                    dataSource={users}
+                    rowKey="id"
+                    pagination={{
+                        total: pagination.total,
+                        current: pagination.current,
+                        pageSize: pagination.pageSize,
+                        showSizeChanger: true,
+                        showQuickJumper: true,
+                        showTotal: (total) => `共 ${total} 条记录`,
+                        pageSizeOptions: ['10', '20', '50', '100'],
+                    }}
+                    loading={loading}
+                    onChange={(newPagination) => 
+                        fetchUsers(newPagination.current, newPagination.pageSize, searchText)
+                    }
+                />
+            </div>
             <Modal
                 title="重置密码"
                 visible={isResetPasswordModalVisible}

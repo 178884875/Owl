@@ -10,6 +10,7 @@ using FastService;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -21,6 +22,7 @@ using Owl.Chat.Host.Services.Chat.Input;
 using Storage.Core;
 using Owl.Chat.Core;
 using Owl.Chat.Core.Entities;
+using Owl.Chat.Host.Options;
 using AudioContent = Microsoft.SemanticKernel.AudioContent;
 using ImageContent = Microsoft.SemanticKernel.ImageContent;
 
@@ -37,6 +39,7 @@ public sealed class ChatService(
     BingScraper bingScraper,
     ImageService imageService,
     DocumentToMarkdown converter,
+    IOptions<ChatSessionOptions> chatSessionOption,
     ILogger<ChatService> logger)
     : FastApi
 {
@@ -496,8 +499,12 @@ public sealed class ChatService(
         catch (Exception e)
         {
             context.Response.StatusCode = 500;
-            logger.LogError(e, "对话失败");
+            logger.LogError("对话失败" + e.ToString());
             await context.Response.WriteAsJsonAsync(ResultDto.FailResult("对话失败" + e.Message));
+
+            await dbContext.MessageTexts.Where(x => x.Id == input.AssistantMessageId)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(a => a.Text, x => "抱歉，服务发生异常，请稍后在试！"));
         }
     }
 
@@ -590,16 +597,18 @@ public sealed class ChatService(
             throw new BusinessException("会话不存在");
         }
 
+        if (string.IsNullOrEmpty(session.Model))
+        {
+            session.Model = chatSessionOption.Value.RenameModel;
+        }
+        
+        // 获取当前会话模型属于的模型
         var model = await dbContext.Models
             .AsNoTracking()
-            .Where(x => x.Id == session.RenameModel || x.ModelId == session.RenameModel)
+            .Where(x => x.Id == session.Model)
             .FirstOrDefaultAsync();
 
-        if (model == null)
-        {
-            throw new BusinessException("模型不存在");
-        }
-
+        // 获取当前用户是否存在当前模型类型的渠道
         var channelShareUsers = await dbContext.ModelChannelShareUsers
             .AsNoTracking()
             .Where(x => x.UserId == userContext.UserId && x.Enabled)
@@ -613,11 +622,11 @@ public sealed class ChatService(
             .OrderByDescending(x => x.CreatedAt)
             .ToArrayAsync();
 
-        channels = channels.Where(x => x.ModelIds.Contains(session.RenameModel)).ToArray();
+        channels = channels.Where(x => x.ModelIds.Contains(session.Model)).ToArray();
 
         if (channels.Length == 0)
         {
-            throw new BusinessException("当前用户不存在当前模型类型的渠道");
+            throw new BusinessException($"抱歉，当前模型:{model.DisplayName}没有可用的渠道，请前往渠道管理创建渠道");
         }
 
         var (channel, key) = GetChannelKey(channels);

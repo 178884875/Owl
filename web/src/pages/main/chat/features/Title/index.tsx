@@ -1,5 +1,5 @@
 import { useChatStore } from "@/store/chat";
-import { Button, Tooltip } from "antd";
+import { Button, Tag, Tooltip } from "antd";
 import { Bolt, MessageSquarePlus } from "lucide-react";
 import { Flexbox } from "react-layout-kit";
 import { useStyles } from "./styles";
@@ -30,25 +30,26 @@ export default function Title() {
             }}
                 horizontal
             >
-                <Flexbox style={{
-                    marginLeft: 10,
-                    width: 180,
-                    fontSize: 14,
-                }}>
-                    <Tooltip title={model?.description}>
-                        {model?.modelId}
-                    </Tooltip>
-                </Flexbox>
-                <Flexbox style={{
-                    flex: 1,
-                    textAlign: 'center',
-                    // 超出显示省略号
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    width: 100,
-                }}>
-                    {currentSession?.name}
+                <Flexbox
+                    horizontal
+                    style={{
+                        flex: 1,
+                        gap: 5,
+                        marginLeft: 10,
+                    }}>
+
+                    <Flexbox style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                    }}>
+                        {currentSession?.name}
+                    </Flexbox>
+                    <Tag color="blue">
+                        <Tooltip title={model?.description}>
+                            {model?.modelId}
+                        </Tooltip>
+                    </Tag>
                 </Flexbox>
                 {isChat && <Button
                     onClick={() => setExpanded(!expanded)}

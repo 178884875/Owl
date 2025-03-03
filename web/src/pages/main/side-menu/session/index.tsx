@@ -11,9 +11,8 @@ export default function Session() {
         <Flexbox style={{
             transition: 'width 0.3s',
             padding: 5,
-            marginTop: 10,
             width: 'auto',
-            overflow: 'hidden',
+            overflow: 'auto',
             gap: 5,
             flex: 1,
         }}>

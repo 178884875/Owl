@@ -15,16 +15,16 @@ interface SelectModelProps {
 
 export default function SelectModel({  modelIds, onSelect }: SelectModelProps) {
     const { token } = useToken();
-    const [loadModels, models] = useChatStore(state => [state.loadModels, state.models]);
+    const [loadEnabledModels, models] = useChatStore(state => [state.loadEnabledModels, state.models]);
 
     useEffect(() => {
-        loadModels();
+        loadEnabledModels();
     }, []);
 
     // 过滤掉不存在于models中的modelIds
     const validModelIds = modelIds.filter(id => {
         return models?.some(model => 
-            model.chatModels?.some((chatModel: any) => chatModel.id === id)
+            model.models?.some((chatModel: any) => chatModel.id === id)
         );
     });
 
@@ -58,7 +58,7 @@ export default function SelectModel({  modelIds, onSelect }: SelectModelProps) {
                         key={model.provider}
                         label={model.provider}
                     >
-                        {model.chatModels?.map((chatModel: any) => {
+                        {model.models?.map((chatModel: any) => {
                             return (
                                 <Select.Option
                                     key={chatModel.id}

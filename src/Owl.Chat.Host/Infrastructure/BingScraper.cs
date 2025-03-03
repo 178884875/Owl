@@ -68,6 +68,8 @@ public class BingScraper(IHttpClientFactory httpClientFactory)
                 // 确保提取的字段有效
                 if (titleNode != null && urlNode != null && snippetNode != null)
                 {
+                    // 将urlNode转移
+                    urlNode = HttpUtility.HtmlDecode(urlNode);
                     results.Add(new SearchResultDto
                     {
                         Title = titleNode.InnerText,

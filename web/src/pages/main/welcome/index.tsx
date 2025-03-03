@@ -74,6 +74,24 @@ export default function WelcomePage() {
     loadModels().then((models) => {
       // 将所有 chatModels 扁平化为一个数组
       const allChatModels = models.flatMap(x => x.chatModels || []);
+
+      // 如果没有模型，则提示
+      if (allChatModels.length === 0) {
+        notification.error({
+          message: '没有可用模型',
+        });
+
+        setTimeout(() => {
+          navigate('/console/channel');
+
+          notification.info({
+            message: '请先添加您的渠道，然后添加模型',
+          });
+        }, 1000);
+
+        return;
+      }
+
       // 查找默认模型
       const defaultModel = allChatModels.find(x => x.modelId === DEFAULT_MODEL);
       if (defaultModel) {
@@ -90,6 +108,11 @@ export default function WelcomePage() {
     }
 
     getRecentSessions().then((res) => {
+      // 循环添加icon
+      res.data.forEach((item: any) => {
+        item.icon = getRandomIcon();
+      });
+
       setRecentChats(res.data);
     });
 
@@ -248,7 +271,6 @@ export default function WelcomePage() {
     }
   };
 
-  // 添加随机图标数组和获取随机图标的函数
   const chatIcons = [
     <BookOutlined />,
     <BulbOutlined />,
@@ -295,7 +317,7 @@ export default function WelcomePage() {
   return (
     <Layout style={{ height: '100vh' }}>
       <Layout style={{ background: token.colorBgLayout }}>
-        <Content style={{ padding: '0 16px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+        <Content style={{ padding: '0 16px', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
           <motion.div
             style={{ display: 'flex', justifyContent: 'center', marginTop: 24, marginBottom: 24 }}
             initial={{ opacity: 0, y: -20 }}
@@ -729,7 +751,7 @@ export default function WelcomePage() {
                             hoverable
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              {getRandomIcon()}
+                              {item.icon}
                               <Text>{item.name}</Text>
                             </div>
                             <Text type="secondary" style={{ marginLeft: 24, fontSize: 12 }}>
