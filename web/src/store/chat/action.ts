@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { ChatStore } from "./store";
-import getModels, { getCurrentUserModels } from "@/apis/Model";
+import  { getCurrentUserModels } from "@/apis/Model";
 import { createSession, deleteSession, getSessionLite, switchSessionModel, toggleFavorite, updateSession } from "@/apis/Session";
 import { createMessage, deleteMessage } from "@/apis/Message";
 import { ChatCompleteParams, ChatRole } from "@/types/Chat";
