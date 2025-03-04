@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react';
 const { Title, Text } = Typography;
 
 export default function SessionConfig() {
-    const { styles, cx } = useStyles();
     const { token } = theme.useToken();
     const [
         sessionConfigExpanded,
