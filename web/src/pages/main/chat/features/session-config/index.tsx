@@ -58,7 +58,7 @@ export default function SessionConfig() {
     }
 
     const renderModel = () => {
-        const item = models?.find(item => item.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel) !== undefined)?.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel);
+        const item = models?.find(item => item.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel) !== undefined)?.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel);
         return <Flexbox
             horizontal
             align="center"
@@ -186,7 +186,7 @@ export default function SessionConfig() {
                                     items: models?.map((item) => ({
                                         label: item.provider,
                                         type: 'group',
-                                        children: item.chatModels?.map((chatModel: any) => ({
+                                        children: item.models?.map((chatModel: any) => ({
                                             label:
                                                 <Flexbox
                                                     horizontal

@@ -35,7 +35,7 @@ export default function Model() {
                         // 第一层是分组
                         label: model.provider,
                         type: 'group',
-                        children: model.chatModels?.map((chatModel: any) => ({
+                        children: model.models?.map((chatModel: any) => ({
                             label:
                                 <Flexbox
                                     horizontal

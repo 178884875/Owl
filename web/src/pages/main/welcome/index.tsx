@@ -72,8 +72,8 @@ export default function WelcomePage() {
 
   useEffect(() => {
     loadModels().then((models) => {
-      // 将所有 chatModels 扁平化为一个数组
-      const allChatModels = models.flatMap(x => x.chatModels || []);
+      // 将所有 models 扁平化为一个数组
+      const allChatModels = models.flatMap(x => x.models || []);
 
       // 如果没有模型，则提示
       if (allChatModels.length === 0) {
@@ -140,7 +140,7 @@ export default function WelcomePage() {
   };
 
   const renderModel = () => {
-    const item = models?.find(item => item.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === model?.id) !== undefined)?.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === model?.id);
+    const item = models?.find(item => item.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === model?.id) !== undefined)?.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === model?.id);
     return <Flexbox
       horizontal
       style={{
@@ -535,7 +535,7 @@ export default function WelcomePage() {
                         items: models?.map((item) => ({
                           label: item.provider,
                           type: 'group',
-                          children: item.chatModels?.map((chatModel: any) => ({
+                          children: item.models?.map((chatModel: any) => ({
                             label:
                               <Flexbox
                                 horizontal

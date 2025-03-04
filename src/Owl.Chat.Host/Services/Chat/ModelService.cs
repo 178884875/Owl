@@ -168,11 +168,11 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
                 modelsDto.Add(modelDto = new InitModelsDto()
                 {
                     Provider = model.Provider,
-                    ChatModels = new List<InitModelChatModels>()
+                    Models = new List<InitModelChatModels>()
                 });
             }
 
-            modelDto.ChatModels.Add(new InitModelChatModels()
+            modelDto.Models.Add(new InitModelChatModels()
             {
                 ContextWindowTokens = model.ContextWindowTokens,
                 Description = model.Description,
@@ -228,11 +228,11 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
                 modelsDto.Add(modelDto = new InitModelsDto()
                 {
                     Provider = model.Provider,
-                    ChatModels = new List<InitModelChatModels>()
+                    Models = new List<InitModelChatModels>()
                 });
             }
 
-            modelDto.ChatModels.Add(new InitModelChatModels()
+            modelDto.Models.Add(new InitModelChatModels()
             {
                 ContextWindowTokens = model.ContextWindowTokens,
                 Description = model.Description,

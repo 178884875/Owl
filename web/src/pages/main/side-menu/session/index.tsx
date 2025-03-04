@@ -12,7 +12,6 @@ export default function Session() {
             transition: 'width 0.3s',
             padding: 5,
             width: 'auto',
-            overflow: 'auto',
             gap: 5,
             flex: 1,
         }}>

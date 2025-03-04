@@ -39,11 +39,11 @@ public sealed class InitModelBackstageService(
                 return;
             }
 
-            var items = new List<Model>(models.SelectMany(x => x.ChatModels).Count());
+            var items = new List<Model>(models.SelectMany(x => x.Models).Count());
 
             foreach (var model in models)
             {
-                items.AddRange(model.ChatModels.Select(chatModel => new Model()
+                items.AddRange(model.Models.Select(chatModel => new Model()
                 {
                     Id = Guid.NewGuid().ToString("N"),
                     ModelId = chatModel.Id,

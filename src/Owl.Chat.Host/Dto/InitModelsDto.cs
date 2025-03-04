@@ -2,7 +2,7 @@
 
 public class InitModelsDto
 {
-    public List<InitModelChatModels> ChatModels { get; set; }
+    public List<InitModelChatModels> Models { get; set; }
 
     /// <summary>
     /// 模型提供者

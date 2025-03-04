@@ -40,9 +40,9 @@ export default function CreateSession() {
     useEffect(() => {
         if (models && models.length > 0) {
             // 如果存在gpt-4o则设置为他的id，模型id是modelId
-            let modelId = models.find(item => item.provider === 'OpenAI')?.chatModels?.find((item: any) => item.modelId === 'gpt-4o')?.id;
-            if (!modelId) {
-                modelId = models[0].chatModels[0].id;
+            let modelId = models.find(item => item.provider === 'OpenAI')?.models?.find((item: any) => item.modelId === 'gpt-4o')?.id;
+            if (!modelId && models.length > 0) {
+                modelId = models[0].models[0].id;
             }
             setModel(modelId);
         }
@@ -97,7 +97,7 @@ export default function CreateSession() {
     }
 
     const renderModel = () => {
-        const item = models?.find(item => item.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === model) !== undefined)?.chatModels?.find((chatModel: { id: string | undefined; }) => chatModel.id === model);
+        const item = models?.find(item => item.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === model) !== undefined)?.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === model);
         return <Flexbox
             horizontal
             style={{
@@ -287,7 +287,7 @@ export default function CreateSession() {
                                     />
                                 </Tooltip>
                                 {/* 检查当前选择的模型是否支持视觉功能 */}
-                                {models?.find(item => item.chatModels?.find((chatModel: any) => chatModel.id === model))?.chatModels?.find((chatModel: any) => chatModel.id === model)?.vision && (
+                                {models?.find(item => item.models?.find((chatModel: any) => chatModel.id === model))?.models?.find((chatModel: any) => chatModel.id === model)?.vision && (
                                     <Tooltip title="添加图片">
                                         <Button type="text" icon={<CameraOutlined />} onClick={triggerImageUpload} />
                                     </Tooltip>
@@ -312,7 +312,7 @@ export default function CreateSession() {
                                         items: models?.map((item) => ({
                                             label: item.provider,
                                             type: 'group',
-                                            children: item.chatModels?.map((chatModel: any) => ({
+                                            children: item.models?.map((chatModel: any) => ({
                                                 label:
                                                     <Flexbox
                                                         horizontal
