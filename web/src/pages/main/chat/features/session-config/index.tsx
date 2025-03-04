@@ -1,6 +1,5 @@
 import { Flexbox } from 'react-layout-kit';
 import { useChatStore } from '@/store/chat';
-import { useStyles } from './styles';
 import { Button, Input, Select, Slider, Form, Checkbox, Dropdown, Tooltip, Drawer, Divider, Space, Typography } from 'antd';
 import { chatSelectors } from '@/store/chat/selectors';
 import { theme } from 'antd';
