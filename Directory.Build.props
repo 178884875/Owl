@@ -1,0 +1,7 @@
+<Project>
+    <PropertyGroup>
+        <VersionSuffix>1</VersionSuffix>
+        <Version>1.0.$(VersionSuffix)</Version>
+        <AssemblyVersion>$(VersionSuffix)</AssemblyVersion>
+    </PropertyGroup>
+</Project>
