@@ -38,7 +38,7 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
     /// <summary>
     /// 获取所有模型
     /// </summary>
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<List<object>> GetListAsync()
     {
         var models = await context.Models

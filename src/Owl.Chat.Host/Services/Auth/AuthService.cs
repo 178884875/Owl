@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using FastService;
@@ -13,6 +15,7 @@ using Owl.Chat.Host.Services.User;
 using Owl.Chat.Core;
 using Owl.Chat.Core.Entities;
 using Owl.Chat.Host.Dto;
+using Owl.Chat.Host.Services.Chat.Dto;
 using Owl.Chat.Host.Services.User.Dto;
 
 namespace Owl.Chat.Host.Services.Auth;
@@ -29,6 +32,8 @@ public class AuthService(
     IDbContext dbContext,
     ILogger<AuthService> logger,
     IOptions<GoogelOption> googenOptions,
+    IOptions<GitHubOptions> gitHubOptions,
+    IOptions<ThorOptions> thorOptions,
     IHttpClientFactory httpClientFactory) : FastApi
 {
     [EndpointSummary("登录")]
@@ -160,6 +165,28 @@ public class AuthService(
             });
         }
 
+        if (gitHubOptions.Value.Enabled)
+        {
+            logger.LogInformation("GitHub OAuth is enabled");
+            result.Add(new AuthOauthDto()
+            {
+                Provider = "GitHub",
+                Icon = "GitHub",
+                ClientId = gitHubOptions.Value.ClientId
+            });
+        }
+
+        if (thorOptions.Value.Enabled)
+        {
+            logger.LogInformation("Thor OAuth is enabled");
+            result.Add(new AuthOauthDto()
+            {
+                Provider = "Thor",
+                Icon = "Thor",
+                ClientId = thorOptions.Value.Host ?? "https://api.token-ai.cn"
+            });
+        }
+
         return await Task.FromResult(result);
     }
 
@@ -173,32 +200,32 @@ public class AuthService(
         if (provider.Equals("github", StringComparison.OrdinalIgnoreCase))
         {
             // 处理github登录
-            // var clientId = configuration["OAuth:Github:ClientId"];
-            // var clientSecret = configuration["OAuth:Github:ClientSecret"];
-            //
-            // var response =
-            //     await client.PostAsync(
-            //         $"https://github.com/login/oauth/access_token?code={code}&client_id={clientId}&client_secret={clientSecret}",
-            //         null);
-            //
-            // var result = await response.Content.ReadFromJsonAsync<OAuthTokenDto>();
-            // if (result is null)
-            // {
-            //     throw new Exception("Github授权失败");
-            // }
-            //
-            // var request = new HttpRequestMessage(HttpMethod.Get,
-            //     $"https://api.github.com/user")
-            // {
-            //     Headers =
-            //     {
-            //         Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken)
-            //     }
-            // };
-            //
-            // var responseMessage = await client.SendAsync(request);
-            //
-            // userDto = await responseMessage.Content.ReadFromJsonAsync<OAuthUserDto>();
+            var clientId = gitHubOptions.Value.ClientId;
+            var clientSecret = gitHubOptions.Value.ClientSecret;
+
+            var response =
+                await client.PostAsync(
+                    $"https://github.com/login/oauth/access_token?code={code}&client_id={clientId}&client_secret={clientSecret}",
+                    null);
+
+            var result = await response.Content.ReadFromJsonAsync<OAuthTokenDto>();
+            if (result is null)
+            {
+                throw new Exception("Github授权失败");
+            }
+
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://api.github.com/user")
+            {
+                Headers =
+                {
+                    Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken)
+                }
+            };
+
+            var responseMessage = await client.SendAsync(request);
+
+            userDto = await responseMessage.Content.ReadFromJsonAsync<OAuthUserDto<object>>();
         }
         else if (provider.Equals("gitee", StringComparison.OrdinalIgnoreCase))
         {
@@ -249,6 +276,25 @@ public class AuthService(
 
             userDto = await responseMessage.Content.ReadFromJsonAsync<OAuthUserDto<object>>();
         }
+        else if (provider.Equals("thor", StringComparison.OrdinalIgnoreCase))
+        {
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get,
+                $"{thorOptions.Value.Host.TrimEnd('/')}/api/v1/user/info");
+
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", code);
+
+            var responseMessage = await client.SendAsync(requestMessage);
+
+            var thorUser = await responseMessage.Content.ReadFromJsonAsync<ThorResultDto<ThorUserDataDto>>();
+
+            userDto = new OAuthUserDto<object>()
+            {
+                Id = thorUser.Data.Id,
+                Name = thorUser.Data.UserName,
+                Email = thorUser.Data.Email,
+                AvatarUrl = null
+            };
+        }
 
         // 获取是否存在当前渠道
         var oauth = await dbContext.UserOAuths.FirstOrDefaultAsync(x =>
@@ -286,6 +332,56 @@ public class AuthService(
                 ProviderUserId = userDto.Id.ToString(),
             };
 
+            if (provider.Equals("thor", StringComparison.OrdinalIgnoreCase))
+            {
+                // 如果是thor平台需要单独处理，导入平台的所有模型列表
+                var requestMessage = new HttpRequestMessage(HttpMethod.Get,
+                    $"{thorOptions.Value.Host.TrimEnd('/')}/v1/models");
+
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", code);
+
+                var responseMessage = await client.SendAsync(requestMessage);
+
+                var thorModels = await responseMessage.Content.ReadFromJsonAsync<OpenAIModel>();
+
+
+                var modelIds = thorModels.Data.Select(x => x.Id).ToList();
+
+                var models = await dbContext.Models
+                    .Where(x => modelIds.Contains(x.ModelId))
+                    .ToListAsync();
+
+                var apiKey = await CreateThorToken(code, client);
+
+                // 创建一个渠道Thor
+                var channel = new ModelChannel()
+                {
+                    Name = "Thor",
+                    Provider = "Thor",
+                    Enabled = true,
+                    CreatedBy = user.Id,
+                    CreatedAt = DateTime.Now,
+                    Avatar = "OpenAI",
+                    Description = "Thor 默认创建的渠道",
+                    Endpoint = thorOptions.Value.Host.TrimEnd('/') + "/v1",
+                    Favorite = true,
+                    Tags = ["Thor", "Default"],
+                    ModelIds = models.Select(x => x.Id).ToList(),
+                    Available = true,
+                    Keys =
+                    [
+                        new ModelChannelKey()
+                        {
+                            Description = "由Owl自动创建的Thor渠道",
+                            Key = apiKey,
+                            Order = 999,
+                        }
+                    ]
+                };
+
+                await dbContext.ModelChannels.AddAsync(channel);
+            }
+
             await dbContext.UserOAuths.AddAsync(oauth);
 
             user = (await dbContext.Users.AddAsync(user)).Entity;
@@ -307,5 +403,26 @@ public class AuthService(
         var token = jwtHelper.CreateToken(dist, user.Id, [user.Role]);
 
         return await Task.FromResult(token);
+    }
+
+    private async Task<string> CreateThorToken(string code, HttpClient client)
+    {
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post,
+            $"{thorOptions.Value.Host.TrimEnd('/')}/api/v1/token");
+
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", code);
+
+        requestMessage.Content = new StringContent(JsonSerializer.Serialize(new
+        {
+            name = "Owl",
+            unlimitedExpired = true,
+            unlimitedQuota = true,
+        }), Encoding.UTF8, "application/json");
+
+        var responseMessage = await client.SendAsync(requestMessage);
+
+        var thorToken = await responseMessage.Content.ReadFromJsonAsync<ThorResultDto<string>>();
+
+        return thorToken.Data;
     }
 }

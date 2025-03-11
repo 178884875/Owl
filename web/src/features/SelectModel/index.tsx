@@ -37,13 +37,12 @@ export default function SelectModel({  modelIds, onSelect }: SelectModelProps) {
             <Select
                 style={{ width: "100%" }}
                 dropdownStyle={{
-                    maxHeight: 300,
+                    maxHeight: 450,
                     overflow: "auto",
                 }}
                 placeholder="请选择模型"
                 mode='tags'
                 value={validModelIds}
-                allowClear
                 onChange={(value: string[]) => {
                     value = value.filter(x => x !== '' && x !== undefined);
                     if (value.length === 0) {

@@ -36,6 +36,10 @@ public static class ServiceExtensions
         services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Name));
 
         services.Configure<GoogelOption>(configuration.GetSection(GoogelOption.Name));
+        
+        services.Configure<GitHubOptions>(configuration.GetSection(GitHubOptions.Name));
+        
+        services.Configure<ThorOptions>(configuration.GetSection(ThorOptions.Name));
 
         services.AddAuthorization()
             .AddAuthentication(options =>

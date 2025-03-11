@@ -7,7 +7,7 @@ import TypewriterEffect from '@/features/TypewriterEffect';
 import { Flexbox } from 'react-layout-kit';
 import Verification from '@/apis/Verification';
 import { getIconByName } from '@/utils/iconutil';
-const {  Text, Link } = Typography;
+const { Text, Link } = Typography;
 
 export default function Desktop() {
     const [loading, setLoading] = useState(false);
@@ -64,7 +64,7 @@ export default function Desktop() {
                     description: '登录成功'
                 });
                 localStorage.setItem('token', result.data);
-                
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirectPath = urlParams.get('redirect');
                 if (redirectPath) {
@@ -96,6 +96,8 @@ export default function Desktop() {
         if (provider === 'Google') {
             // 跳转到Google登录页面
             window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${window.location.origin}/auth/oauth?type=google&response_type=code&scope=email profile`;
+        } else if (provider === 'Thor') {
+            window.location.href = `${clientId.replace(/\/$/, '')}/login?redirect_uri=${window.location.origin}/auth/oauth?type=thor`;
         }
     };
 

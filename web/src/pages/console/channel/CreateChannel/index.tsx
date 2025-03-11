@@ -48,15 +48,15 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
         <Form.Item name='avatar' label='渠道头像'>
           <Popover
             content={
-              <Flexbox 
-                gap={8} 
-                style={{ 
-                  maxWidth: 400, 
+              <Flexbox
+                gap={8}
+                style={{
+                  maxWidth: 400,
                   maxHeight: 200,
                   overflowY: 'auto',
                   padding: 8
-                }} 
-                horizontal 
+                }}
+                horizontal
                 wrap='wrap'
               >
                 {Object.keys(iconMap).map((iconName) => (
@@ -120,6 +120,11 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
             style={{ width: '100%' }}
             placeholder="请输入模型标签"
           />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true }]}
+          name='apiKey' label='API Key'>
+          <Input />
         </Form.Item>
         <Form.Item name="modelIds" label="模型列表">
           <SelectModel modelIds={modelIds} onSelect={(modelIds) => {

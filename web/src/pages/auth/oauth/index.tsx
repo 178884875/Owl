@@ -12,12 +12,13 @@ export default function OAuth() {
     const type = searchParams.get('type');
     // const clientId = searchParams.get('clientId');
     const code = searchParams.get('code');
+    const token = searchParams.get('token');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (type && code) {
+        if (type && (code || token)) {
             const redirectUri = window.location.origin + window.location.pathname + "?type=" + type;
-            Callback(type, code, redirectUri)
+            Callback(type, (code || token)!, redirectUri)
                 .then((response) => {
                     if (response.success) {
                         message.success('登录成功');

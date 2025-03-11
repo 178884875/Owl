@@ -597,16 +597,29 @@ public sealed class ChatService(
             throw new BusinessException("会话不存在");
         }
 
-        if (string.IsNullOrEmpty(session.Model))
+        Model? model;
+
+        if (string.IsNullOrEmpty(session.RenameModel))
         {
-            session.Model = chatSessionOption.Value.RenameModel;
+            // 获取当前会话模型属于的模型
+            model = await dbContext.Models
+                .AsNoTracking()
+                .Where(x => x.ModelId == session.RenameModel)
+                .FirstOrDefaultAsync();
         }
-        
-        // 获取当前会话模型属于的模型
-        var model = await dbContext.Models
-            .AsNoTracking()
-            .Where(x => x.Id == session.Model)
-            .FirstOrDefaultAsync();
+        else
+        {
+            model = await dbContext.Models
+                .AsNoTracking()
+                .Where(x => x.Id == session.Model)
+                .FirstOrDefaultAsync();
+        }
+
+        if (model == null)
+        {
+            throw new BusinessException("抱歉，您并没有可用的模型");
+        }
+
 
         // 获取当前用户是否存在当前模型类型的渠道
         var channelShareUsers = await dbContext.ModelChannelShareUsers
@@ -660,9 +673,7 @@ public sealed class ChatService(
 
         var kernel = KernelFactory.CreateKernel(model.ModelId, channel.Endpoint, key, channel.Provider);
 
-        var chatPlugin = kernel.Plugins["Chat"];
-
-        var result = await kernel.InvokeAsync(chatPlugin["TopicNaming"], new KernelArguments()
+        var result = await kernel.InvokeAsync(kernel.Plugins["Chat"]["TopicNaming"], new KernelArguments()
         {
             ["content"] = sb.ToString(),
         });
