@@ -1,5 +1,5 @@
 import { Flexbox } from "react-layout-kit";
-import SessionConfig from "../features/session-config";
+import SessionConfigPage from "../features/session-config";
 import ChatList from "./ChatList";
 import ChatInput from "./ChatInput";
 
@@ -27,6 +27,6 @@ export default function Workspace() {
             <ChatList />
             <ChatInput />
         </Flexbox>
-        <SessionConfig />
+        <SessionConfigPage />
     </Flexbox>)
 }

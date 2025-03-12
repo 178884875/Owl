@@ -507,7 +507,7 @@ export default function WelcomePage() {
                       onClick={triggerTextFileUpload}
                     />
                   </Tooltip>
-                  {model?.vision && (
+                  {model?.abilities?.vision && (
                     <Tooltip title="添加图片">
                       <Button type="text" icon={<CameraOutlined />} onClick={triggerImageUpload} />
                     </Tooltip>

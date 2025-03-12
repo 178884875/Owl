@@ -18,6 +18,7 @@ public static class Program
         builder.Services.AddServices(builder.Configuration);
 
         builder.Services.AddSingleton<FileStaticMiddleware>();
+        builder.Services.AddSingleton<GlobalMiddleware>();
         
         builder.Services.AddHttpClient();
 
@@ -94,6 +95,7 @@ public static class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
+        app.UseMiddleware<GlobalMiddleware>();
         app.UseMiddleware<FileStaticMiddleware>();
 
         app.UseStaticFiles();

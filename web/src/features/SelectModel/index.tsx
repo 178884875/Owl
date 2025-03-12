@@ -86,8 +86,8 @@ export default function SelectModel({  modelIds, onSelect }: SelectModelProps) {
                                             </Tooltip>
                                             <ModelFeatureTags
                                                 tokens={chatModel.contextWindowTokens}
-                                                vision={chatModel.vision}
-                                                functionCall={chatModel.functionCall}
+                                                vision={chatModel.abilities?.vision}
+                                                functionCall={chatModel.abilities?.functionCall}
                                             />
                                         </Flexbox>
                                     }

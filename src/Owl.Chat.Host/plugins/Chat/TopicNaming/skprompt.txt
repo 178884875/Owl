@@ -12,5 +12,7 @@
 - Respond in English only
 </requirements>
 
-<output_format>[Your 10-character or less Chinese title]</output_format>
+<output_format>
+Your 10-character or less Chinese title
+</output_format>
 </optimized_prompt>

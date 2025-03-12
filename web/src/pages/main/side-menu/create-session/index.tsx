@@ -183,194 +183,276 @@ export default function CreateSession() {
                         closable={false}
                         onCancel={() => setVisible(false)}
                         footer={null}
+                        width={520}
+                        bodyStyle={{
+                            padding: '24px',
+                            borderRadius: '12px',
+                        }}
                     >
-                        <TextArea
-                            placeholder="今天你想聊点什么？"
-                            value={value}
-                            onChange={(e) => {
-                                setValue(e.target.value);
-                            }}
-                            onPaste={handlePaste}
-                            // 回车键
-                            onPressEnter={(e) => {
-                                // 不处理Shift+Enter
-                                if (e.shiftKey) {
-                                    return;
-                                }
-                                // 发送消息
-                                handleCreateSession();
-                            }}
-                            style={{
-                                width: '100%',
-                                height: 100,
-                                marginBottom: 10,
-                                resize: 'none',
-                                border: 'none',
-                                outline: 'none',
-                                boxShadow: 'none',
-                            }}
-                        />
-                        
-                        <Flexbox horizontal gap={8}>
+                        <Flexbox gap={16}>
+                            <TextArea
+                                placeholder="今天你想聊点什么？"
+                                value={value}
+                                onChange={(e) => {
+                                    setValue(e.target.value);
+                                }}
+                                onPaste={handlePaste}
+                                onPressEnter={(e) => {
+                                    if (e.shiftKey) {
+                                        return;
+                                    }
+                                    handleCreateSession();
+                                }}
+                                style={{
+                                    width: '100%',
+                                    height: 120,
+                                    marginBottom: 0,
+                                    resize: 'none',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    padding: '12px 16px',
+                                    fontSize: '15px',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: 'none',
+                                    background: token.colorBgElevated,
+                                }}
+                                autoFocus
+                            />
+                            
                             {(imagePreview || selectedFiles.length > 0) && (
-                                <>
-                                    {imagePreview && (
-                                        <div style={{ marginBottom: 8, position: 'relative' }}>
-                                            <Image
-                                                src={imagePreview}
-                                                alt="Preview"
-                                                style={{ maxWidth: '180px', maxHeight: 180, objectFit: 'contain' }}
-                                            />
-                                            <Button
-                                                type="text"
-                                                icon={<CloseOutlined />}
-                                                onClick={removeImage}
+                                <Flexbox style={{ 
+                                    maxHeight: '200px', 
+                                    overflowY: 'auto',
+                                    padding: '8px',
+                                    background: token.colorBgElevated,
+                                    borderRadius: '8px',
+                                }}>
+                                    <Flexbox horizontal gap={12} wrap="wrap">
+                                        {imagePreview && (
+                                            <div style={{ 
+                                                position: 'relative',
+                                                borderRadius: '8px',
+                                                overflow: 'hidden',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                            }}>
+                                                <Image
+                                                    src={imagePreview}
+                                                    alt="Preview"
+                                                    style={{ 
+                                                        maxWidth: '180px', 
+                                                        maxHeight: 180, 
+                                                        objectFit: 'contain',
+                                                        borderRadius: '8px'
+                                                    }}
+                                                />
+                                                <Button
+                                                    type="primary"
+                                                    size="small"
+                                                    icon={<CloseOutlined />}
+                                                    onClick={removeImage}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: 4,
+                                                        right: 4,
+                                                        background: 'rgba(0, 0, 0, 0.6)',
+                                                        borderColor: 'transparent',
+                                                        color: 'white',
+                                                        width: '24px',
+                                                        height: '24px',
+                                                        display: 'flex',
+                                                        justifyContent: 'center',
+                                                        alignItems: 'center',
+                                                        padding: 0,
+                                                        borderRadius: '50%'
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+                                        {selectedFiles.map((file, index) => (
+                                            <Card
+                                                key={index}
+                                                size="small"
                                                 style={{
-                                                    position: 'absolute',
-                                                    top: 0,
-                                                    right: 0,
-                                                    background: 'rgba(255, 255, 255, 0.8)',
+                                                    background: token.colorBgContainer,
+                                                    width: 'fit-content',
+                                                    height: 'fit-content',
+                                                    borderRadius: '8px',
+                                                    boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                                                    border: `1px solid ${token.colorBorderSecondary}`,
+                                                }}
+                                                bodyStyle={{
+                                                    padding: '8px 12px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 8
+                                                }}
+                                            >
+                                                {file.name.endsWith('.md') ? (
+                                                    <FileMarkdownOutlined style={{ fontSize: 18, color: token.colorPrimary }} />
+                                                ) : (
+                                                    <FileTextOutlined style={{ fontSize: 18, color: token.colorPrimary }} />
+                                                )}
+                                                <Text style={{ maxWidth: 180 }} ellipsis={{ tooltip: file.name }}>
+                                                    {file.name}
+                                                </Text>
+                                                <Button
+                                                    type="text"
+                                                    size="small"
+                                                    icon={<CloseOutlined style={{ fontSize: '12px' }} />}
+                                                    onClick={() => removeFile(file)}
+                                                    style={{ 
+                                                        padding: 0,
+                                                        width: '20px',
+                                                        height: '20px',
+                                                        display: 'flex',
+                                                        justifyContent: 'center',
+                                                        alignItems: 'center',
+                                                        borderRadius: '50%',
+                                                        color: token.colorTextSecondary
+                                                    }}
+                                                />
+                                            </Card>
+                                        ))}
+                                    </Flexbox>
+                                </Flexbox>
+                            )}
+
+                            <Flexbox style={{
+                                justifyContent: 'space-between',
+                                borderTop: `1px solid ${token.colorBorderSecondary}`,
+                                paddingTop: 16
+                            }} horizontal align="center">
+                                <div style={{ display: 'flex', gap: 12 }}>
+                                    <Tooltip title="添加文本文件 (txt, md, 代码文件)">
+                                        <Button
+                                            type="text"
+                                            icon={<PaperClipOutlined style={{ fontSize: '18px', color: token.colorTextSecondary }} />}
+                                            onClick={triggerTextFileUpload}
+                                            style={{
+                                                width: '36px',
+                                                height: '36px',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                borderRadius: '8px',
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    {models?.find(item => item.models?.find((chatModel: any) => chatModel.id === model))?.models?.find((chatModel: any) => chatModel.id === model)?.abilities?.vision && (
+                                        <Tooltip title="添加图片">
+                                            <Button 
+                                                type="text" 
+                                                icon={<CameraOutlined style={{ fontSize: '18px', color: token.colorTextSecondary }} />} 
+                                                onClick={triggerImageUpload}
+                                                style={{
+                                                    width: '36px',
+                                                    height: '36px',
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                    borderRadius: '8px',
+                                                    transition: 'all 0.3s ease'
                                                 }}
                                             />
-                                        </div>
+                                        </Tooltip>
                                     )}
-                                    {selectedFiles.map((file, index) => (
-                                        <Card
-                                            key={index}
-                                            size="small"
-                                            style={{
-                                                background: token.colorBgContainer,
-                                                width: 'fit-content',
-                                                height: 'fit-content',
-                                                margin: 5
-                                            }}
-                                            bodyStyle={{
-                                                padding: '4px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 8
-                                            }}
-                                        >
-                                            {file.name.endsWith('.md') ? (
-                                                <FileMarkdownOutlined style={{ fontSize: 16 }} />
-                                            ) : (
-                                                <FileTextOutlined style={{ fontSize: 16 }} />
-                                            )}
-                                            <Text style={{ maxWidth: 200 }} ellipsis={{ tooltip: file.name }}>
-                                                {file.name}
-                                            </Text>
-                                            <Button
-                                                type="text"
-                                                size="small"
-                                                icon={<CloseOutlined />}
-                                                onClick={() => removeFile(file)}
-                                                style={{ padding: 0 }}
-                                            />
-                                        </Card>
-                                    ))}
-                                </>
-                            )}
-                        </Flexbox>
-
-                        <Flexbox style={{
-                            justifyContent: 'space-between',
-                            marginTop: 8,
-                            borderTop: `1px solid ${token.colorBorderSecondary}`,
-                            paddingTop: 12
-                        }} horizontal>
-                            <div style={{ display: 'flex', gap: 8 }}>
-                                <Tooltip title="添加文本文件 (txt, md, 代码文件)">
-                                    <Button
-                                        type="text"
-                                        icon={<PaperClipOutlined />}
-                                        onClick={triggerTextFileUpload}
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        style={{ display: 'none' }}
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
                                     />
-                                </Tooltip>
-                                {/* 检查当前选择的模型是否支持视觉功能 */}
-                                {models?.find(item => item.models?.find((chatModel: any) => chatModel.id === model))?.models?.find((chatModel: any) => chatModel.id === model)?.vision && (
-                                    <Tooltip title="添加图片">
-                                        <Button type="text" icon={<CameraOutlined />} onClick={triggerImageUpload} />
-                                    </Tooltip>
-                                )}
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    style={{ display: 'none' }}
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                />
-                            </div>
+                                </div>
 
-                            <Flexbox horizontal>
-                                <Dropdown
-                                    trigger={['click']}
-                                    menu={{
-                                        style: {
-                                            maxHeight: 300,
-                                            overflow: 'auto',
-                                        },
-                                        items: models?.map((item) => ({
-                                            label: item.provider,
-                                            type: 'group',
-                                            children: item.models?.map((chatModel: any) => ({
-                                                label:
-                                                    <Flexbox
-                                                        horizontal
-                                                        style={{
-                                                            fontSize: 16,
-                                                        }}
-                                                    > <Tooltip
-                                                        placement="right"
-                                                        title={chatModel.description}>
-                                                            <div style={{
-                                                                flex: 1,
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                marginLeft: 5,
-                                                            }}>
-                                                                {chatModel.displayName}
-                                                            </div>
-                                                        </Tooltip>
-                                                        <ModelFeatureTags
-                                                            tokens={chatModel.contextWindowTokens}
-                                                            vision={chatModel.vision}
-                                                            functionCall={chatModel.functionCall}
-                                                        />
-                                                    </Flexbox>,
-                                                value: chatModel.id,
-                                                key: chatModel.id,
-                                                style: {
-                                                    backgroundColor: chatModel.id === model ? token.controlItemBgActiveHover : 'transparent',
-                                                },
-                                                onClick: () => {
-                                                    setModel(chatModel.id);
-                                                },
-                                                icon: getIconByName(item.provider, 22),
-                                            })),
-                                        })) as MenuItemGroupType[] || [],
-                                    }}
-                                >
-                                    <div style={{
-                                        cursor: 'pointer',
-                                    }}>
-                                        {renderModel()}
-                                    </div>
-                                </Dropdown>
-                                
-                                {value && (
-                                    <Button
-                                        shape="circle"
-                                        type="primary"
-                                        onClick={handleCreateSession}
-                                        style={{
-                                            background: token.colorPrimary,
-                                            borderColor: token.colorPrimary,
-                                            marginLeft: 12
+                                <Flexbox horizontal align="center" gap={12}>
+                                    <Dropdown
+                                        trigger={['click']}
+                                        menu={{
+                                            style: {
+                                                maxHeight: 300,
+                                                overflow: 'auto',
+                                                borderRadius: '10px',
+                                                padding: '8px 0',
+                                            },
+                                            items: models?.map((item) => ({
+                                                label: item.provider,
+                                                type: 'group',
+                                                children: item.models?.map((chatModel: any) => ({
+                                                    label:
+                                                        <Flexbox
+                                                            horizontal
+                                                            style={{
+                                                                fontSize: 16,
+                                                            }}
+                                                        > <Tooltip
+                                                            placement="right"
+                                                            title={chatModel.description}>
+                                                                <div style={{
+                                                                    flex: 1,
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    marginLeft: 5,
+                                                                }}>
+                                                                    {chatModel.displayName}
+                                                                </div>
+                                                            </Tooltip>
+                                                            <ModelFeatureTags
+                                                                tokens={chatModel.contextWindowTokens}
+                                                                vision={chatModel.abilities?.vision}
+                                                                functionCall={chatModel.abilities?.functionCall}
+                                                            />
+                                                        </Flexbox>,
+                                                    value: chatModel.id,
+                                                    key: chatModel.id,
+                                                    style: {
+                                                        backgroundColor: chatModel.id === model ? token.controlItemBgActiveHover : 'transparent',
+                                                        borderRadius: '6px',
+                                                        margin: '2px 6px',
+                                                    },
+                                                    onClick: () => {
+                                                        setModel(chatModel.id);
+                                                    },
+                                                    icon: getIconByName(item.provider, 22),
+                                                })),
+                                            })) as MenuItemGroupType[] || [],
                                         }}
                                     >
-                                        <SendOutlined />
-                                    </Button>
-                                )}
+                                        <div style={{
+                                            cursor: 'pointer',
+                                            padding: '6px 12px',
+                                            border: `1px solid ${token.colorBorderSecondary}`,
+                                            borderRadius: '8px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            transition: 'all 0.3s ease',
+                                            background: token.colorBgContainer,
+                                        }}>
+                                            {renderModel()}
+                                        </div>
+                                    </Dropdown>
+                                    
+                                    {value && (
+                                        <Button
+                                            shape="circle"
+                                            type="primary"
+                                            onClick={handleCreateSession}
+                                            style={{
+                                                background: token.colorPrimary,
+                                                borderColor: token.colorPrimary,
+                                                width: '42px',
+                                                height: '42px',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                                transition: 'all 0.3s ease',
+                                            }}
+                                            icon={<SendOutlined style={{ fontSize: '18px' }} />}
+                                        />
+                                    )}
+                                </Flexbox>
                             </Flexbox>
                         </Flexbox>
                     </Modal>)

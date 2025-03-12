@@ -10,16 +10,8 @@ public sealed class ResultFilter(ILogger<ResultFilter> logger) : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        try
-        {
-            var value = await next(context);
+        var value = await next(context);
 
-            return ResultDto.SuccessResult(value);
-        }
-        catch (Exception e)
-        {
-            logger.LogError("服务发送异常：" + e);
-            return ResultDto.FailResult(e.Message);
-        }
+        return ResultDto.SuccessResult(value);
     }
 }

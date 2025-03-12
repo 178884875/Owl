@@ -45,7 +45,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
 
         if (user == null)
         {
-            throw new BusinessException("用户不存在");
+            throw new UnauthorizedAccessException();
         }
 
         user.PasswordHash = null;
