@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Flexbox } from "react-layout-kit";
 import { List, Card, Tag, Typography, Button, Dropdown, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { deleteChannel, } from "@/apis/ModelaChannel";
+import { deleteChannel, enableChannel} from "@/apis/ModelaChannel";
 import { theme } from "antd";
 import CreateChannel from "../CreateChannel";
 import { getIconByName } from "@/utils/iconutil";
@@ -114,6 +114,16 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                                     },
                                 },
                                 {
+                                    label: item.enabled ? '禁用渠道' : '启用渠道',
+                                    key: 'enable',
+                                    disabled: item.isShare,
+                                    onClick: async () => {
+                                        await enableChannel(item.id);
+                                        message.success(item.enabled ? '禁用成功' : '启用成功');
+                                        onChannelCreateSuccess();
+                                    },
+                                },
+                                {
                                     label: '删除',
                                     style: {
                                         color: 'red',
@@ -155,6 +165,10 @@ export default function ChannelList({ channel, onChannelChange, onChannelListCha
                                                     <Tag style={{
                                                         fontSize: '10px',
                                                     }} color={item.available ? "green" : "red"}>{item.available ? "可用" : "不可用"}</Tag>
+                                                    <Tag style={{
+                                                        fontSize: '10px',
+                                                    }} color={item.enabled ? "green" : "red"}>{item.enabled ? "启用" : "禁用"}</Tag>
+                                                    
                                                     {item.available && item.modelIds && (
                                                         <Tag style={{
                                                             fontSize: '10px',

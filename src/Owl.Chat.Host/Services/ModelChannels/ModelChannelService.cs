@@ -474,4 +474,24 @@ public class ModelChannelService(
 
         await dbContext.SaveChangesAsync();
     }
+    
+    /// <summary>
+    /// 启用或禁用渠道
+    /// </summary>
+    [Authorize]
+    [EndpointSummary("启用或禁用渠道")]
+    public async Task EnableAsync(long id)
+    {
+        var channel = await dbContext.ModelChannels
+            .FirstOrDefaultAsync(x => x.Id == id && x.CreatedBy == userContext.UserId);
+
+        if (channel == null)
+        {
+            throw new BusinessException("渠道不存在或无权限操作");
+        }
+
+        channel.Enabled = !channel.Enabled;
+        dbContext.ModelChannels.Update(channel);
+        await dbContext.SaveChangesAsync();
+    }
 }

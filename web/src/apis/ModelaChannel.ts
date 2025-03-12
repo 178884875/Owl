@@ -150,3 +150,10 @@ export const enableShareUser = async (id: number) => {
     return res;
 }
 
+export const enableChannel = async (id: number) => {
+    const res = await post(`/api/modelChannel/enable?id=${id}`);
+    return res;
+}
+
+
+

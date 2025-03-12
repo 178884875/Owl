@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { Modal, Form, Input, Select, Switch, message, Button, Popover } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Modal, Form, Input, Select, Switch, message, Button, Popover, Tooltip } from 'antd';
 import { createChannel } from '@/apis/ModelaChannel';
 import Channel from '../Channel';
 import { Flexbox } from 'react-layout-kit';
 import SelectModel from '@/features/SelectModel';
 import { iconMap, getIconByName } from '@/utils/iconutil';
-
+import { LoadingOutlined } from '@ant-design/icons';
+import { RotateCw } from 'lucide-react';
+import { useChatStore } from '@/store/chat';
 interface CreateChannelProps {
   visible: boolean;
   onClose: () => void;
@@ -17,6 +19,83 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
   const [loading, setLoading] = useState(false);
   const [modelIds, setModelIds] = useState<string[]>([]);
   const [selectedIcon, setSelectedIcon] = useState<string>('OpenAI');
+  const [loadingRemoteModel, setLoadingRemoteModel] = useState(false);
+  const [loadEnabledModels, models] = useChatStore(state => [state.loadEnabledModels, state.models]);
+
+  useEffect(() => {
+    loadEnabledModels();
+  }, []);
+
+  const loadRemoteModel = async () => {
+    setLoadingRemoteModel(true);
+    // 获取provider | 如果provider为空，则提示用户选择provider
+    const provider = form.getFieldValue('provider');
+    if (!provider) {
+      message.error('请选择模型提供商');
+      setLoadingRemoteModel(false);
+      return;
+    }
+
+    // endpoint
+    const endpoint = form.getFieldValue('endpoint');
+    // 正则表达式 http或者https开头
+    const regex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+    if (!regex.test(endpoint)) {
+      message.error('请输入正确的URL');
+      setLoadingRemoteModel(false);
+      return;
+    }
+    // 获取apiKey
+    const apiKey = form.getFieldValue('apiKey');
+    if (!apiKey) {
+      message.error('请输入API Key');
+      setLoadingRemoteModel(false);
+      return;
+    }
+
+    setModelIds([]);
+
+    if (provider === 'OpenAI') {
+      // 获取模型列表
+      // 解析endpoint,默认他是v1
+      const url = endpoint + "/models";
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+      const responseData = await response.json();
+
+      // data.data
+      const values = responseData.data.map((item: any) => item.id);
+      // 过滤掉models中不存在的modelId
+      // 过滤掉models中不存在的modelId
+      const modelIds = values.filter((id: string) => models?.some((model: any) => model.models?.some((chatModel: any) => chatModel.modelId === id)));
+
+      // 将匹配到的modelId转换为对应的chatModel.id
+      const chatModelIds = values.map((id: string) => {
+        for (const model of models || []) {
+          const chatModel = model.models?.find((cm: any) => cm.modelId === id);
+          if (chatModel) return chatModel.id;
+        }
+        return null;
+      }).filter(Boolean);
+
+      // 如果chatModelIds为空，则提示用户没有模型
+      if (chatModelIds.length === 0) {
+        message.error('没有找到模型');
+        setLoadingRemoteModel(false);
+        return;
+      }
+      // chatModelIds去重
+      const uniqueModelIds = [...new Set(chatModelIds)] as string[];
+
+      setModelIds(uniqueModelIds);
+    }
+
+    setLoadingRemoteModel(false);
+  }
 
   const handleSubmit = async () => {
     try {
@@ -126,7 +205,21 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
           name='apiKey' label='API Key'>
           <Input />
         </Form.Item>
-        <Form.Item name="modelIds" label="模型列表">
+        <Form.Item name="modelIds"
+          label={<Flexbox horizontal gap={8}>
+            <span>模型列表</span>
+            <Tooltip title='导入您当前渠道的所有模型'>
+              <Button
+                size='small'
+                type="text" onClick={loadRemoteModel}>
+                {loadingRemoteModel ? <LoadingOutlined
+                  size={16}
+                /> : <RotateCw
+                  size={16}
+                />}
+              </Button>
+            </Tooltip>
+          </Flexbox>}>
           <SelectModel modelIds={modelIds} onSelect={(modelIds) => {
             setModelIds([...modelIds]);
           }} >
