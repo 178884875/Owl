@@ -69,11 +69,7 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
 
       // data.data
       const values = responseData.data.map((item: any) => item.id);
-      // 过滤掉models中不存在的modelId
-      // 过滤掉models中不存在的modelId
-      const modelIds = values.filter((id: string) => models?.some((model: any) => model.models?.some((chatModel: any) => chatModel.modelId === id)));
 
-      // 将匹配到的modelId转换为对应的chatModel.id
       const chatModelIds = values.map((id: string) => {
         for (const model of models || []) {
           const chatModel = model.models?.find((cm: any) => cm.modelId === id);
@@ -82,7 +78,6 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
         return null;
       }).filter(Boolean);
 
-      // 如果chatModelIds为空，则提示用户没有模型
       if (chatModelIds.length === 0) {
         message.error('没有找到模型');
         setLoadingRemoteModel(false);
