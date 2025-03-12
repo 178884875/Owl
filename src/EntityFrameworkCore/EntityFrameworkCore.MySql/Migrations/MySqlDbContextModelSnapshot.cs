@@ -739,6 +739,48 @@ namespace EntityFrameworkCore.MySql.Migrations
                     b.ToTable("UserOAuths");
                 });
 
+            modelBuilder.Entity("Owl.Chat.Core.Entities.UserPrompt", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Prompt")
+                        .HasMaxLength(-1)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(95)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserPrompt", (string)null);
+                });
+
             modelBuilder.Entity("Owl.Chat.Core.Entities.MessageFile", b =>
                 {
                     b.HasOne("Owl.Chat.Core.Entities.FileStorage", "FileStorage")

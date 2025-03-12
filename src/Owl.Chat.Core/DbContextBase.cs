@@ -37,6 +37,8 @@ public abstract class DbContextBase<TDbContext>(DbContextOptions<TDbContext> opt
 
     public DbSet<ModelChannelInviteCode> ModelChannelInviteCodes { get; set; }
 
+    public DbSet<UserPrompt> UserPrompts { get; set; }
+
     public async Task SaveChangesAsync()
     {
         await SaveChangesAsync(new CancellationToken());

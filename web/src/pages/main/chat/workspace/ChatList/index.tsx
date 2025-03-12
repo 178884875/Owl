@@ -6,7 +6,7 @@ import { Bubble } from '@ant-design/x';
 import { Avatar, Button, message, Popconfirm, Tooltip, Spin, Card, Typography, Image, Input, Collapse } from 'antd';
 import { useUserStore } from '@/store/user';
 import { SyncOutlined, CopyOutlined, DeleteOutlined, EditOutlined, CloseOutlined } from '@ant-design/icons';
-import { Markdown } from '@lobehub/ui';
+import {  Markdown } from '@lobehub/ui';
 import { deleteMessage } from '@/apis/Message';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
@@ -22,9 +22,10 @@ export default function ChatList() {
         messages,
         setMessages,
         currentSession,
-        regenerateMessage
+        regenerateMessage,
+        generateLoading
     ] =
-        useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage]);
+        useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage, state.generateLoading]);
 
     const user = useUserStore(state => state.user);
 
@@ -277,6 +278,11 @@ export default function ChatList() {
                 showFootnotes
                 variant='chat'
                 fullFeaturedCodeBlock
+                componentProps={{
+                  highlight: {
+                    defalutExpand: generateLoading
+                  },
+                }}
                 rehypePlugins={[rehypeKatex]}
                 remarkPlugins={[remarkMath]}
             >
@@ -295,17 +301,40 @@ export default function ChatList() {
         if (ms < 60000) return `${(ms / 1000).toFixed(2)}s`;
         return `${(ms / 60000).toFixed(2)}分钟`;
     };
+// Calculate tokens per second based on completion tokens and response time
+const calculateTokensPerSecond = (completeTokens: number, responseTimeMs: number): number => {
+    // Convert milliseconds to seconds
+    const responseTimeSeconds = responseTimeMs / 1000;
+    
+    // Avoid division by zero
+    if (responseTimeSeconds <= 0) return 0;
+    
+    // Calculate tokens per second
+    const tokensPerSecond = completeTokens / responseTimeSeconds;
+    
+    // Return with two decimal precision
+    return Math.round(tokensPerSecond * 100) / 100;
+};
 
-    const renderModelUsages = (modelUsages: any) => {
-        if (!modelUsages) return null;
-        return (
-            <Flexbox horizontal gap={8} style={{ fontSize: '12px', color: token.colorTextSecondary }}>
-                <span>提示词: {modelUsages.promptTokens}</span>
-                <span>完成词: {modelUsages.completeTokens}</span>
-                <span>响应时间: {formatResponseTime(modelUsages.responseTime)}</span>
-            </Flexbox>
-        );
-    };
+// Update the renderModelUsages function to include tokens per second
+const renderModelUsages = (modelUsages: any) => {
+    if (!modelUsages) return null;
+
+    // Calculate tokens per second
+    const tokensPerSecond = calculateTokensPerSecond(
+        modelUsages.completeTokens,
+        modelUsages.responseTime
+    );
+
+    return (
+        <Flexbox horizontal gap={8} style={{ fontSize: '12px', color: token.colorTextSecondary }}>
+            <span>提示词: {modelUsages.promptTokens}</span>
+            <span>完成词: {modelUsages.completeTokens}</span>
+            <span>响应时间: {formatResponseTime(modelUsages.responseTime)}</span>
+            <span>速率: {tokensPerSecond} tokens/s</span>
+        </Flexbox>
+    );
+};
 
 
     return <Bubble.List

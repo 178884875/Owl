@@ -750,6 +750,49 @@ namespace EntityFrameworkCore.DaMeng.Migrations
                     b.ToTable("UserOAuths");
                 });
 
+            modelBuilder.Entity("Owl.Chat.Core.Entities.UserPrompt", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("BIGINT")
+                        .HasAnnotation("Dm:ValueGenerationStrategy", DmValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("BIT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<string>("Prompt")
+                        .HasMaxLength(-1)
+                        .HasColumnType("NVARCHAR2(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserPrompt", (string)null);
+                });
+
             modelBuilder.Entity("Owl.Chat.Core.Entities.MessageFile", b =>
                 {
                     b.HasOne("Owl.Chat.Core.Entities.FileStorage", "FileStorage")

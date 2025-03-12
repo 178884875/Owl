@@ -1,11 +1,39 @@
 import { ChangePasswordDto } from "@/types/User";
-import { get, del, postJson, post } from "../utils/fetch";
+import { get, del, postJson, post, putJson } from "../utils/fetch";
 
 /**
  * 获取当前用户信息
  */
 export const getCurrentUser = () => {
   return get('/api/User/CurrentUser')
+}
+
+/**
+ * 获取用户提示列表
+ */
+export const getUserPrompts = () => {
+  return get('/api/User/UserPrompts')
+}
+
+/**
+ * 创建用户提示
+ */
+export const createUserPrompt = (data: any) => {
+  return postJson('/api/User/UserPrompt', data)
+}
+
+/**
+ * 删除用户提示
+ */
+export const deleteUserPrompt = (id: number) => {
+  return del(`/api/User/UserPrompt?id=${id}`)
+}
+
+/**
+ * 更新用户提示
+ */
+export const updateUserPrompt = (data: any) => {
+  return putJson('/api/User/UserPrompt', data)
 }
 
 /**

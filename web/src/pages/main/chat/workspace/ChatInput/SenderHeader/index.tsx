@@ -8,7 +8,7 @@ import { useChatStore } from "@/store/chat";
 import Model from "./Model";
 import Clear from "./Clear";
 import Networking from "./Networking";
-
+import UserPrompt from "./UserPrompt";
 export interface SenderHeaderProps {
     senderRef: React.RefObject<SenderRef | null>
     attachmentsRef: React.RefObject<GetRef<typeof Attachments> | null>
@@ -38,6 +38,7 @@ export default function SenderHeader({
                 >
                     <Model />
                     <Networking/>
+                    <UserPrompt/>
                     <Flexbox style={{
                         marginLeft: 'auto',
                     }}>

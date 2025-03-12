@@ -134,6 +134,8 @@ public class AuthService(
 
         user = (await dbContext.Users.AddAsync(userEntity)).Entity;
 
+        await dbContext.UserPrompts.AddRangeAsync(UserPrompt.CreateDefault(user.Id));
+
         await dbContext.SaveChangesAsync();
 
         user.PasswordHash = string.Empty;
@@ -385,6 +387,8 @@ public class AuthService(
             await dbContext.UserOAuths.AddAsync(oauth);
 
             user = (await dbContext.Users.AddAsync(user)).Entity;
+
+            await dbContext.UserPrompts.AddRangeAsync(UserPrompt.CreateDefault(user.Id));
 
             await dbContext.SaveChangesAsync();
         }

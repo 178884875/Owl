@@ -1,5 +1,5 @@
 @echo off
-set MIGRATION_NAME=Initial
+set MIGRATION_NAME=AddUserPromptIsDefault
 
 set ConnectionStrings:Type=postgresql
 dotnet ef migrations add --project src\EntityFrameworkCore\EntityFrameworkCore.PostgreSQL\EntityFrameworkCore.PostgreSQL.csproj --startup-project src\Owl.Chat.Host\Owl.Chat.Host.csproj --context EntityFrameworkCore.PostgreSQL.PostgreSQLDbContext --configuration Debug  %MIGRATION_NAME%  --output-dir Migrations\

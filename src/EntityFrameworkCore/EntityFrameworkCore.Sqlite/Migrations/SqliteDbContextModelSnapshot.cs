@@ -737,6 +737,48 @@ namespace EntityFrameworkCore.Sqlite.Migrations
                     b.ToTable("UserOAuths");
                 });
 
+            modelBuilder.Entity("Owl.Chat.Core.Entities.UserPrompt", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Prompt")
+                        .HasMaxLength(-1)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserPrompt", (string)null);
+                });
+
             modelBuilder.Entity("Owl.Chat.Core.Entities.MessageFile", b =>
                 {
                     b.HasOne("Owl.Chat.Core.Entities.FileStorage", "FileStorage")

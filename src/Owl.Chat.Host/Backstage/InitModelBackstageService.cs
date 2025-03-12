@@ -33,49 +33,51 @@ public sealed class InitModelBackstageService(
 
             var dbContext = scope.ServiceProvider.GetService<IDbContext>();
 
-
             if (await dbContext!.Models.AnyAsync(cancellationToken: stoppingToken))
             {
                 return;
             }
-
-            var items = new List<Model>(models.SelectMany(x => x.Models).Count());
-
-            foreach (var model in models)
+            else
             {
-                items.AddRange(model.Models.Select(chatModel => new Model()
+                var items = new List<Model>(models.SelectMany(x => x.Models).Count());
+
+                foreach (var model in models)
                 {
-                    Id = Guid.NewGuid().ToString("N"),
-                    ModelId = chatModel.Id,
-                    ContextWindowTokens = chatModel.ContextWindowTokens,
-                    Enabled = chatModel.Enabled,
-                    DisplayName = chatModel.DisplayName,
-                    Description = chatModel.Description,
-                    Pricing = new Pricing()
+                    items.AddRange(model.Models.Select(chatModel => new Model()
                     {
-                        Input = chatModel.Pricing?.Input,
-                        Output = chatModel.Pricing?.Output,
-                        WriteCacheInput = chatModel.Pricing?.WriteCacheInput,
-                        AudioInput = chatModel.Pricing?.AudioInput,
-                        AudioOutput = chatModel.Pricing?.AudioOutput,
-                        CachedInput = chatModel.Pricing?.CachedInput,
-                        CachedAudioInput = chatModel.Pricing?.CachedAudioInput,
-                        Standard = chatModel.Pricing?.Standard
-                    },
-                    Type = chatModel.Type,
-                    MaxOutput = chatModel.MaxOutput,
-                    Provider = model.Provider,
-                    ReleasedAt = chatModel.ReleasedAt,
-                    CreatedAt = DateTime.Now,
-                    Abilities = new Abilities() { Vision = chatModel.Vision, FunctionCall = chatModel.FunctionCall },
-                }));
+                        Id = Guid.NewGuid().ToString("N"),
+                        ModelId = chatModel.Id,
+                        ContextWindowTokens = chatModel.ContextWindowTokens,
+                        Enabled = chatModel.Enabled,
+                        DisplayName = chatModel.DisplayName,
+                        Description = chatModel.Description,
+                        Pricing = new Pricing()
+                        {
+                            Input = chatModel.Pricing?.Input,
+                            Output = chatModel.Pricing?.Output,
+                            WriteCacheInput = chatModel.Pricing?.WriteCacheInput,
+                            AudioInput = chatModel.Pricing?.AudioInput,
+                            AudioOutput = chatModel.Pricing?.AudioOutput,
+                            CachedInput = chatModel.Pricing?.CachedInput,
+                            CachedAudioInput = chatModel.Pricing?.CachedAudioInput,
+                            Standard = chatModel.Pricing?.Standard
+                        },
+                        Type = chatModel.Type,
+                        MaxOutput = chatModel.MaxOutput,
+                        Provider = model.Provider,
+                        ReleasedAt = chatModel.ReleasedAt,
+                        CreatedAt = DateTime.Now,
+                        Abilities =
+                            new Abilities() { Vision = chatModel.Vision, FunctionCall = chatModel.FunctionCall },
+                    }));
+                }
+
+                await dbContext.Models.AddRangeAsync(items, stoppingToken);
+
+                await HandleAsync(dbContext, items);
+
+                await dbContext.SaveChangesAsync();
             }
-
-            await dbContext.Models.AddRangeAsync(items, stoppingToken);
-
-            await HandleAsync(dbContext, items);
-
-            await dbContext.SaveChangesAsync();
         }
         catch (Exception ex)
         {
@@ -113,6 +115,8 @@ public sealed class InitModelBackstageService(
         };
 
         await context.Users.AddAsync(user);
+
+        await context.UserPrompts.AddRangeAsync(UserPrompt.CreateDefault(user.Id));
 
         await CreateChannelAsync(context, "OpenAI", "OpenAI", "OpenAI", "https://api.openai.com/v1",
             items
@@ -175,5 +179,7 @@ public sealed class InitModelBackstageService(
         };
 
         await context.ModelChannels.AddAsync(channel);
+
+        Console.Write("");
     }
 }

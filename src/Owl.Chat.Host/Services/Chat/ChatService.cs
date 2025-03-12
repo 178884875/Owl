@@ -122,6 +122,30 @@ public sealed class ChatService(
 
             messages.Reverse();
 
+            if (input.SelectedUserPromptId != null)
+            {
+                var userPrompt = await dbContext.UserPrompts
+                    .AsNoTracking()
+                    .Where(x => x.Id == input.SelectedUserPromptId && x.UserId == userContext.UserId)
+                    .FirstOrDefaultAsync();
+
+                if (userPrompt != null && !string.IsNullOrEmpty(userPrompt.Prompt))
+                {
+                    messages.Insert(0, new Message()
+                    {
+                        Role = "user",
+                        Texts = new List<MessageText>()
+                        {
+                            new()
+                            {
+                                Text = userPrompt.Prompt
+                            }
+                        }
+                    });
+                }
+                
+            }
+
             var first = true;
             // 获取当前会话模型属于的模型
             var model = await dbContext.Models

@@ -18,11 +18,16 @@ export interface ChatState {
      * 是否开启联网
      */
     networking: boolean;
+    /**
+     * 当前选中的用户提示
+     */
+    selectedUserPrompt?: any;
 }
 
 export const initialState: ChatState = {
     sideBarExpanded: localStorage.getItem('sideBarExpanded') === 'true',
     sessions: [],
+    selectedUserPrompt: null,
     currentSession: {
         id: -1,
     },

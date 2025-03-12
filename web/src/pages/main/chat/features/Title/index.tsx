@@ -42,8 +42,12 @@ export default function Title() {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
+                        width: '100%',
+                        maxWidth: '200px',
                     }}>
-                        {currentSession?.name}
+                        <Tooltip title={currentSession?.name}>
+                            {currentSession?.name}
+                        </Tooltip>
                     </Flexbox>
                     <Tag color="blue">
                         <Tooltip title={model?.description}>

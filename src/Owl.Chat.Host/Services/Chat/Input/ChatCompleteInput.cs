@@ -31,4 +31,6 @@ public class ChatCompleteInput
     /// 是否启用联网模式
     /// </summary>
     public bool Networking { get; set; }
+    
+    public long? SelectedUserPromptId { get; set; }
 }

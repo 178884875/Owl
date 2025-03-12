@@ -41,6 +41,8 @@ public interface IDbContext
     /// 模型渠道邀请码
     /// </summary>
     DbSet<ModelChannelInviteCode> ModelChannelInviteCodes { get; set; }
+    
+    DbSet<UserPrompt> UserPrompts { get; set; }
 
     Task SaveChangesAsync();
     

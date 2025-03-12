@@ -166,6 +166,11 @@ export interface ChatAction {
      * 切换收藏状态
      */
     toggleFavorite: (id: number) => Promise<void>;
+
+    /**
+     * 设置当前选中的用户提示
+     */
+    setSelectedUserPrompt: (prompt: any) => void;
 }
 
 
@@ -190,6 +195,9 @@ export const createChatSlice: StateCreator<
         } else {
             message.error(result.message);
         }
+    },
+    setSelectedUserPrompt: (prompt: any) => {
+        set({ selectedUserPrompt: prompt });
     },
     updateSession: async (value: any) => {
         value.avatar = value.avatar ?? '🤖';
@@ -372,6 +380,7 @@ export const createChatSlice: StateCreator<
             text: userMessage.texts[0].text,
             fileIds: userMessage.files.map(file => file.fileId),
             functionCalls: [],
+            selectedUserPromptId: get().selectedUserPrompt,
             assistantMessageId: tempAiMessage.texts[tempAiMessage.texts.length - 1].id
         };
 
@@ -418,6 +427,7 @@ export const createChatSlice: StateCreator<
         const userMessage = {
             sessionId: sessionId,
             role: ChatRole.User,
+            selectedUserPromptId: get().selectedUserPrompt,
             texts: [
                 {
                     text: input.value
@@ -465,6 +475,7 @@ export const createChatSlice: StateCreator<
             const chatCompleteParams = {
                 sessionId: sessionId,
                 parentId: 0,
+                selectedUserPromptId: get().selectedUserPrompt,
                 text: userMessage.texts[0].text,
                 fileIds: userMessage.files.map(file => file.fileId),
                 functionCalls: [],
@@ -585,6 +596,7 @@ export const createChatSlice: StateCreator<
                 sessionId: get().currentSession.id,
                 parentId: 0,
                 text: '',
+                selectedUserPromptId: get().selectedUserPrompt,
                 fileIds: [],
                 networking: get().networking,
                 functionCalls: [],

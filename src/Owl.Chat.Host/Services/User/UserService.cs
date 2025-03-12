@@ -9,6 +9,7 @@ using Owl.Chat.Host.Services.User.Dto;
 using Owl.Chat.Host.Services.User.Input;
 using Owl.Chat.Core;
 using Owl.Chat.Core.Dto;
+using Owl.Chat.Core.Entities;
 
 namespace Owl.Chat.Host.Services.User;
 
@@ -149,6 +150,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
         newUser.Enabled = true;
         newUser.PasswordHash = EncryptionHelper.Md5(newUser.PasswordHash);
         await dbContext.Users.AddAsync(newUser);
+        await dbContext.UserPrompts.AddRangeAsync(UserPrompt.CreateDefault(newUser.Id));
         await dbContext.SaveChangesAsync();
         return mapper.Map<UserDto>(newUser);
     }
@@ -298,7 +300,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
         dbContext.Users.Update(user);
         await dbContext.SaveChangesAsync();
     }
-    
+
     /// <summary>
     /// 修改用户密码
     /// </summary>
@@ -320,5 +322,57 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
         user.PasswordHash = EncryptionHelper.Md5(input.NewPassword);
         dbContext.Users.Update(user);
         await dbContext.SaveChangesAsync();
+    }
+
+    [Authorize]
+    public async Task<List<UserPrompt>> GetUserPromptsAsync()
+    {
+        var value = await dbContext.UserPrompts.Where(x => x.UserId == userContext.UserId).ToListAsync();
+
+        value.ForEach(x => x.Prompt = string.Empty);
+
+        return value;
+    }
+
+    [Authorize]
+    public async Task CreateUserPromptAsync(CreateUserPromptInput input)
+    {
+        var userPrompt = new UserPrompt
+        {
+            UserId = userContext.UserId,
+            Description = input.Description,
+            Name = input.Name,
+            Prompt = input.Prompt
+        };
+        await dbContext.UserPrompts.AddAsync(userPrompt);
+        await dbContext.SaveChangesAsync();
+    }
+
+    [Authorize]
+    public async Task DeleteUserPromptAsync(long id)
+    {
+        var userPrompt = await dbContext.UserPrompts.FirstOrDefaultAsync(x =>
+            x.Id == id && x.UserId == userContext.UserId && x.IsDefault == false);
+        if (userPrompt == null)
+        {
+            throw new BusinessException("用户提示不存在");
+        }
+
+        if (userPrompt.UserId != userContext.UserId)
+        {
+            throw new BusinessException("无权删除");
+        }
+
+        dbContext.UserPrompts.Remove(userPrompt);
+        await dbContext.SaveChangesAsync();
+    }
+
+    [Authorize]
+    public async Task UpdateUserPromptAsync(UpdateUserPromptInput input)
+    {
+        await dbContext.UserPrompts.Where(x => x.Id == input.Id && x.UserId == userContext.UserId)
+            .ExecuteUpdateAsync(a => a.SetProperty(a => a.Name, input.Name)
+                .SetProperty(a => a.Description, input.Description)
+                .SetProperty(a => a.Prompt, input.Prompt));
     }
 }
