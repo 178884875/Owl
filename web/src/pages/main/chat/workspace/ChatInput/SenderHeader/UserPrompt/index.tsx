@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Select, Spin, message, Tooltip, Divider, Button, Modal, Form, Input, List, Typography, Empty, Popconfirm, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined,  FileTextOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { getUserPrompts, createUserPrompt, deleteUserPrompt } from '@/apis/User';
 import { useChatStore } from '@/store/chat/store';
 const { Option } = Select;
@@ -130,12 +130,6 @@ const UserPrompt: React.FC = () => {
             console.error('Failed to delete prompt:', error);
             message.error('删除提示词失败');
         }
-    };
-
-    // 获取提示词内容的简短预览
-    const getPromptPreview = (prompt: string) => {
-        if (!prompt) return '';
-        return prompt.length > 50 ? `${prompt.substring(0, 50)}...` : prompt;
     };
 
     // 渲染提示词列表界面

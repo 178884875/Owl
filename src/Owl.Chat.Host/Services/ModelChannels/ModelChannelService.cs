@@ -134,7 +134,25 @@ public class ModelChannelService(
     {
         var entity = mapper.Map<ModelChannel>(input);
 
+        if (string.IsNullOrEmpty(input.ApiKey))
+        {
+            throw new BusinessException("请先添加密钥");
+        }
+
+        entity.CreatedBy = userContext.UserId;
+
+        entity.Keys =
+        [
+            new ModelChannelKey()
+            {
+                Key = input.ApiKey,
+                Order = 999,
+                Description = "默认密钥"
+            }
+        ];
+
         await dbContext.ModelChannels.AddAsync(entity);
+
 
         await dbContext.SaveChangesAsync();
     }
@@ -361,7 +379,7 @@ public class ModelChannelService(
         {
             throw new BusinessException("邀请码无效");
         }
-        
+
         // 不能邀请自己
         if (inviteCode.Inviter == userContext.UserId)
         {

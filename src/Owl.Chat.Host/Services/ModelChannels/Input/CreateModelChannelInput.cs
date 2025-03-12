@@ -38,6 +38,11 @@ public class CreateModelChannelInput
     /// 渠道标签
     /// </summary>
     public string[] Tags { get; set; } = Array.Empty<string>();
+    
+    /// <summary>
+    /// ApiKey
+    /// </summary>
+    public string ApiKey { get; set; }
 
     /// <summary>
     /// 密钥列表
