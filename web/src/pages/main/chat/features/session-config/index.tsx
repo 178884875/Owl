@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 import { useChatStore } from '@/store/chat';
-import { Button, Input, Select, Slider, Form, Checkbox, Dropdown, Tooltip, Drawer, Divider, Space, Typography, Card } from 'antd';
+import { Button, Input, Select, Slider, Form, Checkbox, Tooltip, Drawer, Space, Typography, Card } from 'antd';
 import { chatSelectors } from '@/store/chat/selectors';
 import { theme } from 'antd';
 import { getIconByName } from '@/utils/iconutil';
@@ -51,7 +51,7 @@ const ConfigPanel = ({
   );
 };
 
-const ModelSelector = ({ renameModel, setRenameModel, models, token }: { renameModel: string | undefined, setRenameModel: (renameModel: string | undefined) => void, models: any[], token: any }) => {
+const ModelSelector = ({ renameModel, models, token }: { renameModel: string | undefined, models: any[], token: any }) => {
     const renderModel = () => {
         const item = models?.find(item => item.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel) !== undefined)?.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel);
         return <Flexbox
@@ -245,7 +245,6 @@ export default function SessionConfig() {
                         <Form.Item label="话题重命名模型" name="renameModel">
                             <ModelSelector
                                 renameModel={renameModel}
-                                setRenameModel={setRenameModel}
                                 models={models}
                                 token={token}
                             />
