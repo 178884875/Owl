@@ -1,12 +1,9 @@
 import { Flexbox } from "react-layout-kit";
-import { MessageSquareText } from "lucide-react";
 import { message, theme } from "antd";
-import { useChatStore } from "@/store/chat";
 
 export default function Chat() {
 
     const { token } = theme.useToken();
-    const [expanded] = useChatStore(state => [state.sideBarExpanded]);
 
     return (<Flexbox
         onClick={() => {

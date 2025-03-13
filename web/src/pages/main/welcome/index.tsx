@@ -17,7 +17,6 @@ import {
   CodeOutlined,
   CloudOutlined,
   DatabaseOutlined,
-  GithubOutlined
 } from '@ant-design/icons';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
@@ -26,7 +25,7 @@ import ModelFeatureTags from '@/features/ModelFeatureTags';
 import { useChatStore } from '@/store/chat';
 import { getIconByName } from '@/utils/iconutil';
 import { MenuItemGroupType } from 'antd/es/menu/interface';
-import { DEFAULT_MODEL, WEBSITE, GITHUB_URL } from '@/consts/app';
+import { DEFAULT_MODEL, WEBSITE } from '@/consts/app';
 import { useNavigate } from 'react-router-dom';
 import { uploadFile } from '@/apis/FileStorage';
 import { getRecentSessions } from '@/apis/Session';

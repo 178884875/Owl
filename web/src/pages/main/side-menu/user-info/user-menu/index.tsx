@@ -4,12 +4,14 @@ import { Avatar, Divider, Dropdown, theme } from "antd";
 import {
     ChartArea, MessageSquareText, LogOut as LogOutIcon, User, Webhook,
     Newspaper,
-    CircleHelp, KeyRound
+    CircleHelp, KeyRound,
+    Github
 } from "lucide-react";
 import React, { useState } from "react";
 import { Flexbox } from "react-layout-kit";
 import { useNavigate } from "react-router-dom";
 import { ChangePasswordModal } from "./change-password";
+import { GITHUB_URL } from "@/consts/app";
 
 const { useToken } = theme;
 
@@ -102,6 +104,17 @@ export function UserMenu({
                             icon: <KeyRound size={18} />,
                             onClick: () => {
                                 setChangePasswordOpen(true);
+                            }
+                        },
+                        {
+                            type: 'divider',
+                        },
+                        {
+                            key: 'github',
+                            label: '关注我们',
+                            icon: <Github size={18} />,
+                            onClick: () => {
+                                window.open(GITHUB_URL, '_blank')
                             }
                         },
                         {
