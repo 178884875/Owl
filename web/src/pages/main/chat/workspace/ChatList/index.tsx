@@ -23,9 +23,8 @@ export default function ChatList() {
         setMessages,
         currentSession,
         regenerateMessage,
-        generateLoading
     ] =
-        useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage, state.generateLoading]);
+        useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage]);
 
     const user = useUserStore(state => state.user);
 
@@ -278,11 +277,6 @@ export default function ChatList() {
                 showFootnotes
                 variant='chat'
                 fullFeaturedCodeBlock
-                componentProps={{
-                  highlight: {
-                    defalutExpand: generateLoading
-                  },
-                }}
                 rehypePlugins={[rehypeKatex]}
                 remarkPlugins={[remarkMath]}
             >
