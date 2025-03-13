@@ -316,7 +316,6 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
             throw new BusinessException("MaxOutput必须大于0");
         }
 
-
         var model = mapper.Map<Model>(dto);
 
         model.Id = Guid.NewGuid().ToString();

@@ -43,6 +43,16 @@ public sealed class ChatService(
     ILogger<ChatService> logger)
     : FastApi
 {
+    /// <summary>
+    /// think: 协议头
+    /// </summary>
+    public const string ThinkStart = "<think>";
+
+    /// <summary>
+    /// think: 协议尾
+    /// </summary>
+    public const string ThinkEnd = "</think>";
+
     private static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
     {
         {
@@ -143,10 +153,10 @@ public sealed class ChatService(
                         }
                     });
                 }
-                
             }
 
             var first = true;
+            var isThink = false;
             // 获取当前会话模型属于的模型
             var model = await dbContext.Models
                 .AsNoTracking()
@@ -382,8 +392,6 @@ public sealed class ChatService(
                     context.Response.Headers.ContentType = "text/event-stream";
                     context.Response.Headers.CacheControl = "no-cache";
                     context.Response.Headers.Connection = "keep-alive";
-
-                    first = false;
                 }
 
                 if (item.InnerContent is StreamingFunctionCallUpdateContent functionCallUpdateContent)
@@ -417,6 +425,33 @@ public sealed class ChatService(
                     }
                     else
                     {
+                        #region 解析内容中的think协议
+
+                        if (first && item.ToString().Equals(ThinkStart, StringComparison.OrdinalIgnoreCase))
+                        {
+                            isThink = true;
+                            continue;
+                        }
+
+                        if (item.ToString().Equals(ThinkEnd, StringComparison.OrdinalIgnoreCase))
+                        {
+                            isThink = false;
+                            continue;
+                        }
+
+                        if (isThink)
+                        {
+                            reasoningUpdateSb.Append(item);
+                            await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
+                            {
+                                data = item,
+                                type = "reasoning",
+                            }, JsonOptions.DefaultJsonSerializerOptions) + "\n\n");
+                            continue;
+                        }
+
+                        #endregion
+
                         sb.Append(item);
                         await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(new
                         {
@@ -425,6 +460,8 @@ public sealed class ChatService(
                         }, JsonOptions.DefaultJsonSerializerOptions) + "\n\n");
                     }
                 }
+
+                first = false;
             }
 
             sw.Stop();
