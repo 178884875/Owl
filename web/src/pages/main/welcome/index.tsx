@@ -50,7 +50,7 @@ export default function WelcomePage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const [loadModels, models, createSession] =
-    useChatStore(state => [state.loadModels, state.models, state.createSession]);
+    useChatStore(state => [state.loadChatModels, state.chatModels, state.createSession]);
   const [model, setModel] = useState<any>();
 
   const user = useUser();
@@ -326,31 +326,8 @@ export default function WelcomePage() {
           >
             <Flexbox >
               <Tag color="purple" style={{ borderRadius: 16, padding: '2px 12px' }}>
-                开 源 社 区 版
+                开源社区版
               </Tag>
-              <Button
-                onClick={() => window.open(GITHUB_URL, '_blank')}
-                style={{
-                  marginTop: 8,
-                }}
-                type='text'
-              >
-                <GithubOutlined />
-                <Text>
-                  Star
-                </Text>
-              </Button>
-              <Button
-                onClick={() => window.open('https://qm.qq.com/q/u8ClPTT3BC', '_blank')}
-                style={{
-                  marginTop: 8,
-                }}
-                type='text'
-              >
-                <Text>
-                  加入QQ
-                </Text>
-              </Button>
             </Flexbox>
           </motion.div>
 
@@ -389,7 +366,7 @@ export default function WelcomePage() {
           >
             <Card
               style={{
-                borderRadius: token.borderRadius,
+                borderRadius: 12,
                 marginBottom: 16,
                 background: token.colorBgElevated,
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
@@ -398,13 +375,13 @@ export default function WelcomePage() {
             >
               <TextArea
                 placeholder={`嗨，${user?.displayName || 'Guest'}，${getGreeting()}我可以帮助您什么？`}
-                autoSize={{ minRows: 1, maxRows: 6 }}
+                autoSize={{ minRows: 3, maxRows: 6 }}
                 style={{
                   background: 'transparent',
                   border: 'none',
                   boxShadow: 'none',
                   resize: 'none',
-                  fontSize: 16
+                  fontSize: 14,
                 }}
                 bordered={false}
                 value={inputValue}
@@ -496,7 +473,6 @@ export default function WelcomePage() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 marginTop: 8,
-                borderTop: `1px solid ${token.colorBorderSecondary}`,
                 paddingTop: 12
               }}>
                 <div style={{ display: 'flex', gap: 8 }}>

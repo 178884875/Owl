@@ -18,7 +18,7 @@ export default function CreateSession() {
     const { token } = useToken();
     const navigate = useNavigate();
     const [loadModels, models, visible, setVisible, createSession, value, setValue] =
-        useChatStore(state => [state.loadModels, state.models, state.createSessionVisible, state.setCreateSessionVisible, state.createSession, state.value, state.updateValue]);
+        useChatStore(state => [state.loadChatModels, state.chatModels, state.createSessionVisible, state.setCreateSessionVisible, state.createSession, state.value, state.updateValue]);
     const [model, setModel] = useState<string | undefined>();
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -183,7 +183,7 @@ export default function CreateSession() {
                         closable={false}
                         onCancel={() => setVisible(false)}
                         footer={null}
-                        width={520}
+                        width={620}
                         bodyStyle={{
                             padding: '24px',
                             borderRadius: '12px',
@@ -319,7 +319,6 @@ export default function CreateSession() {
 
                             <Flexbox style={{
                                 justifyContent: 'space-between',
-                                borderTop: `1px solid ${token.colorBorderSecondary}`,
                                 paddingTop: 16
                             }} horizontal align="center">
                                 <div style={{ display: 'flex', gap: 12 }}>

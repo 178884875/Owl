@@ -14,7 +14,7 @@ const { useToken } = theme;
 export default function Model() {
     const { token } = useToken();
     const [loadModels, models, switchSessionModel, currentSession]
-        = useChatStore(state => [state.loadModels, state.models, state.switchSessionModel, state.currentSession]);
+        = useChatStore(state => [state.loadChatModels, state.chatModels, state.switchSessionModel, state.currentSession]);
 
     useEffect(() => {
         loadModels();

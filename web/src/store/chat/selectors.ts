@@ -45,7 +45,7 @@ const getCurrentModel = (state: ChatState) => {
     // 从state.currentSession中获取modelId
     const modelId = state.currentSession?.model;
     // 从state.models中获取model
-    const model = state.models?.find(item => item.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === modelId) !== undefined)?.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === modelId);
+    const model = state.chatModels?.find(item => item.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === modelId) !== undefined)?.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === modelId);
 
     return model
 }

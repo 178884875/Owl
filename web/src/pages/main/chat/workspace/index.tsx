@@ -2,10 +2,14 @@ import { Flexbox } from "react-layout-kit";
 import SessionConfigPage from "../features/session-config";
 import ChatList from "./ChatList";
 import ChatInput from "./ChatInput";
-
-
+import { useChatStore } from "@/store/chat";
+import ChatWelcome from "./ChatWelcome";
 
 export default function Workspace() {
+    const [
+        messages,
+    ] =
+        useChatStore(state => [state.messages]);
 
 
     return (<Flexbox
@@ -24,7 +28,7 @@ export default function Workspace() {
             display: 'flex',
             flexDirection: 'column',
         }}>
-            <ChatList />
+            {messages.length === 0 ? <ChatWelcome /> : <ChatList />}
             <ChatInput />
         </Flexbox>
         <SessionConfigPage />

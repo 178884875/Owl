@@ -12,7 +12,8 @@ export interface ChatState {
     // 展开文件
     fileExpanded?: boolean;
     createSessionVisible?: boolean;
-    models: any[];
+    chatModels: any[];
+    models:any[];
     generateLoading: boolean;
     /**
      * 是否开启联网
@@ -37,7 +38,8 @@ export const initialState: ChatState = {
     files: [],
     searchSessionValue: '',
     fileExpanded: false,
-    models: [],
+    chatModels: [],
+    models:[],
     generateLoading: false,
     networking: false,
 }

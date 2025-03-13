@@ -1,0 +1,97 @@
+.welcomeContainer {
+  padding: 24px;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+}
+
+.welcomeHeader {
+  text-align: center;
+  margin-bottom: 48px;
+  padding: 24px 0;
+}
+
+.logo {
+  height: 64px;
+  width: auto;
+}
+
+.welcomeTitle {
+  margin: 0 !important;
+  color: #1890ff;
+}
+
+.welcomeSubtitle {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-top: 8px !important;
+}
+
+.contentSection {
+  flex: 1;
+}
+
+.mainCard {
+  height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
+.sideCard {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
+.promptsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.promptButton {
+  height: auto;
+  white-space: normal;
+  text-align: left;
+  padding: 12px 16px;
+  border-radius: 6px;
+  transition: all 0.3s;
+  border: 1px solid #d9d9d9;
+}
+
+.promptButton:hover {
+  border-color: #1890ff;
+  background-color: rgba(24, 144, 255, 0.05);
+}
+
+.newChatAction {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.tipsList {
+  padding-left: 16px;
+  margin-bottom: 0;
+}
+
+.tipsList li {
+  margin-bottom: 8px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.footer {
+  margin-top: 24px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .welcomeHeader {
+    margin-bottom: 24px;
+  }
+  
+  .promptsGrid {
+    grid-template-columns: 1fr;
+  }
+} 

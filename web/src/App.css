@@ -82,3 +82,7 @@ body {
 .ant-highlighter .layoutkit-flexbox {
   padding-inline: 0px;
 }
+
+.ant-prompts-list-vertical {
+  overflow: hidden;
+}

@@ -139,7 +139,7 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
     /// </summary>
     /// <returns></returns>
     [Authorize]
-    public async Task<List<InitModelsDto>> GetCurrentUserModelsAsync()
+    public async Task<List<object>> GetCurrentUserModelsAsync()
     {
         var sharedChannels = await context.ModelChannelShareUsers
             .Where(x => x.UserId == userContext.UserId)
@@ -148,63 +148,61 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
 
 
         // 先获取用户所有渠道，包括共享的
-        var channels =( await context.ModelChannels
+        var channels = (await context.ModelChannels
             .Where(x => x.CreatedBy == userContext.UserId || sharedChannels.Contains(x.Id))
             .Select(x => x.ModelIds)
-            .ToListAsync()).SelectMany(x=>x);
+            .ToListAsync()).SelectMany(x => x);
 
         var models = await context.Models
             .Where(x => x.Enabled == true && channels.Contains(x.Id))
             .ToListAsync();
 
-        var modelsDto = new List<InitModelsDto>();
-
-        foreach (var model in models)
-        {
-            // 判断是否已经存在当前提供商
-            var modelDto = modelsDto.FirstOrDefault(x => x.Provider == model.Provider);
-            if (modelDto == null)
-            {
-                modelsDto.Add(modelDto = new InitModelsDto()
-                {
-                    Provider = model.Provider,
-                    Models = new List<InitModelChatModels>()
-                });
-            }
-
-            modelDto.Models.Add(new InitModelChatModels()
-            {
-                ContextWindowTokens = model.ContextWindowTokens,
-                Description = model.Description,
-                DisplayName = model.DisplayName,
-                Enabled = model.Enabled,
-                Id = model.Id,
-                ModelId = model.ModelId,
-                MaxOutput = model.MaxOutput,
-                Pricing = new InitModelPricing()
-                {
-                    CachedInput = model.Pricing.CachedInput,
-                    Input = model.Pricing.Input,
-                    Output = model.Pricing.Output,
-                    WriteCacheInput = model.Pricing.WriteCacheInput,
-                },
-                ReleasedAt = model.ReleasedAt,
-                Type = model.Type,
-                Vision = model.Abilities.Vision,
-                FunctionCall = model.Abilities.FunctionCall,
-            });
-        }
-
-        // 将OpenAI排在第一个
-        var openAi = modelsDto.FirstOrDefault(x => x.Provider == "OpenAI");
+        // OpenAI排在第一个 Anthropic 排在第二个
+        var openAi = models.FirstOrDefault(x => x.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase));
+        var anthropic = models.FirstOrDefault(x => x.Provider.Equals("Anthropic", StringComparison.OrdinalIgnoreCase));
 
         if (openAi != null)
         {
-            modelsDto.Remove(openAi);
-            modelsDto.Insert(0, openAi);
+            models.Remove(openAi);
+            models.Insert(0, openAi);
         }
 
-        return modelsDto;
+        if (anthropic != null)
+        {
+            models.Remove(anthropic);
+            models.Insert(1, anthropic);
+        }
+
+        // 根据provider分组
+        var group = models.GroupBy(x => x.Provider);
+
+        var result = new List<object>();
+
+        foreach (var item in group)
+        {
+            var provider = new
+            {
+                Provider = item.Key,
+                Models = item.Select(x => new
+                {
+                    x.Id,
+                    x.ModelId,
+                    x.DisplayName,
+                    x.Description,
+                    x.Type,
+                    x.ContextWindowTokens,
+                    x.MaxOutput,
+                    x.Enabled,
+                    x.ReleasedAt,
+                    x.Abilities,
+                    x.Pricing,
+                })
+            };
+
+            result.Add(provider);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -257,11 +255,18 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
 
         // 将OpenAI排在第一个
         var openAi = modelsDto.FirstOrDefault(x => x.Provider == "OpenAI");
+        var anthropic = modelsDto.FirstOrDefault(x => x.Provider == "Anthropic");
 
         if (openAi != null)
         {
             modelsDto.Remove(openAi);
             modelsDto.Insert(0, openAi);
+        }
+
+        if (anthropic != null)
+        {
+            modelsDto.Remove(anthropic);
+            modelsDto.Insert(1, anthropic);
         }
 
         return modelsDto;

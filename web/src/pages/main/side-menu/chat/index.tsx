@@ -20,7 +20,7 @@ export default function Chat() {
             marginBottom: 5,
         }}
     >
-        <Flexbox
+        {/* <Flexbox
             horizontal
             style={{
                 padding: 5,
@@ -47,6 +47,6 @@ export default function Chat() {
                         与好友聊天
                     </span>)
             }
-        </Flexbox>
+        </Flexbox> */}
     </Flexbox>)
 }

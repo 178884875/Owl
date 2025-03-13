@@ -68,6 +68,8 @@ export default function SideMenu() {
             ...styles.container,
             width: expanded ? 220 : 50,
             maxWidth: 220,
+            // 如果没有展开则隐藏背景
+            backgroundColor: expanded ? 'transparent' : 'transparent',
         }}>
             <Flexbox horizontal style={styles.header}>
                 <Flexbox style={{
@@ -96,6 +98,6 @@ export default function SideMenu() {
             <UserInfo />
             <CreateSession />
         </Flexbox>
-        <Divider type="vertical" style={styles.divider} />
+        {expanded && <Divider type="vertical" style={styles.divider} />}
     </>)
 }

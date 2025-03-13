@@ -117,7 +117,7 @@ export default function SessionConfig() {
         chatSelectors.getCurrentModel(state),
         state.currentSession,
         state.updateSession,
-        state.models]);
+        state.chatModels]);
 
     const [form] = Form.useForm();
     const [renameModel, setRenameModel] = useState<string | undefined>(undefined);

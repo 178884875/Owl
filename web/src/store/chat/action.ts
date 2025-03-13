@@ -95,7 +95,7 @@ export interface ChatAction {
     /**
      * 加载当前用户可用模型列表
      */
-    loadModels: () => Promise<any[]>;
+    loadChatModels: () => Promise<any[]>;
 
     /**
      * 加载所有启用模型列表
@@ -284,7 +284,7 @@ export const createChatSlice: StateCreator<
     },
     clearCacheAndReloadModels: async () => {
         const result = await getCurrentUserModels();
-        set({ models: result.data });
+        set({ chatModels: result.data });
     },
     loadEnabledModels: async () => {
         const result = await getModelList();
@@ -292,12 +292,12 @@ export const createChatSlice: StateCreator<
 
         return result.data;
     },
-    loadModels: async () => {
-        if (get().models.length > 0) {
-            return get().models;
+    loadChatModels: async () => {
+        if (get().chatModels.length > 0) {
+            return get().chatModels;
         }
         const value = await getCurrentUserModels()
-        set({ models: value.data });
+        set({ chatModels: value.data });
         return value.data;
     },
     createSession: async ({

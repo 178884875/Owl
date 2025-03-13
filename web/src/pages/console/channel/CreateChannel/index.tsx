@@ -20,7 +20,7 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
   const [modelIds, setModelIds] = useState<string[]>([]);
   const [selectedIcon, setSelectedIcon] = useState<string>('OpenAI');
   const [loadingRemoteModel, setLoadingRemoteModel] = useState(false);
-  const [loadEnabledModels, models] = useChatStore(state => [state.loadEnabledModels, state.models]);
+  const [loadEnabledModels, models] = useChatStore(state => [state.loadEnabledModels, state.chatModels]);
 
   useEffect(() => {
     loadEnabledModels();
