@@ -1,0 +1,17 @@
+.markdown-render .ant-typography {
+    margin: 0 !important;
+}
+
+.shiki.light {
+    background-color: #f0f0f0;
+    height: 100%;
+}
+
+.shiki.dark {
+    background-color: #1e1e1e;
+    height: 100%;
+}
+
+.ant-highlighter-shiki {
+    height: 100%;
+}

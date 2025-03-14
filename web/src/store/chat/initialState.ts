@@ -13,7 +13,7 @@ export interface ChatState {
     fileExpanded?: boolean;
     createSessionVisible?: boolean;
     chatModels: any[];
-    models:any[];
+    models: any[];
     generateLoading: boolean;
     /**
      * 是否开启联网
@@ -23,6 +23,25 @@ export interface ChatState {
      * 当前选中的用户提示
      */
     selectedUserPrompt?: any;
+
+    /**
+     * 是否显示代码渲染
+     */
+    codeRendering: {
+        visible: false,
+        index: 0,
+        /**
+         * 代码渲染的items
+         */
+        items: CodeRenderingItem[]
+    }
+}
+
+export interface CodeRenderingItem {
+    language: string;
+    code: string;
+    title: string;
+    description: string;
 }
 
 export const initialState: ChatState = {
@@ -39,7 +58,12 @@ export const initialState: ChatState = {
     searchSessionValue: '',
     fileExpanded: false,
     chatModels: [],
-    models:[],
+    models: [],
     generateLoading: false,
     networking: false,
+    codeRendering: {
+        visible: false,
+        index: 0,
+        items: [] as CodeRenderingItem[],
+    }
 }

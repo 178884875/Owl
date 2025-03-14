@@ -3,16 +3,14 @@ import { Button, Tag, Tooltip } from "antd";
 import { Bolt, MessageSquarePlus } from "lucide-react";
 import { Flexbox } from "react-layout-kit";
 import { useStyles } from "./styles";
-import { chatSelectors } from "@/store/chat/selectors";
 export default function Title() {
     const isChat = window.location.pathname.startsWith('/chat');
     const [
         expanded,
         setExpanded,
         createSessionVisible,
-        model,
         currentSession
-    ] = useChatStore(state => [state.sessionConfigExpanded, state.setSessionConfigExpanded, state.setCreateSessionVisible, chatSelectors.getCurrentModel(state), state.currentSession]);
+    ] = useChatStore(state => [state.sessionConfigExpanded, state.setSessionConfigExpanded, state.setCreateSessionVisible, state.currentSession]);
 
 
     const { styles, cx } = useStyles();
@@ -49,11 +47,6 @@ export default function Title() {
                             {currentSession?.name}
                         </Tooltip>
                     </Flexbox>
-                    <Tag color="blue">
-                        <Tooltip title={model?.description}>
-                            {model?.modelId}
-                        </Tooltip>
-                    </Tag>
                 </Flexbox>
                 {isChat && <Button
                     onClick={() => setExpanded(!expanded)}

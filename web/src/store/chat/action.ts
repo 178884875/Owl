@@ -171,6 +171,11 @@ export interface ChatAction {
      * 设置当前选中的用户提示
      */
     setSelectedUserPrompt: (prompt: any) => void;
+
+    /**
+     * 设置代码渲染
+     */
+    setCodeRendering: (codeRendering: any) => void;
 }
 
 
@@ -198,6 +203,9 @@ export const createChatSlice: StateCreator<
     },
     setSelectedUserPrompt: (prompt: any) => {
         set({ selectedUserPrompt: prompt });
+    },
+    setCodeRendering: (codeRendering: any) => {
+        set({ codeRendering });
     },
     updateSession: async (value: any) => {
         value.avatar = value.avatar ?? '🤖';
@@ -455,7 +463,6 @@ export const createChatSlice: StateCreator<
             id: 0
         };
 
-
         const result = await createMessage(userMessage);
         userMessage.id = result.data.id;
         // 添加一个临时的AI响应消息
@@ -503,7 +510,6 @@ export const createChatSlice: StateCreator<
                     accumulatedText += data;
                     tempAiMessage.texts[tempAiMessage.texts.length - 1].text = accumulatedText;
 
-                    // 每100ms更新一次，创建全新数组
                     const currentTime = Date.now();
                     if (currentTime - lastUpdateTime >= 100) {
                         set({ messages: [...get().messages] });
@@ -649,6 +655,7 @@ export const createChatSlice: StateCreator<
                 else if (type === 'model_usage') {
                     tempAiMessage.modelUsages = data;
                 }
+                
             }
             set({ messages: [...messages], generateLoading: false });
 
@@ -656,7 +663,6 @@ export const createChatSlice: StateCreator<
 
         } catch (error) {
             console.error('Error in chatComplete:', error);
-            // 将临时AI消息标记为错误
             set(state => ({
                 messages: state.messages.map(msg =>
                     msg === tempAiMessage ? {

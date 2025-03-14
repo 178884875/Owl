@@ -56,5 +56,6 @@ export const chatSelectors = {
     isCurrentSession,
     getMessages,
     getMessagesBySessionId,
-    getCurrentModel
+    getCurrentModel,
+    
 }

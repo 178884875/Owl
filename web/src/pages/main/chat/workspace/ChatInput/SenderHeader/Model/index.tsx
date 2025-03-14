@@ -8,13 +8,14 @@ import { MenuItemGroupType } from "antd/es/menu/interface";
 import ModelFeatureTags from "../../../../../../../features/ModelFeatureTags";
 import { useChatStore } from "@/store/chat";
 import { theme } from "antd";
+import { chatSelectors } from "@/store/chat/selectors";
 const { useToken } = theme;
 
 
 export default function Model() {
     const { token } = useToken();
-    const [loadModels, models, switchSessionModel, currentSession]
-        = useChatStore(state => [state.loadChatModels, state.chatModels, state.switchSessionModel, state.currentSession]);
+    const [loadModels, models, switchSessionModel, currentSession, model]
+        = useChatStore(state => [state.loadChatModels, state.chatModels, state.switchSessionModel, state.currentSession, chatSelectors.getCurrentModel(state)]);
 
     useEffect(() => {
         loadModels();
@@ -22,7 +23,7 @@ export default function Model() {
 
     return (
         <Tooltip
-            title="选择对话模型"
+            title={model?.description}
         >
             <Dropdown
                 trigger={['click']}
@@ -32,7 +33,6 @@ export default function Model() {
                         overflow: 'auto',
                     },
                     items: models?.map((model) => ({
-                        // 第一层是分组
                         label: model.provider,
                         type: 'group',
                         children: model.models?.map((chatModel: any) => ({
@@ -75,10 +75,15 @@ export default function Model() {
             >
                 <Button
                     type="text"
-                    shape="circle"
                     size='small'
+                    style={{
+                        padding: 5,
+                    }}
                 >
-                    <BrainCog size={14}/>
+                    <BrainCog size={14} />
+                    {
+                        model?.modelId
+                    }
                 </Button>
             </Dropdown>
         </Tooltip>

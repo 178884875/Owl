@@ -3,19 +3,14 @@ import { Flexbox } from 'react-layout-kit';
 import { getMessages, updateMessage } from '@/apis/Message';
 import { useEffect, useState } from 'react';
 import { Bubble } from '@ant-design/x';
-import { Avatar, Button, message, Popconfirm, Tooltip, Spin, Card, Typography, Image, Input, Collapse } from 'antd';
+import { Avatar, Button, message, Popconfirm, Tooltip, Input } from 'antd';
 import { useUserStore } from '@/store/user';
 import { SyncOutlined, CopyOutlined, DeleteOutlined, EditOutlined, CloseOutlined } from '@ant-design/icons';
-import { Markdown } from '@lobehub/ui';
 import { deleteMessage } from '@/apis/Message';
-import { ChevronUp, ChevronDown } from 'lucide-react';
-import { FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
 import { theme } from 'antd';
 import { UpdateMessage } from '@/types/Message';
-const { Text, } = Typography;
 import ChatWelcome from '../ChatWelcome';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
+import ChatItem from './ChatItem';
 
 export default function ChatList() {
     const { token } = theme.useToken();
@@ -24,15 +19,15 @@ export default function ChatList() {
         setMessages,
         currentSession,
         regenerateMessage,
+        setCodeRendering,
+        generateLoading
     ] =
-        useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage]);
+        useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage, state.setCodeRendering, state.generateLoading]);
 
     const user = useUserStore(state => state.user);
 
     const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
     const [editingText, setEditingText] = useState('');
-    const [showThinking, setShowThinking] = useState(true);
-
 
     const loadMessages = async () => {
         try {
@@ -85,212 +80,6 @@ export default function ChatList() {
         setEditingText('');
     };
 
-    const renderFile = (file: any, index: number) => {
-        // 根据文件名判断文件类型
-        const fileType = file.fileName.split('.').pop();
-        if (fileType === 'md') {
-            return <Card
-                key={index}
-                size="small"
-                style={{
-                    background: token.colorBgContainer,
-                    width: 'fit-content',
-                    height: 'fit-content',
-                    cursor: 'pointer',
-                    margin: 5
-                }}
-                bodyStyle={{
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8
-                }}
-            >
-                {file.fileName.endsWith('.md') ? (
-                    <FileMarkdownOutlined style={{ fontSize: 16 }} />
-                ) : (
-                    <FileTextOutlined style={{ fontSize: 16 }} />
-                )}
-                <Text style={{ maxWidth: 200 }} ellipsis={{ tooltip: file.fileName }}>
-                    {file.fileName}
-                </Text>
-            </Card>
-        }
-
-        //如果是图片，则返回图片
-        if (fileType === 'png' || fileType === 'jpg' || fileType === 'jpeg') {
-            return <Image style={{
-                maxHeight: 100,
-                maxWidth: 100,
-                cursor: 'pointer',
-                margin: 5
-            }} src={'/api/FileStorage?id=' + file.fileId} />
-        }
-
-        // 如果是pdf则显示文件
-        if (fileType === 'pdf') {
-            return <Card
-                key={index}
-                size="small"
-                style={{
-                    background: token.colorBgContainer,
-                    width: 'fit-content',
-                    height: 'fit-content',
-                    cursor: 'pointer',
-                    margin: 5
-                }}
-                bodyStyle={{
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8
-                }}
-                onClick={() => {
-                    window.open('/api/FileStorage?id=' + file.fileId, '_blank');
-                }}
-            >
-                <FileTextOutlined style={{ fontSize: 16 }} />
-                <Text style={{ maxWidth: 200 }} ellipsis={{ tooltip: file.fileName }}>
-                    {file.fileName}
-                </Text>
-            </Card>
-        }
-
-        // 如果是其他类型的文件，返回默认的文件卡片
-        return <Card
-            key={index}
-            size="small"
-            style={{
-                background: token.colorBgContainer,
-                width: 'fit-content',
-                height: 'fit-content',
-                cursor: 'pointer',
-                margin: 5
-            }}
-            bodyStyle={{
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8
-            }}
-            onClick={() => {
-                window.open('/api/FileStorage?id=' + file.fileId, '_blank');
-            }}
-        >
-            <FileTextOutlined style={{ fontSize: 16 }} />
-            <Text style={{ maxWidth: 200 }} ellipsis={{ tooltip: file.fileName }}>
-                {file.fileName}
-            </Text>
-        </Card>
-    }
-
-    const renderContent = (chatMessage: any) => {
-        // 如果消息是...则显示加载
-        const currentText = chatMessage.texts[chatMessage.currentIndex ?? chatMessage.texts?.length - 1];
-        if (currentText?.text === '...' && (currentText?.reasoningUpdate === '' || currentText?.reasoningUpdate === null) && (currentText?.searchResults && currentText?.searchResults.length === 0)) {
-            return <Spin />
-        }
-
-        return <>
-            {currentText?.searchResults?.length > 0 && (
-                <Collapse
-                    ghost
-                    style={{ marginBottom: 8 }}
-                >
-                    <Collapse.Panel
-                        header={`搜索结果 (${currentText?.searchResults.length})`}
-                        key="1"
-                    >
-                        {currentText?.searchResults.map((result: any) => (
-                            <Flexbox
-                                onClick={() => {
-                                    window.open(result.url, '_blank');
-                                }}
-                                key={result.id} style={{
-                                    marginBottom: 8,
-                                    background: token.colorFillAlter,
-                                    borderRadius: token.borderRadiusLG,
-                                    padding: '8px 12px',
-                                    cursor: 'pointer',
-                                    gap: 4,
-                                    fontSize: 12
-                                }}>
-                                <Text
-                                    style={{
-                                        fontSize: 13
-                                    }}
-                                    strong>{result.title}</Text>
-                                <Text style={{
-                                    fontSize: 12
-                                }} type="secondary">{result.snippet}</Text>
-                            </Flexbox>
-                        ))}
-                    </Collapse.Panel>
-                </Collapse>
-            )}
-
-            {currentText?.reasoningUpdate && (
-                <>
-                    <Button
-                        type="text"
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '4px 8px',
-                            background: token.colorFillAlter,
-                            borderRadius: token.borderRadiusLG,
-                            marginBottom: showThinking ? 8 : 0
-                        }}
-                        onClick={() => setShowThinking(!showThinking)}
-                    >
-                        <Text strong>深度思考</Text>
-                        {showThinking ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </Button>
-                    {showThinking && (
-                        <div
-                            style={{
-                                background: token.colorFillAlter,
-                                borderRadius: token.borderRadiusLG,
-                                padding: '8px 12px',
-                                marginBottom: 12
-                            }}
-                        >
-                            <Markdown
-                                allowHtml
-                                enableMermaid
-                                enableImageGallery
-                                enableLatex
-                                showFootnotes
-                                variant='chat'
-                                fullFeaturedCodeBlock
-                            >
-                                {`> ${currentText?.reasoningUpdate.split('\n').join('\n> ')}`}
-                            </Markdown>
-                        </div>
-                    )}
-                </>
-            )}
-
-            <Markdown
-                allowHtml
-                enableMermaid
-                enableImageGallery
-                enableLatex
-                showFootnotes
-                variant='chat'
-                fullFeaturedCodeBlock
-                rehypePlugins={[rehypeKatex]}
-                remarkPlugins={[remarkMath]}
-            >
-                {currentText?.text}
-            </Markdown>
-            {
-                chatMessage.files?.map((file: any, index: number) => {
-                    return renderFile(file, index)
-                })
-            }
-        </>
-    }
 
     const formatResponseTime = (ms: number) => {
         if (ms < 1000) return `${ms}ms`;
@@ -332,10 +121,102 @@ export default function ChatList() {
         );
     };
 
+    useEffect(() => {
+        if (messages.length === 0) return;
+        const lastMessage = messages[messages.length - 1];
+        const currentText = lastMessage.texts[lastMessage.currentIndex ?? lastMessage.texts.length - 1].text;
+        const codeBlocks = getCodeBlocks(currentText);
+        if (codeBlocks.length > 0 ) {
+            setCodeRendering({
+                visible: generateLoading,
+                index: 0,
+                items: codeBlocks.map((codeBlock) => ({
+                    language: codeBlock.language,
+                    code: codeBlock.code,
+                    title: codeBlock.fileName,
+                    description: codeBlock.description
+                }))
+            });
+        } else {
+            setCodeRendering({
+                visible: false,
+                index: 0,
+                items: []
+            });
+        }
+    }, [messages, generateLoading]); 
+    
+    /**
+     * 解析accumulatedText代码块，得到代码中所有的代码块，并且提取```csharp|[BubbleSort.cs:实现冒泡排序算法] 这种格式的信息
+     * @param state ChatState
+     * @param accumulatedText 包含代码块的文本
+     * @returns 解析后的代码块信息数组
+     */
+    const getCodeBlocks = (accumulatedText: string) => {
+        if (!accumulatedText) return [];
+        
+        const result = [];
+        
+        try {
+            // 首先尝试匹配完整的代码块
+            const completeCodeBlockRegex = /```([\w\+\#]+)?\|?\[?([^\]:\n]*):?([^\]\n]*)\]?(?:\n|\s)([\s\S]*?)```/g;
+            let match;
+            let lastIndex = 0;
+
+            // 处理完整的代码块
+            while ((match = completeCodeBlockRegex.exec(accumulatedText)) !== null) {
+                const [fullMatch, language, fileName, description, code] = match;
+                lastIndex = completeCodeBlockRegex.lastIndex;
+
+                result.push({
+                    language: language || 'text', // 如果没有指定语言，默认为text
+                    fileName: fileName || '',
+                    description: description || '',
+                    code: code.trim(),
+                    fullMatch,
+                    isComplete: true
+                });
+            }
+
+            // 检查是否有未完成的代码块（只有开始标记，没有结束标记）
+            // 查找最后一个 ``` 开始的代码块
+            const remainingText = accumulatedText.slice(lastIndex);
+            const lastCodeBlockStart = remainingText.lastIndexOf('```');
+            
+            if (lastCodeBlockStart !== -1) {
+                // 找到了可能的未完成代码块
+                const incompleteBlockText = remainingText.slice(lastCodeBlockStart);
+                // 使用更简单的正则表达式来匹配未完成的代码块头部
+                const headerRegex = /```([\w\+\#]+)?\|?\[?([^\]:\n]*):?([^\]\n]*)\]?(?:\n|\s)/;
+                const headerMatch = headerRegex.exec(incompleteBlockText);
+                
+                if (headerMatch) {
+                    const [_, language, fileName, description] = headerMatch;
+                    // 提取代码部分 (去掉头部后的所有内容)
+                    const code = incompleteBlockText.slice(headerMatch[0].length);
+                    
+                    result.push({
+                        language: language || 'text',
+                        fileName: fileName || '',
+                        description: description || '',
+                        code: code.trim(),
+                        fullMatch: incompleteBlockText,
+                        isComplete: false
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('解析代码块时出错:', error);
+            // 出错时返回已解析的结果，不中断流程
+        }
+
+        return result;
+    }
+
+
     if (messages.length === 0) {
         return <ChatWelcome />
     }
-
 
     return <Bubble.List
         autoScroll
@@ -352,7 +233,8 @@ export default function ChatList() {
                         background: token.colorBgContainer,
                         borderRadius: token.borderRadiusLG,
                         padding: '8px 12px',
-                        marginBottom: 12
+                        marginBottom: 12,
+                        marginRight: 12
                     },
                     content: isEditing ? (
                         <Input.TextArea
@@ -367,7 +249,7 @@ export default function ChatList() {
                             autoSize={{ minRows: 3, maxRows: 10 }}
                         />
                     ) : (
-                        renderContent(chatMessage)
+                        <ChatItem chatMessage={chatMessage} />
                     ),
                     avatar: <Avatar src={chatMessage.role === 'user' ? user?.avatar : '/logo.png'} />,
                     header: chatMessage.role === 'user' ? user?.displayName : 'AI助手',
@@ -425,7 +307,6 @@ export default function ChatList() {
                                     <Button color="red" variant="text" size="small" icon={<DeleteOutlined />} />
                                 </Popconfirm>
                             </Tooltip>
-                            {/* 如果是最后一条消息显示 */}
                             {index === messages.length - 1 && (
                                 <Tooltip title={chatMessage.role === 'user' ? '重新生成' : '删除并且重新生成'}>
                                     <Button

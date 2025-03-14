@@ -130,6 +130,36 @@ public sealed class ChatService(
             }
 
             messages.Reverse();
+            
+            messages.Insert(0,new Message()
+            {
+                Role = "user",
+                Texts = new List<MessageText>()
+                {
+                    new()
+                    {
+                        Text = """
+                               <code_formatting_instructions>
+                               当您提供代码时，请按照以下固定格式返回代码块：
+                               
+                               ```[语言]|[文件名:文件描述]
+                               代码内容
+                               ```
+                               
+                               示例格式：
+                               ```python|[app.py:主应用文件]
+                               处理用户请求的Flask应用
+                               ```
+                               
+                               注意事项：
+                               - 语言：明确指定编程语言（如python, javascript, java等）
+                               - 文件名和描述：提供有意义的文件名和简短描述
+                               - 所有代码必须包含在代码块内，使用正确的语法高亮
+                               </code_formatting_instructions>
+                               """
+                    }
+                }
+            });
 
             if (input.SelectedUserPromptId != null)
             {

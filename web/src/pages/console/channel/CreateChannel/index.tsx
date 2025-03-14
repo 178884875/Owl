@@ -8,6 +8,7 @@ import { iconMap, getIconByName } from '@/utils/iconutil';
 import { LoadingOutlined } from '@ant-design/icons';
 import { RotateCw } from 'lucide-react';
 import { useChatStore } from '@/store/chat';
+
 interface CreateChannelProps {
   visible: boolean;
   onClose: () => void;
@@ -21,6 +22,66 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
   const [selectedIcon, setSelectedIcon] = useState<string>('OpenAI');
   const [loadingRemoteModel, setLoadingRemoteModel] = useState(false);
   const [loadEnabledModels, models] = useChatStore(state => [state.loadEnabledModels, state.models]);
+
+  // 添加新的常量对象，用于存储特定提供商的预设值
+  const providerPresets = {
+    'SiliconCloud': {
+      endpoint: 'https://api.siliconflow.cn/v1',
+      apiKey: '', // 这里可以设置默认的 API Key，如果有的话
+    },
+    'Moonshot': {
+      endpoint: 'https://api.moonshot.cn/v1',
+      apiKey: '',
+    },
+    'GiteeAI': {
+      endpoint: 'https://ai-api.gitee.com/v1',
+      apiKey: '',
+    },
+    'DeepSeek': {
+      endpoint: 'https://api.deepseek.com/v1',
+      apiKey: '',
+    },
+    'Ollama': {
+      endpoint: 'http://localhost:11434/v1',
+      apiKey: '',
+    },
+    'OpenRouter': {
+      endpoint: 'https://openrouter.ai/api/v1',
+      apiKey: '',
+    },
+    'Grok': {
+      endpoint: 'https://api.grok.com/v1',
+      apiKey: '',
+    },
+    'OpenAI': {
+      endpoint: 'https://api.openai.com/v1',
+      apiKey: '',
+    },
+    'default': {
+      endpoint: 'https://api.openai.com/v1',
+      apiKey: '',
+    }
+  } as any;
+
+  // 判断当前选择的提供商是否为预设提供商
+  const isPresetProvider = (provider: string) => ['SiliconCloud', 'Moonshot', 'GiteeAI'].includes(provider);
+
+  // 添加一个新的 effect 来监听 provider 的变化
+  useEffect(() => {
+    const provider = form.getFieldValue('provider');
+    if (providerPresets[provider]) {
+      form.setFieldsValue(providerPresets[provider]);
+      // 禁用endpoint 不可编辑
+      form.setFields([
+        {
+          name: 'endpoint',
+          value: providerPresets[provider].endpoint,
+          touched: true,
+          validating: false,
+        },
+      ]);
+    }
+  }, [form.getFieldValue('provider')]);
 
   useEffect(() => {
     loadEnabledModels();
@@ -36,8 +97,8 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
       return;
     }
 
-    // endpoint
-    const endpoint = form.getFieldValue('endpoint');
+    let endpoint = form.getFieldValue('endpoint');
+    
     // 正则表达式 http或者https开头
     const regex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
     if (!regex.test(endpoint)) {
@@ -55,6 +116,8 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
 
     setModelIds([]);
 
+    
+
     try {
       if (provider === 'OpenAI' || provider === 'OpenRouter' || provider === 'SiliconCloud' || provider === 'DeepSeek' || provider === 'Moonshot' || provider === 'Grok' || provider === 'GiteeAI') {
         // 获取模型列表
@@ -70,21 +133,39 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
 
         // data.data
         const values = responseData.data.map((item: any) => item.id);
-        const chatModelIds = values.map((id: string) => {
-          for (const model of models || []) {
-            const chatModel = model.models?.find((cm: any) => cm.modelId === id);
-            if (chatModel) return chatModel.id;
-          }
-          return null;
-        }).filter(Boolean);
+        
+        // 根据提供商过滤模型
+        let filteredModelIds = [];
+        
+        if (provider === 'SiliconCloud' || provider === 'Moonshot' || provider === 'GiteeAI') {
+          // 只保留属于当前提供商的模型
+          filteredModelIds = values.map((id: string) => {
+            for (const model of models || []) {
+              const chatModel = model.models?.find((cm: any) => 
+                cm.modelId === id && cm.provider === provider
+              );
+              if (chatModel) return chatModel.id;
+            }
+            return null;
+          }).filter(Boolean);
+        } else {
+          // 其他提供商保持原有逻辑
+          filteredModelIds = values.map((id: string) => {
+            for (const model of models || []) {
+              const chatModel = model.models?.find((cm: any) => cm.modelId === id);
+              if (chatModel) return chatModel.id;
+            }
+            return null;
+          }).filter(Boolean);
+        }
 
-        if (chatModelIds.length === 0) {
-          message.error('没有找到模型');
+        if (filteredModelIds.length === 0) {
+          message.error('没有找到适用于该提供商的模型');
           setLoadingRemoteModel(false);
           return;
         }
-        // chatModelIds去重
-        const uniqueModelIds = [...new Set(chatModelIds)] as string[];
+        // 去重
+        const uniqueModelIds = [...new Set(filteredModelIds)] as string[];
 
         setModelIds(uniqueModelIds);
       }
@@ -169,17 +250,19 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
         </Form.Item>
         <Form.Item name="provider" label="模型提供商" rules={[{ required: true }]}>
           <Select
-            options={Channel.map(x => {
-              return {
-                label: <Flexbox gap={8} horizontal>
-                  {x.icon}
-                  <span>{x.name}</span>
-                </Flexbox>,
-                value: x.id,
-              }
-            })}
-          >
-          </Select>
+            options={Channel.map(x => ({
+              label: <Flexbox gap={8} horizontal>
+                {x.icon}
+                <span>{x.name}</span>
+              </Flexbox>,
+              value: x.id,
+            }))}
+            onChange={(value) => {
+              if (providerPresets[value as any]) {
+                form.setFieldsValue(providerPresets[value as any]);
+              } 
+            }}
+          />
         </Form.Item>
         <Form.Item name="endpoint" label="Base URL"
           tooltip='请输入提供商的Base URL 如果是兼容OpenAI的模型，请输入https://地址/v1'
@@ -191,7 +274,9 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
               callback();
             }
           }]}>
-          <Input />
+          <Input 
+            disabled={isPresetProvider(form.getFieldValue('provider'))}
+          />
         </Form.Item>
         <Form.Item name="tags" label="模型标签">
           <Select
@@ -203,7 +288,8 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
         <Form.Item
           rules={[{ required: true }]}
           name='apiKey' label='API Key'>
-          <Input />
+          <Input 
+          />
         </Form.Item>
         <Form.Item name="modelIds"
           label={<Flexbox horizontal gap={8}>
@@ -220,7 +306,8 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
               </Button>
             </Tooltip>
           </Flexbox>}>
-          <SelectModel modelIds={modelIds} onSelect={(modelIds) => {
+          <SelectModel 
+          modelIds={modelIds} onSelect={(modelIds) => {
             setModelIds([...modelIds]);
           }} >
           </SelectModel>

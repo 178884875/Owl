@@ -3,7 +3,7 @@ import Title from "./features/Title";
 import Workspace from "./workspace";
 import { useChatStore } from "@/store/chat";
 import { useEffect } from "react";
-
+import CodeRendering from "@/components/CodeRendering";
 
 export default function Chat() {
     // 解析路由参数
@@ -23,6 +23,7 @@ export default function Chat() {
         }}>
             <Title />
             <Workspace />
+            <CodeRendering />
         </Flexbox>
     )
 }

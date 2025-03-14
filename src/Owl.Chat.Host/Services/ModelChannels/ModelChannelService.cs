@@ -271,6 +271,7 @@ public class ModelChannelService(
         }
         catch (Exception e)
         {
+            throw new BusinessException("测试失败:" + e.Message);
         }
         finally
         {
@@ -474,7 +475,7 @@ public class ModelChannelService(
 
         await dbContext.SaveChangesAsync();
     }
-    
+
     /// <summary>
     /// 启用或禁用渠道
     /// </summary>
