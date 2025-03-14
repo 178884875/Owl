@@ -28,7 +28,7 @@ export default function Workspace() {
             display: 'flex',
             flexDirection: 'column',
         }}>
-            {messages.length === 0 ? <ChatWelcome /> : <ChatList />}
+            <ChatList />
             <ChatInput />
         </Flexbox>
         <SessionConfigPage />

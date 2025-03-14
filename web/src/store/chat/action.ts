@@ -387,7 +387,17 @@ export const createChatSlice: StateCreator<
         let accumulatedText = '';
         let reasoningUpdate = '';
         let lastUpdateTime = Date.now();
+
+        let first = true;
+        
         for await (const chunk of chatComplete(chatCompleteParams)) {
+            if (first) {
+                first = false;
+                set({ 
+                    generateLoading: false
+                 });
+            }
+
             const { data, type } = chunk;
             if (type === 'chat') {
                 accumulatedText += data;

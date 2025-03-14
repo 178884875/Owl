@@ -6,13 +6,14 @@ import { Bubble } from '@ant-design/x';
 import { Avatar, Button, message, Popconfirm, Tooltip, Spin, Card, Typography, Image, Input, Collapse } from 'antd';
 import { useUserStore } from '@/store/user';
 import { SyncOutlined, CopyOutlined, DeleteOutlined, EditOutlined, CloseOutlined } from '@ant-design/icons';
-import {  Markdown } from '@lobehub/ui';
+import { Markdown } from '@lobehub/ui';
 import { deleteMessage } from '@/apis/Message';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
 import { theme } from 'antd';
 import { UpdateMessage } from '@/types/Message';
 const { Text, } = Typography;
+import ChatWelcome from '../ChatWelcome';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 
@@ -205,15 +206,16 @@ export default function ChatList() {
                                 onClick={() => {
                                     window.open(result.url, '_blank');
                                 }}
-                                key={result.id} style={{ marginBottom: 8,
-                                background: token.colorFillAlter,
-                                borderRadius: token.borderRadiusLG,
-                                padding: '8px 12px',
-                                cursor: 'pointer',
-                                gap: 4,
-                                fontSize: 12
-                             }}>
-                                <Text 
+                                key={result.id} style={{
+                                    marginBottom: 8,
+                                    background: token.colorFillAlter,
+                                    borderRadius: token.borderRadiusLG,
+                                    padding: '8px 12px',
+                                    cursor: 'pointer',
+                                    gap: 4,
+                                    fontSize: 12
+                                }}>
+                                <Text
                                     style={{
                                         fontSize: 13
                                     }}
@@ -295,80 +297,83 @@ export default function ChatList() {
         if (ms < 60000) return `${(ms / 1000).toFixed(2)}s`;
         return `${(ms / 60000).toFixed(2)}分钟`;
     };
-// Calculate tokens per second based on completion tokens and response time
-const calculateTokensPerSecond = (completeTokens: number, responseTimeMs: number): number => {
-    // Convert milliseconds to seconds
-    const responseTimeSeconds = responseTimeMs / 1000;
-    
-    // Avoid division by zero
-    if (responseTimeSeconds <= 0) return 0;
-    
-    // Calculate tokens per second
-    const tokensPerSecond = completeTokens / responseTimeSeconds;
-    
-    // Return with two decimal precision
-    return Math.round(tokensPerSecond * 100) / 100;
-};
+    // Calculate tokens per second based on completion tokens and response time
+    const calculateTokensPerSecond = (completeTokens: number, responseTimeMs: number): number => {
+        // Convert milliseconds to seconds
+        const responseTimeSeconds = responseTimeMs / 1000;
 
-// Update the renderModelUsages function to include tokens per second
-const renderModelUsages = (modelUsages: any) => {
-    if (!modelUsages) return null;
+        // Avoid division by zero
+        if (responseTimeSeconds <= 0) return 0;
 
-    // Calculate tokens per second
-    const tokensPerSecond = calculateTokensPerSecond(
-        modelUsages.completeTokens,
-        modelUsages.responseTime
-    );
+        // Calculate tokens per second
+        const tokensPerSecond = completeTokens / responseTimeSeconds;
 
-    return (
-        <Flexbox horizontal gap={8} style={{ fontSize: '12px', color: token.colorTextSecondary }}>
-            <span>提示词: {modelUsages.promptTokens}</span>
-            <span>完成词: {modelUsages.completeTokens}</span>
-            <span>响应时间: {formatResponseTime(modelUsages.responseTime)}</span>
-            <span>速率: {tokensPerSecond} tokens/s</span>
-        </Flexbox>
-    );
-};
+        // Return with two decimal precision
+        return Math.round(tokensPerSecond * 100) / 100;
+    };
+
+    // Update the renderModelUsages function to include tokens per second
+    const renderModelUsages = (modelUsages: any) => {
+        if (!modelUsages) return null;
+
+        // Calculate tokens per second
+        const tokensPerSecond = calculateTokensPerSecond(
+            modelUsages.completeTokens,
+            modelUsages.responseTime
+        );
+
+        return (
+            <Flexbox horizontal gap={8} style={{ fontSize: '12px', color: token.colorTextSecondary }}>
+                <span>提示词: {modelUsages.promptTokens}</span>
+                <span>完成词: {modelUsages.completeTokens}</span>
+                <span>响应时间: {formatResponseTime(modelUsages.responseTime)}</span>
+                <span>速率: {tokensPerSecond} tokens/s</span>
+            </Flexbox>
+        );
+    };
+
+    if (messages.length === 0) {
+        return <ChatWelcome />
+    }
 
 
     return <Bubble.List
         autoScroll
         items={messages
-            // 过滤相同id
             .filter((chatMessage: any, index: number) => {
                 return index === 0 || chatMessage.id !== messages[index - 1].id;
             })
             ?.map((chatMessage: any, index: number) => {
-            const isEditing = chatMessage.id === editingMessageId;
-            return {
-                role: chatMessage.role,
-                id: 'bubble-list-item' + chatMessage.id,
-                style: {
-                    background: token.colorBgContainer,
-                    borderRadius: token.borderRadiusLG,
-                    padding: '8px 12px',
-                    marginBottom: 12
-                },
-                content: isEditing ? (
-                    <Input.TextArea
-                        value={editingText}
-                        style={{
-                            fontSize: 14,
-                            width: '100%',
-                            minWidth: '50vw',
-                        }}
-                        onChange={(e) => setEditingText(e.target.value)}
-                        onBlur={() => handleSaveEdit(chatMessage.id)}
-                        autoSize={{ minRows: 3, maxRows: 10 }}
-                    />
-                ) : (
-                    renderContent(chatMessage)
-                ),
-                avatar: <Avatar src={chatMessage.role === 'user' ? user?.avatar : '/logo.png'} />,
-                header: chatMessage.role === 'user' ? user?.displayName : 'AI助手',
-                footer: <Flexbox gap={8}>
-                    {renderModelUsages(chatMessage.modelUsages)}
-                    {/* <Flexbox
+                const isEditing = chatMessage.id === editingMessageId;
+                return {
+                    role: chatMessage.role,
+                    id: 'bubble-list-item' + chatMessage.id,
+                    style: {
+                        background: token.colorBgContainer,
+                        borderRadius: token.borderRadiusLG,
+                        padding: '8px 12px',
+                        marginBottom: 12
+                    },
+                    content: isEditing ? (
+                        <Input.TextArea
+                            value={editingText}
+                            style={{
+                                fontSize: 14,
+                                width: '100%',
+                                minWidth: '50vw',
+                            }}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            onBlur={() => handleSaveEdit(chatMessage.id)}
+                            autoSize={{ minRows: 3, maxRows: 10 }}
+                        />
+                    ) : (
+                        renderContent(chatMessage)
+                    ),
+                    avatar: <Avatar src={chatMessage.role === 'user' ? user?.avatar : '/logo.png'} />,
+                    header: chatMessage.role === 'user' ? user?.displayName : 'AI助手',
+                    footer: <Flexbox gap={8}>
+                        {renderModelUsages(chatMessage.modelUsages)}
+                        {/* <Flexbox
                         horizontal
                         gap={2}
                         style={{ fontSize: '12px', alignItems: 'center' }}
@@ -400,58 +405,58 @@ const renderModelUsages = (modelUsages: any) => {
                             style={{ minWidth: '20px', height: '20px', padding: 0 }}
                         />
                     </Flexbox> */}
-                    <Flexbox
-                        horizontal
-                        gap={5}
-                    >
-                        {isEditing ? (
-                            <Button color="default" variant="text" size="small" icon={<CloseOutlined />} onClick={handleCancelEdit} />
-                        ) : (
-                            <Button color="default" variant="text" size="small" icon={<EditOutlined />} onClick={() => handleEditMessage(chatMessage.id)} />
-                        )}
-                        <Tooltip title={'删除当前消息'}>
-                            <Popconfirm
-                                title="确定删除吗？"
-                                onConfirm={async () => {
-                                    await deleteMessage(chatMessage.id);
-                                    setMessages(messages.filter((message: any) => message.id !== chatMessage.id));
-                                }}
-                            >
-                                <Button color="red" variant="text" size="small" icon={<DeleteOutlined />} />
-                            </Popconfirm>
-                        </Tooltip>
-                        {/* 如果是最后一条消息显示 */}
-                        {index === messages.length - 1 && (
-                            <Tooltip title={chatMessage.role === 'user' ? '重新生成' : '删除并且重新生成'}>
-                                <Button
-                                    onClick={async () => {
-                                        await regenerateMessage(chatMessage.id);
+                        <Flexbox
+                            horizontal
+                            gap={5}
+                        >
+                            {isEditing ? (
+                                <Button color="default" variant="text" size="small" icon={<CloseOutlined />} onClick={handleCancelEdit} />
+                            ) : (
+                                <Button color="default" variant="text" size="small" icon={<EditOutlined />} onClick={() => handleEditMessage(chatMessage.id)} />
+                            )}
+                            <Tooltip title={'删除当前消息'}>
+                                <Popconfirm
+                                    title="确定删除吗？"
+                                    onConfirm={async () => {
+                                        await deleteMessage(chatMessage.id);
+                                        setMessages(messages.filter((message: any) => message.id !== chatMessage.id));
                                     }}
-                                    color="default" variant="text" size="small" icon={<SyncOutlined />} />
-                            </Tooltip>)}
+                                >
+                                    <Button color="red" variant="text" size="small" icon={<DeleteOutlined />} />
+                                </Popconfirm>
+                            </Tooltip>
+                            {/* 如果是最后一条消息显示 */}
+                            {index === messages.length - 1 && (
+                                <Tooltip title={chatMessage.role === 'user' ? '重新生成' : '删除并且重新生成'}>
+                                    <Button
+                                        onClick={async () => {
+                                            await regenerateMessage(chatMessage.id);
+                                        }}
+                                        color="default" variant="text" size="small" icon={<SyncOutlined />} />
+                                </Tooltip>)}
 
-                        <Tooltip title={'复制源码'}>
-                            <Button color="default"
-                                onClick={() => {
-                                    navigator.clipboard.writeText(chatMessage.texts[0].text).then(() => {
-                                        message.success('复制成功');
-                                    }).catch(() => {
-                                        // 创建input
-                                        const input = document.createElement('input');
-                                        input.value = chatMessage.texts[0].text;
-                                        document.body.appendChild(input);
-                                        input.select();
-                                        document.execCommand('copy');
-                                        document.body.removeChild(input);
-                                        message.success('复制成功');
-                                    });
-                                }}
-                                variant="text" size="small" icon={<CopyOutlined />} />
-                        </Tooltip>
+                            <Tooltip title={'复制源码'}>
+                                <Button color="default"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(chatMessage.texts[0].text).then(() => {
+                                            message.success('复制成功');
+                                        }).catch(() => {
+                                            // 创建input
+                                            const input = document.createElement('input');
+                                            input.value = chatMessage.texts[0].text;
+                                            document.body.appendChild(input);
+                                            input.select();
+                                            document.execCommand('copy');
+                                            document.body.removeChild(input);
+                                            message.success('复制成功');
+                                        });
+                                    }}
+                                    variant="text" size="small" icon={<CopyOutlined />} />
+                            </Tooltip>
+                        </Flexbox>
                     </Flexbox>
-                </Flexbox>
-            }
-        })}
+                }
+            })}
         style={{
             transition: 'width 0.3s',
             overflowY: 'auto',
