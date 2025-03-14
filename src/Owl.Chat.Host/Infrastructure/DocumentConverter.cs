@@ -136,7 +136,7 @@ namespace DocumentConverter
                 var text = new TextContent()
                 {
                     Text = $@"
-```markdown {textContent} {docFileName}
+```markdown {docFileName}
 {textContent}
 ```
 "
@@ -214,11 +214,14 @@ namespace DocumentConverter
             }
         }
 
-        public string ConvertWordToMarkdown(string wordPath)
+
+        public ChatMessageContentItemCollection ConvertWordToMarkdown(Stream stream, ref int requestToken, string wordFileName)
         {
+            var chatMessageContentItemCollection = new ChatMessageContentItemCollection();
+
             StringBuilder markdown = new StringBuilder();
 
-            using (WordprocessingDocument doc = WordprocessingDocument.Open(wordPath, false))
+            using (WordprocessingDocument doc = WordprocessingDocument.Open(stream, false))
             {
                 var body = doc.MainDocumentPart.Document.Body;
 
@@ -289,7 +292,25 @@ namespace DocumentConverter
                 }
             }
 
-            return markdown.ToString();
+            var md = markdown.ToString();
+
+            requestToken += TokenHelper.GetTokens(md);
+            // 首先添加文本内容
+            if (md.Length > 0)
+            {
+                var text = new TextContent()
+                {
+                    Text = $@"
+```markdown {wordFileName}
+{md}
+```
+"
+                };
+                requestToken += TokenHelper.GetTokens(text.Text);
+                chatMessageContentItemCollection.Add(text);
+            }
+
+            return chatMessageContentItemCollection;
         }
 
         private bool IsNumberingStyleBullet(Numbering numbering, NumberingInstance numInstance, int level)
