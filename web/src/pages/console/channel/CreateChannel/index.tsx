@@ -20,7 +20,7 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
   const [modelIds, setModelIds] = useState<string[]>([]);
   const [selectedIcon, setSelectedIcon] = useState<string>('OpenAI');
   const [loadingRemoteModel, setLoadingRemoteModel] = useState(false);
-  const [loadEnabledModels, models] = useChatStore(state => [state.loadEnabledModels, state.chatModels]);
+  const [loadEnabledModels, models] = useChatStore(state => [state.loadEnabledModels, state.models]);
 
   useEffect(() => {
     loadEnabledModels();
@@ -55,41 +55,45 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
 
     setModelIds([]);
 
-    if (provider === 'OpenAI') {
-      // 获取模型列表
-      // 解析endpoint,默认他是v1
-      const url = endpoint + "/models";
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`
+    try {
+      if (provider === 'OpenAI' || provider === 'OpenRouter' || provider === 'SiliconCloud') {
+        // 获取模型列表
+        // 解析endpoint,默认他是v1
+        const url = endpoint + "/models";
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`
+          }
+        });
+        const responseData = await response.json();
+
+        // data.data
+        const values = responseData.data.map((item: any) => item.id);
+        debugger
+        const chatModelIds = values.map((id: string) => {
+          for (const model of models || []) {
+            const chatModel = model.models?.find((cm: any) => cm.modelId === id);
+            if (chatModel) return chatModel.id;
+          }
+          return null;
+        }).filter(Boolean);
+
+        if (chatModelIds.length === 0) {
+          message.error('没有找到模型');
+          setLoadingRemoteModel(false);
+          return;
         }
-      });
-      const responseData = await response.json();
+        // chatModelIds去重
+        const uniqueModelIds = [...new Set(chatModelIds)] as string[];
 
-      // data.data
-      const values = responseData.data.map((item: any) => item.id);
-
-      const chatModelIds = values.map((id: string) => {
-        for (const model of models || []) {
-          const chatModel = model.models?.find((cm: any) => cm.modelId === id);
-          if (chatModel) return chatModel.id;
-        }
-        return null;
-      }).filter(Boolean);
-
-      if (chatModelIds.length === 0) {
-        message.error('没有找到模型');
-        setLoadingRemoteModel(false);
-        return;
+        setModelIds(uniqueModelIds);
       }
-      // chatModelIds去重
-      const uniqueModelIds = [...new Set(chatModelIds)] as string[];
-
-      setModelIds(uniqueModelIds);
+    } catch (error) {
+      message.error('获取模型列表失败，请检查API Key是否正确');
+    } finally {
+      setLoadingRemoteModel(false);
     }
-
-    setLoadingRemoteModel(false);
   }
 
   const handleSubmit = async () => {
@@ -178,14 +182,16 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
           >
           </Select>
         </Form.Item>
-        <Form.Item name="endpoint" label="提供商地址" rules={[{ required: true }, {
-          validator(_, value, callback) {
-            if (value && !value.startsWith('http')) {
-              callback('请输入正确的URL');
+        <Form.Item name="endpoint" label="Base URL"
+          tooltip='请输入提供商的Base URL 如果是兼容OpenAI的模型，请输入https://地址/v1'
+          rules={[{ required: true }, {
+            validator(_, value, callback) {
+              if (value && !value.startsWith('http')) {
+                callback('请输入正确的URL');
+              }
+              callback();
             }
-            callback();
-          }
-        }]}>
+          }]}>
           <Input />
         </Form.Item>
         <Form.Item name="tags" label="模型标签">
