@@ -56,7 +56,7 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
     setModelIds([]);
 
     try {
-      if (provider === 'OpenAI' || provider === 'OpenRouter' || provider === 'SiliconCloud') {
+      if (provider === 'OpenAI' || provider === 'OpenRouter' || provider === 'SiliconCloud' || provider === 'DeepSeek' || provider === 'Moonshot' || provider === 'Grok' || provider === 'GiteeAI') {
         // 获取模型列表
         // 解析endpoint,默认他是v1
         const url = endpoint + "/models";
@@ -70,7 +70,6 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
 
         // data.data
         const values = responseData.data.map((item: any) => item.id);
-        debugger
         const chatModelIds = values.map((id: string) => {
           for (const model of models || []) {
             const chatModel = model.models?.find((cm: any) => cm.modelId === id);
