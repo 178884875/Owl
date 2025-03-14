@@ -293,7 +293,8 @@ public sealed class ChatService(
                                     pdf.Position = 0;
                                     history.AddUserMessage(
                                         converter.ConvertPdfToMarkdown(pdf, ref requestToken, file.FileName));
-                                }else if(file.FileName.EndsWith(".word"))
+                                }
+                                else if (file.FileName.EndsWith(".word"))
                                 {
                                     using var word = new MemoryStream();
                                     await stream.CopyToAsync(word);
