@@ -1,54 +1,329 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Options;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 using Break = DocumentFormat.OpenXml.Wordprocessing.Break;
+using Hyperlink = DocumentFormat.OpenXml.Wordprocessing.Hyperlink;
 using IOPath = System.IO.Path;
+using Run = DocumentFormat.OpenXml.Wordprocessing.Run;
 using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
 using TableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
+using TableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
 using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
 using WordParagraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
 
 #pragma warning disable SKEXP0001
 
-namespace DocumentConverter
+namespace Owl.Chat.Host.Infrastructure
 {
-    public class DocumentToMarkdown(
-        ChatOptions chatOptions,
-        string imageOutputPath = null,
-        bool useBase64 = false)
+    public class DocumentToMarkdown
     {
-        private string _imageOutputPath = imageOutputPath;
+        private string _imageOutputPath;
+        private readonly ChatOptions _chatOptions;
+        private readonly bool _useBase64;
 
-        public string ConvertPdfToMarkdown(Stream stream)
+        public DocumentToMarkdown(
+            ChatOptions chatOptions,
+            string imageOutputPath = null,
+            bool useBase64 = false)
+        {
+            _chatOptions = chatOptions;
+            _imageOutputPath = imageOutputPath;
+            _useBase64 = useBase64;
+        }
+
+        /// <summary>
+        /// Unified method to convert any document to markdown based on file extension
+        /// </summary>
+        public ChatMessageContentItemCollection ConvertDocumentToMarkdown(Stream stream, string fileName,
+            ref int requestToken)
+        {
+            // Determine file type from extension
+            string extension = IOPath.GetExtension(fileName).ToLowerInvariant();
+
+            switch (extension)
+            {
+                case ".pdf":
+                    return ConvertPdfToMarkdown(stream, ref requestToken, fileName);
+                case ".docx":
+                    return ConvertWordToMarkdown(stream, ref requestToken, fileName);
+                case ".doc":
+                    // First try to use OpenXML (some .doc files can be read this way)
+                    try
+                    {
+                        return ConvertWordToMarkdown(stream, ref requestToken, fileName);
+                    }
+                    catch
+                    {
+                        // If that fails, use our docx converter with binary format fallback
+                        return ConvertDocToMarkdown(stream, ref requestToken, fileName);
+                    }
+                default:
+                    throw new NotSupportedException($"File format {extension} is not supported.");
+            }
+        }
+
+        /// <summary>
+        /// Converts .doc file (older Word format) to markdown using binary format reading
+        /// </summary>
+        public ChatMessageContentItemCollection ConvertDocToMarkdown(Stream stream, ref int requestToken,
+            string docFileName)
+        {
+            var chatMessageContentItemCollection = new ChatMessageContentItemCollection();
+            StringBuilder markdown = new StringBuilder();
+
+            try
+            {
+                // Try using Word Interop if available
+                if (IsWordInteropAvailable())
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        stream.CopyTo(ms);
+                        ms.Position = 0;
+                        string tempFilePath = SaveToTempFile(ms, ".doc");
+
+                        try
+                        {
+                            string extractedText = ExtractTextUsingWordInterop(tempFilePath);
+                            markdown.Append(FormatExtractedText(extractedText));
+                        }
+                        finally
+                        {
+                            // Clean up temp file
+                            try
+                            {
+                                if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
+                            }
+                            catch
+                            {
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Fallback to binary format reader
+                    markdown.AppendLine("<!-- Using basic binary DOC parser -->");
+                    string text = ExtractTextFromDocBinary(stream);
+                    markdown.Append(FormatExtractedText(text));
+                }
+            }
+            catch (Exception ex)
+            {
+                markdown.AppendLine($"<!-- Warning: Document parsing failed: {ex.Message} -->");
+                markdown.AppendLine("<!-- Attempting basic text extraction -->");
+
+                // Very basic fallback - try to extract any readable text
+                try
+                {
+                    stream.Position = 0;
+                    string text = ExtractBasicTextFromStream(stream);
+                    markdown.Append(text);
+                }
+                catch
+                {
+                    markdown.AppendLine("<!-- Document could not be parsed in any available format -->");
+                }
+            }
+
+            string formattedMarkdown = markdown.ToString();
+            requestToken += TokenHelper.GetTokens(formattedMarkdown);
+
+            // Add content to the collection
+            if (formattedMarkdown.Length > 0)
+            {
+                var text = new TextContent()
+                {
+                    Text = $@"
+```markdown {docFileName}
+{formattedMarkdown}
+```
+"
+                };
+                requestToken += TokenHelper.GetTokens(text.Text);
+                chatMessageContentItemCollection.Add(text);
+            }
+
+            return chatMessageContentItemCollection;
+        }
+
+        /// <summary>
+        /// Checks if Word Interop is available on the system
+        /// </summary>
+        private bool IsWordInteropAvailable()
+        {
+            try
+            {
+                // Check if the Word Interop assembly is available
+                Type wordType = Type.GetTypeFromProgID("Word.Application");
+                return wordType != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Saves stream to a temporary file
+        /// </summary>
+        private string SaveToTempFile(Stream stream, string extension)
+        {
+            string tempPath = IOPath.Combine(IOPath.GetTempPath(), IOPath.GetRandomFileName() + extension);
+            using (var fileStream = File.Create(tempPath))
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                stream.CopyTo(fileStream);
+            }
+
+            return tempPath;
+        }
+
+        /// <summary>
+        /// Extracts text from .doc using Word Interop
+        /// </summary>
+        private string ExtractTextUsingWordInterop(string filePath)
+        {
+            // This code uses reflection to avoid direct reference to Microsoft.Office.Interop.Word
+            // which might not be available in all environments
+
+            object wordApp = null;
+            object document = null;
+            StringBuilder content = new StringBuilder();
+
+            try
+            {
+                // Create Word application instance
+                Type wordAppType = Type.GetTypeFromProgID("Word.Application");
+                wordApp = Activator.CreateInstance(wordAppType);
+
+                // Set visible to false
+                wordAppType.GetProperty("Visible").SetValue(wordApp, false);
+
+                // Get Documents collection
+                object documents = wordAppType.GetProperty("Documents").GetValue(wordApp);
+                Type documentsType = documents.GetType();
+
+                // Open document
+                object filename = filePath;
+                object readOnly = true;
+                object missing = Type.Missing;
+                document = documentsType.InvokeMember("Open",
+                    BindingFlags.InvokeMethod,
+                    null, documents,
+                    new object[] { filename, missing, readOnly });
+
+                // Get document content
+                Type documentType = document.GetType();
+                string text = (string)documentType.GetProperty("Content").GetValue(document).GetType()
+                    .GetProperty("Text").GetValue(documentType.GetProperty("Content").GetValue(document));
+                content.Append(text);
+
+                // Close document
+                object saveChanges = false;
+                documentType.InvokeMember("Close",
+                    BindingFlags.InvokeMethod,
+                    null, document,
+                    new object[] { saveChanges });
+
+                return content.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error using Word Interop: " + ex.Message, ex);
+            }
+            finally
+            {
+                // Clean up COM objects
+                if (document != null)
+                {
+                    Marshal.ReleaseComObject(document);
+                }
+
+                if (wordApp != null)
+                {
+                    wordApp.GetType().InvokeMember("Quit",
+                        BindingFlags.InvokeMethod,
+                        null, wordApp, new object[] { });
+                    Marshal.ReleaseComObject(wordApp);
+                }
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+        }
+
+        /// <summary>
+        /// Format extracted raw text into better markdown
+        /// </summary>
+        private string FormatExtractedText(string text)
         {
             StringBuilder markdown = new StringBuilder();
 
-            using (PdfDocument document = PdfDocument.Open(stream))
+            // Split into lines and process
+            string[] lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            bool inList = false;
+
+            for (int i = 0; i < lines.Length; i++)
             {
-                foreach (var page in document.GetPages())
+                string line = lines[i].Trim();
+
+                if (string.IsNullOrWhiteSpace(line))
                 {
-                    // 提取文本
-                    string pageText = ExtractText(page);
+                    markdown.AppendLine();
+                    inList = false;
+                    continue;
+                }
 
-                    // 处理文本格式
-                    pageText = ProcessHeadings(pageText);
-                    pageText = ProcessLists(pageText);
-                    pageText = ProcessParagraphs(pageText);
-
-                    markdown.Append(pageText);
-
-                    // 处理图片
-                    if (_imageOutputPath != null || useBase64)
+                // Try to detect headings
+                if (IsLikelyHeading(line))
+                {
+                    inList = false;
+                    if (i > 0) markdown.AppendLine();
+                    markdown.AppendLine("## " + line);
+                    markdown.AppendLine();
+                }
+                // Try to detect bullet lists
+                else if (line.StartsWith("•") || line.StartsWith("*") || line.StartsWith("-") ||
+                         Regex.IsMatch(line,
+                             @"^\s*[\u2022\u2023\u2043\u204C\u204D\u2219\u25AA\u25CF\u25E6\u2981\u2999]"))
+                {
+                    string cleanLine = Regex.Replace(line,
+                        @"^[\s\u2022\u2023\u2043\u204C\u204D\u2219\u25AA\u25CF\u25E6\u2981\u2999*-]+", "").Trim();
+                    markdown.AppendLine("* " + cleanLine);
+                    inList = true;
+                }
+                // Try to detect numbered lists
+                else if (Regex.IsMatch(line, @"^\s*\d+[\.\)]\s+"))
+                {
+                    string cleanLine = Regex.Replace(line, @"^\s*\d+[\.\)]\s+", "").Trim();
+                    markdown.AppendLine("1. " + cleanLine);
+                    inList = true;
+                }
+                // Regular paragraph
+                else
+                {
+                    if (inList)
                     {
-                        ExtractImages(page, markdown);
+                        markdown.AppendLine();
+                        inList = false;
+                    }
+
+                    markdown.AppendLine(line);
+
+                    // Add blank line after paragraph
+                    if (i < lines.Length - 1 && !string.IsNullOrWhiteSpace(lines[i + 1].Trim()))
+                    {
+                        markdown.AppendLine();
                     }
                 }
             }
@@ -57,14 +332,319 @@ namespace DocumentConverter
         }
 
         /// <summary>
-        /// 将PDF文件转换为Markdown格式
+        /// Extracts text directly from .doc binary format
+        /// This is a very basic implementation that only extracts plain text
         /// </summary>
-        /// <param name="pdfPath"></param>
-        /// <param name="chatHistory"></param>
-        /// <returns></returns>
+        private string ExtractTextFromDocBinary(Stream stream)
+        {
+            StringBuilder text = new StringBuilder();
+
+            try
+            {
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, true))
+                {
+                    stream.Position = 0;
+                    byte[] bytes = new byte[stream.Length];
+                    stream.Read(bytes, 0, (int)stream.Length);
+
+                    // Very basic implementation to extract plain text
+                    // DOC files have text in UTF-16 LE encoding with numerous control codes
+
+                    // First, try to find the text part of the document
+                    int startPos = -1;
+
+                    // Try to find some common markers
+                    for (int i = 0; i < bytes.Length - 20; i++)
+                    {
+                        // Look for potential start of text section
+                        if (bytes[i] == 0x42 && bytes[i + 1] == 0x00 && bytes[i + 2] == 0x6F && bytes[i + 3] == 0x00 &&
+                            bytes[i + 4] == 0x64 && bytes[i + 5] == 0x00 && bytes[i + 6] == 0x79 &&
+                            bytes[i + 7] == 0x00)
+                        {
+                            startPos = i + 8; // After "Body" marker
+                            break;
+                        }
+                    }
+
+                    if (startPos < 0)
+                    {
+                        // If we can't find the text part, return a fallback message
+                        return
+                            "The document could not be parsed in binary format. Please convert to .docx format for better results.";
+                    }
+
+                    // Extract text - looking for Unicode strings
+                    for (int i = startPos; i < bytes.Length - 1; i += 2)
+                    {
+                        // Check if this is a printable character (basic ASCII range)
+                        if (bytes[i] >= 32 && bytes[i] < 127 && bytes[i + 1] == 0)
+                        {
+                            text.Append((char)bytes[i]);
+                        }
+                        else if (bytes[i] == 13 && bytes[i + 1] == 0)
+                        {
+                            text.AppendLine(); // CR/LF
+                        }
+                    }
+                }
+
+                return text.ToString();
+            }
+            catch (Exception ex)
+            {
+                return "Error extracting text from binary DOC: " + ex.Message;
+            }
+        }
+
         /// <summary>
-        /// Extracts images from the page and returns a list of image data
+        /// Basic text extraction - tries to get any text content from the binary stream
         /// </summary>
+        private string ExtractBasicTextFromStream(Stream stream)
+        {
+            StringBuilder text = new StringBuilder();
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                stream.CopyTo(ms);
+                byte[] bytes = ms.ToArray();
+
+                // Try to extract ASCII and Unicode strings
+                for (int i = 0; i < bytes.Length - 1; i++)
+                {
+                    // Look for potential text strings
+                    if (bytes[i] >= 32 && bytes[i] < 127)
+                    {
+                        // If this is the start of a potential string, extract it
+                        int start = i;
+                        StringBuilder word = new StringBuilder();
+
+                        while (i < bytes.Length && bytes[i] >= 32 && bytes[i] < 127)
+                        {
+                            word.Append((char)bytes[i]);
+                            i++;
+                        }
+
+                        // Only keep reasonably sized words (likely to be real text)
+                        if (word.Length > 3)
+                        {
+                            text.Append(word);
+                            text.Append(" ");
+                        }
+                    }
+                }
+            }
+
+            // Format the extracted text
+            string result = text.ToString();
+            result = Regex.Replace(result, @"\s{2,}", " "); // Remove excess spaces
+            result = Regex.Replace(result, @"(.{50,}?)\s", "$1\n"); // Add line breaks for readability
+
+            return result;
+        }
+
+        /// <summary>
+        /// Enhanced version of ConvertWordToMarkdown that handles .docx files better
+        /// </summary>
+        public ChatMessageContentItemCollection ConvertWordToMarkdown(Stream stream, ref int requestToken,
+            string wordFileName)
+        {
+            var chatMessageContentItemCollection = new ChatMessageContentItemCollection();
+            StringBuilder markdown = new StringBuilder();
+
+            try
+            {
+                using (WordprocessingDocument doc = WordprocessingDocument.Open(stream, false))
+                {
+                    var body = doc.MainDocumentPart?.Document.Body;
+                    if (body == null) throw new InvalidOperationException("Document body is null");
+
+                    // Process document styles
+                    IDictionary<string, TableStyle> tableStyles = new Dictionary<string, TableStyle>();
+                    if (doc.MainDocumentPart?.StyleDefinitionsPart != null)
+                    {
+                        var stylesPart = doc.MainDocumentPart.StyleDefinitionsPart;
+                        var styles = stylesPart.Styles;
+                        foreach (var style in styles?.Elements<Style>().Where(s => s.Type == StyleValues.Table))
+                        {
+                            if (style.StyleId != null)
+                            {
+                                tableStyles[style.StyleId] = new TableStyle
+                                {
+                                    StyleId = style?.StyleId.Value ?? "",
+                                    Name = style?.StyleName?.Val?.Value ?? ""
+                                };
+                            }
+                        }
+                    }
+
+                    // Track context state
+                    bool inList = false;
+                    int currentListLevel = 0;
+                    bool inTable = false;
+                    string previousListId = null;
+                    int previousListLevel = -1;
+
+                    foreach (var element in body.ChildElements)
+                    {
+                        if (element is WordParagraph para)
+                        {
+                            ProcessParagraph(para, doc, markdown, ref inList, ref currentListLevel, ref previousListId,
+                                ref previousListLevel);
+                        }
+                        else if (element is Table table)
+                        {
+                            inList = false; // End previous list
+                            ProcessTable(table, markdown);
+                            inTable = true;
+                        }
+                        else if (element is SectionProperties)
+                        {
+                            // Handle section properties if needed
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Fallback to simple text extraction for problematic files
+                try
+                {
+                    stream.Position = 0;
+                    markdown.AppendLine("<!-- Using fallback text extraction due to error: " + ex.Message + " -->");
+
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        stream.CopyTo(ms);
+                        ms.Position = 0;
+
+                        // Try alternative approach
+                        try
+                        {
+                            string tempFilePath = SaveToTempFile(ms, ".docx");
+                            try
+                            {
+                                if (IsWordInteropAvailable())
+                                {
+                                    string extractedText = ExtractTextUsingWordInterop(tempFilePath);
+                                    markdown.Append(FormatExtractedText(extractedText));
+                                }
+                                else
+                                {
+                                    // Basic fallback
+                                    ms.Position = 0;
+                                    string text = ExtractBasicTextFromStream(ms);
+                                    markdown.Append(FormatExtractedText(text));
+                                }
+                            }
+                            finally
+                            {
+                                // Clean up temp file
+                                try
+                                {
+                                    if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
+                                }
+                                catch
+                                {
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Last resort - try to extract any text
+                            ms.Position = 0;
+                            string text = ExtractBasicTextFromStream(ms);
+                            markdown.Append(text);
+                        }
+                    }
+                }
+                catch (Exception fallbackEx)
+                {
+                    markdown.AppendLine($"<!-- Document parsing failed completely: {fallbackEx.Message} -->");
+                }
+            }
+
+            var md = markdown.ToString();
+            requestToken += TokenHelper.GetTokens(md);
+
+            // Add text content
+            if (md.Length > 0)
+            {
+                var text = new TextContent()
+                {
+                    Text = $@"
+```markdown {wordFileName}
+{md}
+```
+"
+                };
+                requestToken += TokenHelper.GetTokens(text.Text);
+                chatMessageContentItemCollection.Add(text);
+            }
+
+            return chatMessageContentItemCollection;
+        }
+
+        /// <summary>
+        /// Determines if text is likely a heading
+        /// </summary>
+        private bool IsLikelyHeading(string line)
+        {
+            return !string.IsNullOrEmpty(line)
+                   && line.Length < 100
+                   && !line.EndsWith(".")
+                   && char.IsUpper(line[0]);
+        }
+
+        public ChatMessageContentItemCollection ConvertPdfToMarkdown(Stream stream, ref int requestToken,
+            string docFileName)
+        {
+            StringBuilder textContent = new StringBuilder();
+            List<(byte[] ImageData, string FileName, string MimeType)> allImages = new();
+
+            var chatMessageContentItemCollection = new ChatMessageContentItemCollection();
+
+            using (PdfDocument document = PdfDocument.Open(stream))
+            {
+                foreach (var page in document.GetPages())
+                {
+                    // Extract text
+                    string pageText = ExtractText(page);
+                    pageText = ProcessHeadings(pageText);
+                    pageText = ProcessLists(pageText);
+                    pageText = ProcessParagraphs(pageText);
+                    textContent.Append(pageText);
+
+                    // Extract images
+                    if (_imageOutputPath != null || _useBase64)
+                    {
+                        var pageImages = ExtractImagesData(page);
+                        allImages.AddRange(pageImages);
+                        foreach (var image in pageImages)
+                        {
+                            textContent.Append("![image](" + image.FileName + ")\n");
+                        }
+                    }
+                }
+            }
+
+            // Add text content first
+            if (textContent.Length > 0)
+            {
+                var text = new TextContent()
+                {
+                    Text = $@"
+```markdown {docFileName}
+{textContent}
+```
+"
+                };
+                requestToken += TokenHelper.GetTokens(text.Text);
+                chatMessageContentItemCollection.Add(text);
+            }
+
+            return chatMessageContentItemCollection;
+        }
+
         private List<(byte[] ImageData, string FileName, string MimeType)> ExtractImagesData(Page page)
         {
             var result = new List<(byte[] ImageData, string FileName, string MimeType)>();
@@ -84,12 +664,12 @@ namespace DocumentConverter
                 }
 
                 // Save file if not using base64
-                if (!useBase64 && !string.IsNullOrEmpty(_imageOutputPath))
+                if (!_useBase64 && !string.IsNullOrEmpty(_imageOutputPath))
                 {
                     Directory.CreateDirectory(_imageOutputPath);
                     string imagePath = IOPath.Combine(_imageOutputPath, filename);
                     File.WriteAllBytes(imagePath, bytes);
-                    filename = chatOptions.App + "/images/" + filename;
+                    filename = _chatOptions.App + "/images/" + filename;
                 }
 
                 result.Add((bytes, filename, mimeType));
@@ -98,65 +678,11 @@ namespace DocumentConverter
             return result;
         }
 
-        /// <summary>
-        /// 将PDF文件转换为Markdown格式并添加到聊天历史
-        /// </summary>
-        public ChatMessageContentItemCollection ConvertPdfToMarkdown(Stream stream, ref int requestToken,
-            string docFileName)
-        {
-            StringBuilder textContent = new StringBuilder();
-            List<(byte[] ImageData, string FileName, string MimeType)> allImages = new();
-
-            var chatMessageContentItemCollection = new ChatMessageContentItemCollection();
-
-            using (PdfDocument document = PdfDocument.Open(stream))
-            {
-                foreach (var page in document.GetPages())
-                {
-                    // 提取文本
-                    string pageText = ExtractText(page);
-                    pageText = ProcessHeadings(pageText);
-                    pageText = ProcessLists(pageText);
-                    pageText = ProcessParagraphs(pageText);
-                    textContent.Append(pageText);
-
-                    // 提取图片
-                    if (_imageOutputPath != null || useBase64)
-                    {
-                        var pageImages = ExtractImagesData(page);
-                        allImages.AddRange(pageImages);
-                        foreach (var image in pageImages)
-                        {
-                            textContent.Append("![image](" + image.FileName + ")\n");
-                        }
-                    }
-                }
-            }
-
-            // 首先添加文本内容
-            if (textContent.Length > 0)
-            {
-                var text = new TextContent()
-                {
-                    Text = $@"
-```markdown {docFileName}
-{textContent}
-```
-"
-                };
-                requestToken += TokenHelper.GetTokens(text.Text);
-                chatMessageContentItemCollection.Add(text);
-            }
-
-
-            return chatMessageContentItemCollection;
-        }
-
         private string ExtractText(Page page)
         {
             StringBuilder text = new StringBuilder();
 
-            // 获取所有文本块
+            // Get all text blocks
             var words = page.GetWords();
             var sortedWords = words.OrderBy(w => w.BoundingBox.Bottom)
                 .ThenBy(w => w.BoundingBox.Left)
@@ -166,7 +692,7 @@ namespace DocumentConverter
 
             foreach (var word in sortedWords)
             {
-                // 检查是否需要添加换行
+                // Check if a new line is needed
                 if (Math.Abs(word.BoundingBox.Bottom - currentLine) > 5f)
                 {
                     text.AppendLine();
@@ -187,14 +713,14 @@ namespace DocumentConverter
                 string filename = IOPath.GetRandomFileName();
                 filename = IOPath.ChangeExtension(filename, ".png");
 
-                if (useBase64)
+                if (_useBase64)
                 {
                     byte[] bytes = image.RawBytes.ToArray();
                     string base64 = Convert.ToBase64String(bytes);
-                    string mimeType = "image/png"; // 默认为PNG
+                    string mimeType = "image/png"; // Default
 
-                    // 根据图片数据判断格式
-                    if (bytes.Length > 2 && bytes[0] == 0xFF && bytes[1] == 0xD8) // JPEG 文件头
+                    // Determine format from image data
+                    if (bytes.Length > 2 && bytes[0] == 0xFF && bytes[1] == 0xD8) // JPEG header
                     {
                         mimeType = "image/jpeg";
                     }
@@ -212,96 +738,19 @@ namespace DocumentConverter
                     string imagePath = IOPath.Combine(_imageOutputPath, filename);
 
                     File.WriteAllBytes(imagePath, image.RawBytes.ToArray());
-                    markdown.AppendLine($"![image]({chatOptions.App + "/images/" + filename})\n");
+                    markdown.AppendLine($"![image]({_chatOptions.App + "/images/" + filename})\n");
                 }
             }
-        }
-
-        public ChatMessageContentItemCollection ConvertWordToMarkdown(Stream stream, ref int requestToken,
-            string wordFileName)
-        {
-            var chatMessageContentItemCollection = new ChatMessageContentItemCollection();
-            StringBuilder markdown = new StringBuilder();
-
-            using (WordprocessingDocument doc = WordprocessingDocument.Open(stream, false))
-            {
-                var body = doc.MainDocumentPart?.Document.Body;
-
-                // 处理文档内的表格样式引用
-                IDictionary<string, TableStyle> tableStyles = new Dictionary<string, TableStyle>();
-                if (doc.MainDocumentPart?.StyleDefinitionsPart != null)
-                {
-                    var stylesPart = doc.MainDocumentPart.StyleDefinitionsPart;
-                    var styles = stylesPart.Styles;
-                    foreach (var style in styles?.Elements<Style>().Where(s => s.Type == StyleValues.Table))
-                    {
-                        if (style.StyleId != null)
-                        {
-                            tableStyles[style.StyleId] = new TableStyle
-                            {
-                                StyleId = style?.StyleId.Value ?? "",
-                                Name = style?.StyleName?.Val?.Value ?? ""
-                            };
-                        }
-                    }
-                }
-
-                // 跟踪上下文状态
-                bool inList = false;
-                int currentListLevel = 0;
-                bool inTable = false;
-                string previousListId = null;
-                int previousListLevel = -1;
-
-                foreach (var element in body.ChildElements)
-                {
-                    if (element is WordParagraph para)
-                    {
-                        ProcessParagraph(para, doc, markdown, ref inList, ref currentListLevel, ref previousListId,
-                            ref previousListLevel);
-                    }
-                    else if (element is Table table)
-                    {
-                        inList = false; // 结束之前的列表
-                        ProcessTable(table, markdown);
-                        inTable = true;
-                    }
-                    else if (element is SectionProperties)
-                    {
-                        
-                    }
-                }
-            }
-
-            var md = markdown.ToString();
-            requestToken += TokenHelper.GetTokens(md);
-
-            // 添加文本内容
-            if (md.Length > 0)
-            {
-                var text = new TextContent()
-                {
-                    Text = $@"
-```markdown {wordFileName}
-{md}
-```
-"
-                };
-                requestToken += TokenHelper.GetTokens(text.Text);
-                chatMessageContentItemCollection.Add(text);
-            }
-
-            return chatMessageContentItemCollection;
         }
 
         private void ProcessParagraph(WordParagraph para, WordprocessingDocument doc, StringBuilder markdown,
             ref bool inList, ref int currentListLevel, ref string previousListId, ref int previousListLevel)
         {
-            // 获取段落样式
+            // Get paragraph style
             var style = para.ParagraphProperties?.ParagraphStyleId?.Val?.Value;
             var numProp = para.ParagraphProperties?.NumberingProperties;
 
-            // 检查段落是否为空
+            // Check if paragraph is empty
             if (!para.Descendants<Text>().Any() && !para.Descendants<Drawing>().Any() &&
                 !para.Descendants<Break>().Any(b => b.Type == BreakValues.Page))
             {
@@ -309,22 +758,22 @@ namespace DocumentConverter
                 return;
             }
 
-            // 处理分页符
+            // Handle page breaks
             if (para.Descendants<Break>()
                 .Any(b => b.Type == BreakValues.Page))
             {
-                // markdown.AppendLine("\n<!-- 分页符 -->\n");
+                // markdown.AppendLine("\n<!-- Page break -->\n");
             }
 
-            // 处理标题
+            // Handle headings
             if (style != null && style.StartsWith("Heading"))
             {
-                inList = false; // 结束之前的列表
+                inList = false; // End previous list
                 int level = int.Parse(Regex.Match(style, @"\d+").Value);
                 string headingText = ProcessFormattedText(para);
                 markdown.AppendLine(new string('#', level) + " " + headingText + "\n");
             }
-            // 处理列表
+            // Handle lists
             else if (numProp != null)
             {
                 var numId = numProp.NumberingId?.Val;
@@ -341,10 +790,10 @@ namespace DocumentConverter
                     {
                         bool isBullet = IsNumberingStyleBullet(numbering, numDef, lvl);
 
-                        // 处理列表缩进和层级
+                        // Handle list indentation and levels
                         if (!inList || numId.Value.ToString() != previousListId || lvl != previousListLevel)
                         {
-                            // 如果不是延续之前的列表，先添加空行
+                            // If not continuing previous list, add blank line
                             if (inList && (numId.Value.ToString() != previousListId || lvl < previousListLevel))
                             {
                                 markdown.AppendLine();
@@ -365,21 +814,21 @@ namespace DocumentConverter
             }
             else
             {
-                inList = false; // 结束之前的列表
+                inList = false; // End previous list
 
-                // 处理块引用（通常是缩进段落）
+                // Handle block quotes (usually indented paragraphs)
                 int.TryParse(para.ParagraphProperties?.Indentation?.Left?.Value, out int indent);
                 if (indent > 0)
                 {
                     string blockText = ProcessFormattedText(para);
                     markdown.AppendLine("> " + blockText + "\n");
                 }
-                // 处理常规段落
+                // Handle regular paragraphs
                 else
                 {
                     string paragraphText = ProcessFormattedText(para);
 
-                    // 检查段落中的图片
+                    // Check for images in paragraph
                     var drawings = para.Descendants<Drawing>();
                     if (drawings.Any())
                     {
@@ -406,13 +855,13 @@ namespace DocumentConverter
                 }
             }
 
-            // 处理脚注和尾注
+            // Handle footnotes and endnotes
             var footnoteReferences = para.Descendants<FootnoteReference>();
             var endnoteReferences = para.Descendants<EndnoteReference>();
 
             if (footnoteReferences.Any() || endnoteReferences.Any())
             {
-                // markdown.AppendLine("\n<!-- 文档包含脚注或尾注 -->\n");
+                // markdown.AppendLine("\n<!-- Document contains footnotes or endnotes -->\n");
 
                 int footnoteCount = 1;
                 foreach (var footnote in footnoteReferences)
@@ -440,13 +889,13 @@ namespace DocumentConverter
         {
             StringBuilder textBuilder = new StringBuilder();
 
-            foreach (var run in para.Elements<DocumentFormat.OpenXml.Wordprocessing.Run>())
+            foreach (var run in para.Elements<Run>())
             {
                 string runText = string.Join("", run.Elements<Text>().Select(t => t.Text));
 
                 if (string.IsNullOrEmpty(runText)) continue;
 
-                // 检查文字格式
+                // Check text formatting
                 var runProps = run.RunProperties;
                 bool isBold = runProps?.Bold != null;
                 bool isItalic = runProps?.Italic != null;
@@ -454,14 +903,14 @@ namespace DocumentConverter
                 bool isStrike = runProps?.Strike != null;
                 bool isHighlight = runProps?.Highlight != null;
 
-                // 应用Markdown格式
+                // Apply Markdown formatting
                 if (isBold) runText = $"**{runText}**";
                 if (isItalic) runText = $"*{runText}*";
                 if (isStrike) runText = $"~~{runText}~~";
-                if (isUnderline) runText = $"<u>{runText}</u>"; // HTML标签，某些Markdown解析器支持
+                if (isUnderline) runText = $"<u>{runText}</u>"; // HTML tag, supported by some Markdown parsers
 
-                // 检查超链接
-                var hyperlink = run.Ancestors<DocumentFormat.OpenXml.Wordprocessing.Hyperlink>().FirstOrDefault();
+                // Check for hyperlinks
+                var hyperlink = run.Ancestors<Hyperlink>().FirstOrDefault();
                 if (hyperlink != null)
                 {
                     string relationshipId = hyperlink.Id?.Value;
@@ -489,14 +938,14 @@ namespace DocumentConverter
 
         private void ProcessTable(Table table, StringBuilder markdown)
         {
-            // 获取所有行
-            var rows = table.Elements<DocumentFormat.OpenXml.Wordprocessing.TableRow>().ToList();
+            // Get all rows
+            var rows = table.Elements<TableRow>().ToList();
             if (!rows.Any()) return;
 
-            // 确定列数（使用第一行）
+            // Determine column count (using first row)
             int columnCount = rows[0].Elements<TableCell>().Count();
 
-            // 添加表头分隔符
+            // Add header separator
             StringBuilder headerRow = new StringBuilder("|");
             StringBuilder separatorRow = new StringBuilder("|");
 
@@ -506,21 +955,22 @@ namespace DocumentConverter
                 separatorRow.Append(" --- |");
             }
 
-            // 处理表头（假设第一行是表头）
+            // Process header (assume first row is header)
             var firstRow = rows[0];
             markdown.Append("|");
 
             foreach (var cell in firstRow.Elements<TableCell>())
             {
-                string cellText = string.Join("", cell.Descendants<Text>().Select(t => t.Text));
-                // 处理单元格中的格式
+                string cellText = string.Join("",
+                    cell.Descendants<Text>().Select(t => t.Text));
+                // Process formatting in cells
                 markdown.Append($" {cellText} |");
             }
 
             markdown.AppendLine();
             markdown.AppendLine(separatorRow.ToString());
 
-            // 处理数据行
+            // Process data rows
             for (int i = 1; i < rows.Count; i++)
             {
                 var row = rows[i];
@@ -529,13 +979,13 @@ namespace DocumentConverter
                 foreach (var cell in row.Elements<TableCell>())
                 {
                     string cellText = string.Join("", cell.Descendants<Text>().Select(t => t.Text));
-                    // 处理合并单元格
+                    // Handle merged cells
                     var spanAttr = cell.TableCellProperties?.GridSpan?.Val;
                     int span = spanAttr != null ? spanAttr.Value : 1;
 
                     markdown.Append($" {cellText} |");
 
-                    // 为合并的单元格添加额外的分隔符
+                    // Add extra separators for merged cells
                     for (int j = 1; j < span; j++)
                     {
                         markdown.Append(" |");
@@ -572,70 +1022,13 @@ namespace DocumentConverter
             return false;
         }
 
-        // 用于存储表格样式信息的辅助类
-        private class TableStyle
-        {
-            public string StyleId { get; set; }
-            public string Name { get; set; }
-        }
-
-
-        private string ProcessHeadings(string text)
-        {
-            var lines = text.Split('\n');
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (IsLikelyHeading(lines[i]))
-                {
-                    lines[i] = "# " + lines[i];
-                }
-            }
-
-            return string.Join("\n", lines);
-        }
-
-        private bool IsLikelyHeading(string line)
-        {
-            return !string.IsNullOrEmpty(line)
-                   && line.Length < 100
-                   && !line.EndsWith(".")
-                   && char.IsUpper(line[0]);
-        }
-
-        private string ProcessLists(string text)
-        {
-            var lines = text.Split('\n');
-            for (int i = 0; i < lines.Length; i++)
-            {
-                // 检测和转换项目符号列表
-                if (Regex.IsMatch(lines[i], @"^[\u2022\u2023\u2043\u204C\u204D\u2219\u25AA\u25CF\u25E6\u2981\u2999]"))
-                {
-                    lines[i] = "* " + lines[i]
-                        .TrimStart(
-                            " \t\u2022\u2023\u2043\u204C\u204D\u2219\u25AA\u25CF\u25E6\u2981\u2999".ToCharArray());
-                }
-                // 检测和转换数字列表
-                else if (Regex.IsMatch(lines[i], @"^\d+[\.\)]"))
-                {
-                    lines[i] = "1. " + Regex.Replace(lines[i], @"^\d+[\.\)]", "").Trim();
-                }
-            }
-
-            return string.Join("\n", lines);
-        }
-
-        private string ProcessParagraphs(string text)
-        {
-            return Regex.Replace(text, @"([^\n])\n([^\n])", "$1\n\n$2");
-        }
-
         private string ProcessImage(OpenXmlPart imagePart)
         {
             string filename = IOPath.GetRandomFileName();
             string extension = imagePart.Uri.ToString().Split('.').Last();
             filename = IOPath.ChangeExtension(filename, extension);
 
-            if (useBase64)
+            if (_useBase64)
             {
                 using var stream = imagePart.GetStream();
                 using var ms = new MemoryStream();
@@ -660,7 +1053,7 @@ namespace DocumentConverter
                 stream.CopyTo(fs);
             }
 
-            return $"![image]({imagePath.Replace("\\", "/")})\n";
+            return $"![image]({_chatOptions.App + "/images/" + filename})\n";
         }
 
         private string GetMimeType(string extension)
@@ -672,8 +1065,60 @@ namespace DocumentConverter
                 case "jpeg": return "image/jpeg";
                 case "gif": return "image/gif";
                 case "bmp": return "image/bmp";
+                case "tiff":
+                case "tif": return "image/tiff";
+                case "emf": return "image/emf";
+                case "wmf": return "image/wmf";
                 default: return "application/octet-stream";
             }
+        }
+
+        private string ProcessHeadings(string text)
+        {
+            var lines = text.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (IsLikelyHeading(lines[i]))
+                {
+                    lines[i] = "# " + lines[i];
+                }
+            }
+
+            return string.Join("\n", lines);
+        }
+
+        private string ProcessLists(string text)
+        {
+            var lines = text.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                // Detect and convert bullet lists
+                if (Regex.IsMatch(lines[i], @"^[\u2022\u2023\u2043\u204C\u204D\u2219\u25AA\u25CF\u25E6\u2981\u2999]"))
+                {
+                    lines[i] = "* " + lines[i]
+                        .TrimStart(
+                            " \t\u2022\u2023\u2043\u204C\u204D\u2219\u25AA\u25CF\u25E6\u2981\u2999".ToCharArray());
+                }
+                // Detect and convert numbered lists
+                else if (Regex.IsMatch(lines[i], @"^\d+[\.\)]"))
+                {
+                    lines[i] = "1. " + Regex.Replace(lines[i], @"^\d+[\.\)]", "").Trim();
+                }
+            }
+
+            return string.Join("\n", lines);
+        }
+
+        private string ProcessParagraphs(string text)
+        {
+            return Regex.Replace(text, @"([^\n])\n([^\n])", "$1\n\n$2");
+        }
+
+        // Helper class for table styles
+        private class TableStyle
+        {
+            public string StyleId { get; set; }
+            public string Name { get; set; }
         }
     }
 }

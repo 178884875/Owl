@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using DocumentConverter;
 using FastService;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -294,7 +293,8 @@ public sealed class ChatService(
                                     history.AddUserMessage(
                                         converter.ConvertPdfToMarkdown(pdf, ref requestToken, file.FileName));
                                 }
-                                else if (file.FileName.EndsWith(".word"))
+                                else if (file.FileName.EndsWith(".word") || file.FileName.EndsWith(".docx") ||
+                                         file.FileName.EndsWith(".doc"))
                                 {
                                     using var word = new MemoryStream();
                                     await stream.CopyToAsync(word);
