@@ -195,8 +195,6 @@ export const createChatSlice: StateCreator<
         if (result.success) {
             // 更新session列表
             await get().loadSessions('');
-
-            message.success(result.data ? '已收藏' : '已取消收藏');
         } else {
             message.error(result.message);
         }

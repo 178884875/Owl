@@ -86,3 +86,7 @@ body {
 .ant-prompts-list-vertical {
   overflow: hidden;
 }
+
+.ant-prompts .ant-prompts-list {
+  overflow: hidden !important;
+}
