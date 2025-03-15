@@ -16,6 +16,13 @@ export default function CodeRendering() {
         return null;
     }
 
+    if (!codeRendering.items || codeRendering.items.length === 0 || 
+        codeRendering.index < 0 || codeRendering.index >= codeRendering.items.length || 
+        !codeRendering.items[codeRendering.index]) {
+        console.warn('CodeRendering: 数据不完整，无法显示代码窗口', codeRendering);
+        return null;
+    }
+
     const handleCopy = () => {
         navigator.clipboard.writeText(codeRendering.items[codeRendering.index].code)
             .then(() => {
@@ -35,10 +42,6 @@ export default function CodeRendering() {
         a.click();
         URL.revokeObjectURL(url);
         message.success('代码已下载');
-    }
-
-    if (codeRendering.items?.length === 0 || !codeRendering.items[codeRendering.index]) {
-        return null;
     }
 
     return (

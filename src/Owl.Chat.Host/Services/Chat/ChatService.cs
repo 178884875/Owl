@@ -140,21 +140,35 @@ public sealed class ChatService(
                     {
                         Text = """
                                <code_formatting_instructions>
-                               当您提供代码时，请按照以下固定格式返回代码块：
+                               提供代码或复杂内容时，请按照以下固定格式返回：
                                
+                               1. 代码格式：
                                ```[语言]|[文件名:文件描述]
                                代码内容
                                ```
                                
+                               2. 文案/复杂内容格式：
+                               ```text|[文档名:内容描述]
+                               文案或复杂内容
+                               ```
+                               
                                示例格式：
                                ```python|[app.py:主应用文件]
-                               处理用户请求的Flask应用
+                               def hello_world():
+                                   return "Hello, World!"
+                               ```
+                               
+                               ```text|[marketing_copy.txt:产品描述文案]
+                               这是一段详细的产品描述文案，内容较长时使用此格式...
                                ```
                                
                                注意事项：
-                               - 语言：明确指定编程语言（如python, javascript, java等）
+                               - 语言：明确指定编程语言（如python, javascript, java等）或内容类型（text, markdown等）
                                - 文件名和描述：提供有意义的文件名和简短描述
-                               - 所有代码必须包含在代码块内，使用正确的语法高亮
+                               - 所有代码或复杂内容必须包含在代码块内，使用正确的语法高亮
+                               - 当内容较长或结构复杂时，始终使用代码块格式保持清晰
+                               - 在回复用户提问时保持友好可爱的风格，但在提供代码或技术内容时保持专业严谨
+                               - 除非用户明确要求不需要解释，否则应提供适当的说明和与用户互动
                                </code_formatting_instructions>
                                """
                     }

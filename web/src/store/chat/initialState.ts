@@ -28,8 +28,8 @@ export interface ChatState {
      * 是否显示代码渲染
      */
     codeRendering: {
-        visible: false,
-        index: 0,
+        visible: boolean,
+        index: number,
         /**
          * 代码渲染的items
          */

@@ -10,6 +10,7 @@ import remarkMath from 'remark-math';
 import './styles.css';
 import { useChatStore } from '@/store/chat';
 import { Code } from 'lucide-react';
+import { getCodeBlocks } from '@/utils/render';
 const { Title, Text, Paragraph } = Typography;
 const { useToken } = theme;
 
@@ -22,14 +23,29 @@ export default function MarkdownIRender({ content, className }: MarkdownIRenderP
     const { token } = useToken();
     const [setCodeRendering, codeRendering] = useChatStore((state) => [state.setCodeRendering, state.codeRendering]);
 
-    const showCodeWindow = ( code: string) => {
-        const index = codeRendering.items.findIndex(item => item.code.replace(/\n/g, '') === code.replace(/\n/g, ''));
+    const showCodeWindow = (code: string) => {
+        // 标准化代码：移除所有空白字符并转为小写以进行不区分大小写的比较
+        const normalizeCode = (text: string) => text.replace(/\s+/g, '')
+            .replace(/\n/g, '')
+            .replace(/\t/g, '')
+            .toLowerCase();
+        const normalizedCode = normalizeCode(code);
+        const items = getCodeBlocks(content);
+        
+        const index = items.findIndex(item => 
+            normalizeCode(item.code) === normalizedCode
+        );
+        
         if (index !== -1) {
             setCodeRendering({
                 ...codeRendering,
                 index,
+                items,
                 visible: true
             });
+        } else {
+            // 如果没有找到完全匹配，可以考虑添加一个新项
+            console.log('未找到匹配的代码块', code, codeRendering.items);
         }
     };
 
@@ -52,6 +68,9 @@ export default function MarkdownIRender({ content, className }: MarkdownIRenderP
                     strong: ({ node, ...props }) => <Text strong {...props} />,
                     em: ({ node, ...props }) => <Text italic {...props} />,
                     del: ({ node, ...props }) => <Text delete {...props} />,
+
+                    // 引用块
+                    blockquote: ({ node, ...props }) => <blockquote className="markdown-blockquote" {...props} />,
 
                     // 链接
                     a: ({ node, ...props }) => <span

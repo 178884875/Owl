@@ -402,7 +402,11 @@ export const createChatSlice: StateCreator<
             if (first) {
                 first = false;
                 set({ 
-                    generateLoading: false
+                    generateLoading: false,
+                    codeRendering: {
+                        ...get().codeRendering,
+                        visible: true
+                    }
                  });
             }
 

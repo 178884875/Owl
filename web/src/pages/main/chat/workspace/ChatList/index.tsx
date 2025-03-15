@@ -11,6 +11,7 @@ import { theme } from 'antd';
 import { UpdateMessage } from '@/types/Message';
 import ChatWelcome from '../ChatWelcome';
 import ChatItem from './ChatItem';
+import { getCodeBlocks } from '@/utils/render';
 
 export default function ChatList() {
     const { token } = theme.useToken();
@@ -20,9 +21,10 @@ export default function ChatList() {
         currentSession,
         regenerateMessage,
         setCodeRendering,
-        generateLoading
+        generateLoading,
+        codeRendering
     ] =
-        useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage, state.setCodeRendering, state.generateLoading]);
+        useChatStore(state => [state.messages, state.setMessages, state.currentSession, state.regenerateMessage, state.setCodeRendering, state.generateLoading, state.codeRendering]);
 
     const user = useUserStore(state => state.user);
 
@@ -123,12 +125,13 @@ export default function ChatList() {
 
     useEffect(() => {
         if (messages.length === 0) return;
+        
         const lastMessage = messages[messages.length - 1];
         const currentText = lastMessage.texts[lastMessage.currentIndex ?? lastMessage.texts.length - 1].text;
         const codeBlocks = getCodeBlocks(currentText);
-        if (codeBlocks.length > 0 ) {
+        if (codeBlocks.length > 0) {
             setCodeRendering({
-                visible: generateLoading,
+                ...codeRendering,
                 index: 0,
                 items: codeBlocks.map((codeBlock) => ({
                     language: codeBlock.language,
@@ -137,81 +140,8 @@ export default function ChatList() {
                     description: codeBlock.description
                 }))
             });
-        } else {
-            setCodeRendering({
-                visible: false,
-                index: 0,
-                items: []
-            });
-        }
-    }, [messages, generateLoading]); 
-    
-    /**
-     * 解析accumulatedText代码块，得到代码中所有的代码块，并且提取```csharp|[BubbleSort.cs:实现冒泡排序算法] 这种格式的信息
-     * @param state ChatState
-     * @param accumulatedText 包含代码块的文本
-     * @returns 解析后的代码块信息数组
-     */
-    const getCodeBlocks = (accumulatedText: string) => {
-        if (!accumulatedText) return [];
-        
-        const result = [];
-        
-        try {
-            // 首先尝试匹配完整的代码块
-            const completeCodeBlockRegex = /```([\w\+\#]+)?\|?\[?([^\]:\n]*):?([^\]\n]*)\]?(?:\n|\s)([\s\S]*?)```/g;
-            let match;
-            let lastIndex = 0;
-
-            // 处理完整的代码块
-            while ((match = completeCodeBlockRegex.exec(accumulatedText)) !== null) {
-                const [fullMatch, language, fileName, description, code] = match;
-                lastIndex = completeCodeBlockRegex.lastIndex;
-
-                result.push({
-                    language: language || 'text', // 如果没有指定语言，默认为text
-                    fileName: fileName || '',
-                    description: description || '',
-                    code: code.trim(),
-                    fullMatch,
-                    isComplete: true
-                });
-            }
-
-            // 检查是否有未完成的代码块（只有开始标记，没有结束标记）
-            // 查找最后一个 ``` 开始的代码块
-            const remainingText = accumulatedText.slice(lastIndex);
-            const lastCodeBlockStart = remainingText.lastIndexOf('```');
-            
-            if (lastCodeBlockStart !== -1) {
-                // 找到了可能的未完成代码块
-                const incompleteBlockText = remainingText.slice(lastCodeBlockStart);
-                // 使用更简单的正则表达式来匹配未完成的代码块头部
-                const headerRegex = /```([\w\+\#]+)?\|?\[?([^\]:\n]*):?([^\]\n]*)\]?(?:\n|\s)/;
-                const headerMatch = headerRegex.exec(incompleteBlockText);
-                
-                if (headerMatch) {
-                    const [_, language, fileName, description] = headerMatch;
-                    // 提取代码部分 (去掉头部后的所有内容)
-                    const code = incompleteBlockText.slice(headerMatch[0].length);
-                    
-                    result.push({
-                        language: language || 'text',
-                        fileName: fileName || '',
-                        description: description || '',
-                        code: code.trim(),
-                        fullMatch: incompleteBlockText,
-                        isComplete: false
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('解析代码块时出错:', error);
-            // 出错时返回已解析的结果，不中断流程
-        }
-
-        return result;
-    }
+        } 
+    }, [messages, generateLoading]);
 
 
     if (messages.length === 0) {
