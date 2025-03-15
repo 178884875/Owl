@@ -125,22 +125,35 @@ export default function ChatList() {
 
     useEffect(() => {
         if (messages.length === 0) return;
-        
+
         const lastMessage = messages[messages.length - 1];
         const currentText = lastMessage.texts[lastMessage.currentIndex ?? lastMessage.texts.length - 1].text;
         const codeBlocks = getCodeBlocks(currentText);
         if (codeBlocks.length > 0) {
-            setCodeRendering({
-                ...codeRendering,
-                index: 0,
-                items: codeBlocks.map((codeBlock) => ({
-                    language: codeBlock.language,
-                    code: codeBlock.code,
-                    title: codeBlock.fileName,
-                    description: codeBlock.description
-                }))
-            });
-        } 
+            if (generateLoading) {
+                setCodeRendering({
+                    visible: true,
+                    index: 0,
+                    items: codeBlocks.map((codeBlock) => ({
+                        language: codeBlock.language,
+                        code: codeBlock.code,
+                        title: codeBlock.fileName,
+                        description: codeBlock.description
+                    }))
+                });
+            } else {
+                setCodeRendering({
+                    ...codeRendering,
+                    index: 0,
+                    items: codeBlocks.map((codeBlock) => ({
+                        language: codeBlock.language,
+                        code: codeBlock.code,
+                        title: codeBlock.fileName,
+                        description: codeBlock.description
+                    }))
+                });
+            }
+        }
     }, [messages, generateLoading]);
 
 

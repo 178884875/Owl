@@ -400,11 +400,7 @@ export const createChatSlice: StateCreator<
             if (first) {
                 first = false;
                 set({ 
-                    generateLoading: false,
-                    codeRendering: {
-                        ...get().codeRendering,
-                        visible: true
-                    }
+                    generateLoading: false
                  });
             }
 
