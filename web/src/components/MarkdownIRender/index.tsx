@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import { Button, theme } from 'antd';
+import {  theme } from 'antd';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Highlighter } from '@lobehub/ui';

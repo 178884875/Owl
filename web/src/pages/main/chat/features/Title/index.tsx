@@ -1,5 +1,5 @@
 import { useChatStore } from "@/store/chat";
-import { Button, Tag, Tooltip } from "antd";
+import { Button, Tooltip } from "antd";
 import { Bolt, MessageSquarePlus } from "lucide-react";
 import { Flexbox } from "react-layout-kit";
 import { useStyles } from "./styles";
