@@ -1,6 +1,6 @@
 import { Flexbox } from 'react-layout-kit';
 import { Attachments, Sender } from '@ant-design/x';
-import { Button, Dropdown, GetRef, Space, Tooltip } from 'antd';
+import { Button, Dropdown, GetRef, Space,} from 'antd';
 import React from 'react';
 import SenderHeader from './SenderHeader';
 import { LinkOutlined } from '@ant-design/icons';
