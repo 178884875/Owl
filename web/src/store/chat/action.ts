@@ -1,11 +1,11 @@
 import { StateCreator } from "zustand";
 import { ChatStore } from "./store";
-import  { getCurrentUserModels, getModelList } from "@/apis/Model";
+import { getCurrentUserModels, getModelList } from "@/apis/Model";
 import { createSession, deleteSession, getSessionLite, switchSessionModel, toggleFavorite, updateSession } from "@/apis/Session";
 import { createMessage, deleteMessage } from "@/apis/Message";
 import { ChatCompleteParams, ChatRole } from "@/types/Chat";
 import { message } from "antd";
-import { chatComplete, generateSessionName } from '@/apis/Chat';
+import { chatComplete, generatePrompt, generateSessionName } from '@/apis/Chat';
 import { chatSelectors } from "./selectors";
 import { uploadFile } from "@/apis/FileStorage";
 
@@ -176,6 +176,21 @@ export interface ChatAction {
      * 设置代码渲染
      */
     setCodeRendering: (codeRendering: any) => void;
+
+    /**
+     * 优化当前输入框提示词
+     */
+    optimizeCurrentInputPrompt: () => void;
+
+    /**
+     * 创建用户消息
+     */
+    createUserMessage: () => Promise<void>;
+
+    /**
+     * 创建助手消息
+     */
+    createAssistantMessage: () => Promise<void>;
 }
 
 
@@ -205,6 +220,33 @@ export const createChatSlice: StateCreator<
     setCodeRendering: (codeRendering: any) => {
         set({ codeRendering });
     },
+    optimizeCurrentInputPrompt: async () => {
+        const value = get().value;
+        const sessionId = get().currentSession?.id;
+        if (!sessionId) {
+            message.error('请先创建一个会话');
+            return;
+        }
+        set({
+            generateLoading: true
+        });
+        try {
+            const result = await generatePrompt({
+                sessionId,
+                prompt: value
+            });
+            if (result.success) {
+                set({
+                    value: result.data
+                });
+            }
+            message.success('优化成功');
+        } catch (error) {
+            console.error('Error in optimizeCurrentInputPrompt:', error);
+        } finally {
+            set({ generateLoading: false });
+        }
+    },
     updateSession: async (value: any) => {
         value.avatar = value.avatar ?? '🤖';
         const result = await updateSession(value);
@@ -219,6 +261,44 @@ export const createChatSlice: StateCreator<
         } else {
             message.error(result.message);
         }
+    },
+    createAssistantMessage: async () => {
+        const value = get().value;
+        if (!value) {
+            message.error('请输入内容');
+            return;
+        }
+        const userMessage = {
+            sessionId: get().currentSession?.id,
+            role: ChatRole.Assistant,
+            texts: [{ text: value }],
+            isLoading: true,
+            id: 0,
+            modelUsages: null
+        };
+        const messageResponse = await createMessage(userMessage);
+        userMessage.id = messageResponse.data.id;
+
+        set({ messages: [...get().messages, userMessage] });
+    },
+    createUserMessage: async () => {
+        const value = get().value;
+        if (!value) {
+            message.error('请输入内容');
+            return;
+        }
+        const userMessage = {
+            sessionId: get().currentSession?.id,
+            role: ChatRole.User,
+            texts: [{ text: value }],
+            isLoading: true,
+            id: 0,
+            modelUsages: null
+        };
+        const messageResponse = await createMessage(userMessage);
+        userMessage.id = messageResponse.data.id;
+
+        set({ messages: [...get().messages, userMessage] });
     },
     renameSession: async (id: number) => {
         try {
@@ -395,13 +475,13 @@ export const createChatSlice: StateCreator<
         let lastUpdateTime = Date.now();
 
         let first = true;
-        
+
         for await (const chunk of chatComplete(chatCompleteParams)) {
             if (first) {
                 first = false;
-                set({ 
+                set({
                     generateLoading: false
-                 });
+                });
             }
 
             const { data, type } = chunk;
@@ -653,7 +733,7 @@ export const createChatSlice: StateCreator<
                 else if (type === 'model_usage') {
                     tempAiMessage.modelUsages = data;
                 }
-                
+
             }
             set({ messages: [...messages], generateLoading: false });
 

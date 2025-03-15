@@ -689,6 +689,60 @@ public sealed class ChatService(
                 return new Tuple<int, Exception>(0, new Exception("Invalid detail option"));
         }
     }
+    
+    /// <summary>
+    /// 提示词优化
+    /// </summary>
+    /// <returns></returns>
+    [EndpointSummary("优化指定会话的提示词")]
+    [Filter(typeof(ResultFilter))]
+    [Authorize]
+    public async Task<string> GeneratePromptAsync(GeneratePromptInput input)
+    {
+        var session = await dbContext.Sessions
+            .AsNoTracking()
+            .Where(x => x.Id == input.SessionId)
+            .FirstOrDefaultAsync();
+        
+        // 获取当前会话模型属于的模型
+        var model = await dbContext.Models
+            .AsNoTracking()
+            .Where(x => x.Id == session.Model)
+            .FirstOrDefaultAsync();
+
+        // 获取当前用户是否存在当前模型类型的渠道
+        var channelShareUsers = await dbContext.ModelChannelShareUsers
+            .AsNoTracking()
+            .Where(x => x.UserId == userContext.UserId && x.Enabled)
+            .Select(x => x.ChannelId)
+            .ToListAsync();
+
+        var channels = await dbContext.ModelChannels
+            .AsNoTracking()
+            .Where(x => channelShareUsers.Contains(x.Id) ||
+                        x.CreatedBy == userContext.UserId)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToArrayAsync();
+
+        channels = channels.Where(x => x.ModelIds.Contains(session.Model)).ToArray();
+
+        if (channels.Length == 0)
+        {
+            throw new BusinessException($"抱歉，当前模型:{model.DisplayName}没有可用的渠道，请前往渠道管理创建渠道");
+        }
+
+        // 根据权重分配Key
+        var (channel, key) = GetChannelKey(channels);
+
+        var kernel = KernelFactory.CreateKernel(model.ModelId, channel.Endpoint, key, channel.Provider);
+        
+        var result = await kernel.InvokeAsync(kernel.Plugins["Generate"]["PromptWord"], new KernelArguments()
+        {
+            ["prompt"] = input.Prompt,
+        });
+        
+        return result.ToString();
+    }
 
     /// <summary>
     /// 生成会话名称

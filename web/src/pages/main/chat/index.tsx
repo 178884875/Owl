@@ -7,7 +7,7 @@ import CodeRendering from "@/components/CodeRendering";
 
 export default function Chat() {
     // 解析路由参数
-    const [sessions, selectSession] = useChatStore(state => [state.sessions, state.selectSession]);
+    const [sessions, selectSession, sideBarExpanded] = useChatStore(state => [state.sessions, state.selectSession,state.sideBarExpanded]);
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const sessionId = parseInt(query.get('sessionId') || '');
@@ -20,6 +20,7 @@ export default function Chat() {
         <Flexbox style={{
             flex: 1,
             height: '100%',
+            width: sideBarExpanded ? 'calc(100% - 230px)' : 'calc(100% - 60px)',
         }}>
             <Title />
             <Workspace />

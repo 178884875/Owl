@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "type": "completion",
+  "description": "提示词优化",
+  "execution_settings": {
+    "default": {
+      "max_tokens": 2000,
+      "temperature": 0.5
+    }
+  },
+  "input_variables": [
+    {
+      "name": "prompt",
+      "description": "用户的需求",
+      "required": true
+    }
+  ]
+}

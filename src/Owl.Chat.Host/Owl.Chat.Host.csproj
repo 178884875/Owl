@@ -54,11 +54,23 @@
         <Content Include="..\..\.dockerignore">
           <Link>.dockerignore</Link>
         </Content>
+        <Content Update="plugins\Genrate\PromptWord\config.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Update="plugins\Generate\PromptWord\config.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
         <None Update="plugins\Chat\TopicNaming\skprompt.txt">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="plugins\Genrate\PromptWord\skprompt.txt">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="plugins\Generate\PromptWord\skprompt.txt">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
