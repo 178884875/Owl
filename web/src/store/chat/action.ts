@@ -180,7 +180,7 @@ export interface ChatAction {
     /**
      * 优化当前输入框提示词
      */
-    optimizeCurrentInputPrompt: () => void;
+    optimizeCurrentInputPrompt: () => Promise<void>;
 
     /**
      * 创建用户消息

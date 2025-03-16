@@ -13,24 +13,24 @@ export default function ChatInput() {
             key: 'create-user',
             label: '创建用户消息',
             icon: <User />,
-            onClick: () => {
-                createUserMessage();
+            onClick: async () => {
+                await createUserMessage();
             }
         },
         {
             key: 'create-assistant',
             label: '创建助手消息',
             icon: <MessagesSquare />,
-            onClick: () => {
-                createAssistantMessage();
+            onClick: async () => {
+                await createAssistantMessage();
             }
         },
         {
             key: 'optimize-prompt',
             label: '优化提示词',
             icon: <MoonStar />,
-            onClick: () => {
-                optimizeCurrentInputPrompt();
+            onClick: async () => {
+                await optimizeCurrentInputPrompt();
             }
         }
     ];

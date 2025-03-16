@@ -13,6 +13,8 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
+        Launch.Initialize();
+        
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddServices(builder.Configuration);
