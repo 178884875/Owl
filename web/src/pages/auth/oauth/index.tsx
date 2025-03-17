@@ -16,7 +16,7 @@ export default function OAuth() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (type && (code || token)) {
+        if (type && code) {
             const redirectUri = window.location.origin + window.location.pathname + "?type=" + type;
             Callback(type, (code || token)!, redirectUri)
                 .then((response) => {
@@ -38,7 +38,31 @@ export default function OAuth() {
                 .finally(() => {
                     setLoading(false);
                 });
-        } else {
+        }
+        else if (type && token) {
+            const redirectUri = window.location.origin + window.location.pathname + "?type=" + type;
+            Callback(type, token, redirectUri)
+                .then((response) => {
+                    if (response.success) {
+                        message.success('登录成功');
+                        localStorage.setItem('token', response.data);
+                        navigate('/');
+                    } else {
+                        message.error('登录失败：' + response.message);
+                        // 跳转登录页面
+                        navigate('/auth/login');
+                    }
+                })
+                .catch((error) => {
+                    message.error('登录失败：' + error.message);
+                    // 跳转登录页面
+                    navigate('/auth/login');
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        }
+        else {
             setLoading(false);
         }
     }, [type, code, navigate]);

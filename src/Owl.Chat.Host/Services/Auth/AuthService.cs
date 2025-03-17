@@ -369,19 +369,12 @@ public class AuthService(
                     Favorite = true,
                     Tags = ["Thor", "Default"],
                     ModelIds = models.Select(x => x.Id).ToList(),
-                    Available = true,
-                    Keys =
-                    [
-                        new ModelChannelKey()
-                        {
-                            Description = "由Owl自动创建的Thor渠道",
-                            Key = apiKey,
-                            Order = 999,
-                        }
-                    ]
+                    Available = true
                 };
 
                 await dbContext.ModelChannels.AddAsync(channel);
+                
+
             }
 
             await dbContext.UserOAuths.AddAsync(oauth);

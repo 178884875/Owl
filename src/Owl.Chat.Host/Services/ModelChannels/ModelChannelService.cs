@@ -179,12 +179,18 @@ public class ModelChannelService(
     {
         var result = await dbContext.ModelChannels
             .AsNoTracking()
-            .Where(x => x.Id == id)
+            .Where(x => x.Id == id && x.CreatedBy == userContext.UserId)
             .Select(x => x.Keys)
             .FirstOrDefaultAsync();
 
         // 将密钥脱敏
-        result.ForEach(x => x.Key = x.Key.Substring(0, 4) + "****" + x.Key[^4..]);
+        result?.ForEach(x =>
+        {
+            if(x.Key.Length > 10)
+            {
+                x.Key = x.Key[..3] + "******" + x.Key[^3..];
+            }
+        });
 
         return result;
     }
@@ -195,7 +201,7 @@ public class ModelChannelService(
     {
         var channel = await dbContext.ModelChannels
             .AsNoTracking()
-            .Where(x => x.Id == id)
+            .Where(x => x.Id == id && x.CreatedBy == userContext.UserId)
             .FirstOrDefaultAsync();
 
         if (channel == null)
