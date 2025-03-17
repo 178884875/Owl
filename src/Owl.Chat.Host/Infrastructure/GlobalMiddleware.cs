@@ -17,11 +17,17 @@ public sealed class GlobalMiddleware(ILogger<GlobalMiddleware> logger) : IMiddle
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(JsonSerializer.Serialize(ResultDto.FailResult("未授权")));
         }
+        catch (BusinessException e)
+        {
+            context.Response.StatusCode = 400;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(ResultDto.FailResult(e.Message));
+        }
         catch (Exception e) when (e is ArgumentException or ArgumentNullException)
         {
             context.Response.StatusCode = 400;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(JsonSerializer.Serialize(ResultDto.FailResult("参数错误")));
+            await context.Response.WriteAsJsonAsync(ResultDto.FailResult("参数错误"));
         }
         catch (Exception e)
         {
@@ -29,7 +35,7 @@ public sealed class GlobalMiddleware(ILogger<GlobalMiddleware> logger) : IMiddle
 
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(JsonSerializer.Serialize(ResultDto.FailResult("服务器内部错误")));
+            await context.Response.WriteAsJsonAsync(ResultDto.FailResult("服务器内部错误"));
         }
     }
 }
