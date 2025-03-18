@@ -34,7 +34,7 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
       apiKey: '',
     },
     'GiteeAI': {
-      endpoint: 'https://ai-api.gitee.com/v1',
+      endpoint: 'https://ai.gitee.com/v1',
       apiKey: '',
     },
     'DeepSeek': {
@@ -58,7 +58,7 @@ const CreateChannel: React.FC<CreateChannelProps> = ({ visible, onClose, onSucce
       apiKey: '',
     },
     'default': {
-      endpoint: 'https://api.openai.com/v1',
+      endpoint: 'https://api.token-ai.cn/v1',
       apiKey: '',
     }
   } as any;

@@ -34,6 +34,7 @@ public class KernelFactory
                     case "deepseek":
                     case "grok":
                     case "custom":
+                    case "giteeai":
                     case "siliconcloud":    
                         kernelBuilder.AddOpenAIChatCompletion(model, new Uri(endpoint), apiKey, "Owl-Chat");
                         break;
