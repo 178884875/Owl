@@ -13,7 +13,7 @@
   <a href="#安装">安装</a> •
   <a href="#使用指南">使用指南</a> •
   <a href="#贡献">贡献</a> •
-  <a href="#许可证">许可证</a>
+  <a href="#许可证">许可证</a> •
   <a href='https://ycnv7u8vf1o3.feishu.cn/wiki/space/7477239683374645251?ccm_open_type=lark_wiki_spaceLink&open_tab_from=wiki_home'>文档教程</a>
 </p>
 
