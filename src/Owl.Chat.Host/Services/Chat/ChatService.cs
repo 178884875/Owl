@@ -130,50 +130,6 @@ public sealed class ChatService(
             }
 
             messages.Reverse();
-            
-            messages.Insert(0,new Message()
-            {
-                Role = "user",
-                Texts = new List<MessageText>()
-                {
-                    new()
-                    {
-                        Text = """
-                               <code_formatting_instructions>
-                               提供代码或复杂内容时，请按照以下固定格式返回：
-                               
-                               1. 代码格式：
-                               ```[语言]|[文件名:文件描述]
-                               代码内容
-                               ```
-                               
-                               2. 文案/复杂内容格式：
-                               ```text|[文档名:内容描述]
-                               文案或复杂内容
-                               ```
-                               
-                               示例格式：
-                               ```python|[app.py:主应用文件]
-                               def hello_world():
-                                   return "Hello, World!"
-                               ```
-                               
-                               ```text|[marketing_copy.txt:产品描述文案]
-                               这是一段详细的产品描述文案，内容较长时使用此格式...
-                               ```
-                               
-                               注意事项：
-                               - 语言：明确指定编程语言（如python, javascript, java等）或内容类型（text, markdown等）
-                               - 文件名和描述：提供有意义的文件名和简短描述
-                               - 所有代码或复杂内容必须包含在代码块内，使用正确的语法高亮
-                               - 当内容较长或结构复杂时，始终使用代码块格式保持清晰
-                               - 在回复用户提问时保持友好可爱的风格，但在提供代码或技术内容时保持专业严谨
-                               - 除非用户明确要求不需要解释，否则应提供适当的说明和与用户互动
-                               </code_formatting_instructions>
-                               """
-                    }
-                }
-            });
 
             if (input.SelectedUserPromptId != null)
             {
@@ -229,6 +185,66 @@ public sealed class ChatService(
 
             // 根据权重分配Key
             var (channel, key) = GetChannelKey(channels);
+
+            messages.Insert(0, new Message()
+            {
+                Role = "user",
+                Texts = new List<MessageText>()
+                {
+                    new()
+                    {
+                        Text = """
+                               <code_formatting_instructions>
+                               提供代码或复杂内容时，请按照以下固定格式返回：
+
+                               1. 代码格式：
+                               ```[语言]|[文件名:文件描述]
+                               代码内容
+                               ```
+
+                               2. 文案/复杂内容格式：
+                               ```text|[文档名:内容描述]
+                               文案或复杂内容
+                               ```
+
+                               示例格式：
+                               ```python|[app.py:主应用文件]
+                               def hello_world():
+                                   return "Hello, World!"
+                               ```
+
+                               ```text|[marketing_copy.txt:产品描述文案]
+                               这是一段详细的产品描述文案，内容较长时使用此格式...
+                               ```
+
+                               注意事项：
+                               - 语言：明确指定编程语言（如python, javascript, java等）或内容类型（text, markdown等）
+                               - 文件名和描述：提供有意义的文件名和简短描述
+                               - 所有代码或复杂内容必须包含在代码块内，使用正确的语法高亮
+                               - 当内容较长或结构复杂时，始终使用代码块格式保持清晰
+                               - 在回复用户提问时保持友好可爱的风格，但在提供代码或技术内容时保持专业严谨
+                               - 除非用户明确要求不需要解释，否则应提供适当的说明和与用户互动
+                               </code_formatting_instructions>
+                               """
+                    }
+                }
+            });
+
+
+            if (model.ModelId.EndsWith("DeepSeek-R1") || model.ModelId == "deepseek-reasoner")
+            {
+                messages.Insert(1, new Message()
+                {
+                    Role = "assistant",
+                    Texts = new List<MessageText>()
+                    {
+                        new()
+                        {
+                            Text = "ok"
+                        }
+                    }
+                });
+            }
 
             var kernel = KernelFactory.CreateKernel(model.ModelId, channel.Endpoint, key, channel.Provider);
 
@@ -689,7 +705,7 @@ public sealed class ChatService(
                 return new Tuple<int, Exception>(0, new Exception("Invalid detail option"));
         }
     }
-    
+
     /// <summary>
     /// 提示词优化
     /// </summary>
@@ -703,7 +719,7 @@ public sealed class ChatService(
             .AsNoTracking()
             .Where(x => x.Id == input.SessionId)
             .FirstOrDefaultAsync();
-        
+
         // 获取当前会话模型属于的模型
         var model = await dbContext.Models
             .AsNoTracking()
@@ -735,12 +751,12 @@ public sealed class ChatService(
         var (channel, key) = GetChannelKey(channels);
 
         var kernel = KernelFactory.CreateKernel(model.ModelId, channel.Endpoint, key, channel.Provider);
-        
+
         var result = await kernel.InvokeAsync(kernel.Plugins["Generate"]["PromptWord"], new KernelArguments()
         {
             ["prompt"] = input.Prompt,
         });
-        
+
         return result.ToString();
     }
 

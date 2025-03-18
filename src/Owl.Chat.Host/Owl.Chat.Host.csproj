@@ -9,10 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DocumentFormat.OpenXml" Version="3.2.0" />
+        <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
         <PackageReference Include="FastService" Version="0.1.2" />
         <PackageReference Include="FastService.Analyzers" Version="0.1.2" />
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.74" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.12.0" />
         <PackageReference Include="Lazy.Captcha.Core" Version="2.1.0" />
         <PackageReference Include="Mapster.DependencyInjection" Version="1.0.3-pre02" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
@@ -25,11 +25,11 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.SemanticKernel" Version="1.40.0" />
+        <PackageReference Include="Microsoft.SemanticKernel" Version="1.41.0" />
         <PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.40.0-alpha" />
         <PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.40.1-alpha" />
         <PackageReference Include="SharpToken" Version="2.0.3" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
         <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     </ItemGroup>
 

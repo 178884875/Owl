@@ -52,7 +52,9 @@ public class KernelFactory
                         break;
                 }
 
-                return kernelBuilder.Build();
+                var kernel = kernelBuilder.Build();
+
+                return kernel;
             });
         }
     }
