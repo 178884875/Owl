@@ -1,8 +1,9 @@
 import { useChatStore } from "@/store/chat";
-import { Code, X, Copy, Download, ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button, theme, Typography, message, } from "antd";
+import { Code, X, Copy, Download, ArrowLeft, ArrowRight, Eye, Maximize, Minimize } from 'lucide-react';
+import { Button, theme, Typography, message } from "antd";
 import { Highlighter } from "@lobehub/ui";
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useState } from 'react';
 
 import { Flexbox } from "react-layout-kit";
 const { Text } = Typography;
@@ -11,20 +12,27 @@ const { useToken } = theme;
 export default function CodeRendering() {
     const [codeRendering, setCodeRendering] = useChatStore((state) => [state.codeRendering, state.setCodeRendering]);
     const { token } = useToken();
+    const [viewMode, setViewMode] = useState<'code' | 'preview'>('code');
+    const [isMaximized, setIsMaximized] = useState(false);
 
     if (!codeRendering.visible) {
         return null;
     }
 
-    if (!codeRendering.items || codeRendering.items.length === 0 || 
-        codeRendering.index < 0 || codeRendering.index >= codeRendering.items.length || 
+    if (!codeRendering.items || codeRendering.items.length === 0 ||
+        codeRendering.index < 0 || codeRendering.index >= codeRendering.items.length ||
         !codeRendering.items[codeRendering.index]) {
         console.warn('CodeRendering: 数据不完整，无法显示代码窗口', codeRendering);
         return null;
     }
 
+
+    const currentItem = codeRendering.items[codeRendering.index];
+    const isHtml = currentItem.language === 'html' ||
+        (currentItem.fileName && currentItem.fileName.toLowerCase().endsWith('.html'));
+
     const handleCopy = () => {
-        navigator.clipboard.writeText(codeRendering.items[codeRendering.index].code)
+        navigator.clipboard.writeText(currentItem.code)
             .then(() => {
                 message.success('代码已复制到剪贴板');
             })
@@ -34,33 +42,90 @@ export default function CodeRendering() {
     }
 
     const handleDownload = () => {
-        const blob = new Blob([codeRendering.items[codeRendering.index].code], { type: 'text/plain' });
+        const blob = new Blob([currentItem.code], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = codeRendering.items[codeRendering.index].title;
+        a.download = currentItem.fileName;
         a.click();
         URL.revokeObjectURL(url);
         message.success('代码已下载');
     }
+
+    const togglePreview = () => {
+        if (viewMode === 'code') {
+            setViewMode('preview');
+            // setIsMaximized(true);
+        } else {
+            setViewMode('code');
+            // setIsMaximized(false);
+        }
+    };
+
+    const toggleMaximize = () => {
+        setIsMaximized(!isMaximized);
+    };
+
+    const renderContent = () => {
+        if (isHtml && viewMode === 'preview') {
+            return (
+                <div
+                    style={{
+                        height: '100%',
+                        overflow: 'auto',
+                        padding: 0,
+                        backgroundColor: '#ffffff'
+                    }}
+                >
+                    <iframe
+                        srcDoc={currentItem.code}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            border: 'none',
+                            backgroundColor: '#ffffff'
+                        }}
+                        title={currentItem.fileName}
+                        sandbox="allow-scripts"
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <Highlighter
+                style={{
+                    height: '100%',
+                    flex: 1,
+                    ...vscDarkPlus as any
+                }}
+                language={currentItem.language}
+            >
+                {currentItem.code}
+            </Highlighter>
+        );
+    };
 
     return (
         <div
             className="code-floating-window"
             style={{
                 position: 'fixed',
-                top: 20,
-                right: 20,
-                width: '40%',
-                height: '80vh',
+                top: isMaximized ? 0 : 20,
+                right: isMaximized ? 0 : 20,
+                left: isMaximized ? 0 : 'auto',
+                bottom: isMaximized ? 0 : 'auto',
+                width: isMaximized ? '100%' : '40%',
+                height: isMaximized ? '100vh' : '80vh',
                 backgroundColor: token.colorBgContainer,
-                borderRadius: token.borderRadiusLG,
+                borderRadius: isMaximized ? 0 : token.borderRadiusLG,
                 boxShadow: token.boxShadowSecondary,
                 display: 'flex',
                 flexDirection: 'column',
                 zIndex: 1000,
                 overflow: 'hidden',
-                border: `1px solid ${token.colorBorderSecondary}`
+                border: isMaximized ? 'none' : `1px solid ${token.colorBorderSecondary}`,
+                transition: 'all 0.3s ease'
             }}
         >
             <div style={{
@@ -71,36 +136,45 @@ export default function CodeRendering() {
                 alignItems: 'center',
                 backgroundColor: token.colorBgElevated
             }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Code size={16} style={{ marginRight: token.marginXS, color: token.colorTextSecondary }} />
-                    <Text strong>{codeRendering.items[codeRendering.index]?.title}</Text>
-                    {codeRendering.items[codeRendering.index]?.description && (
-                        <Text type="secondary" style={{ marginLeft: token.marginXS, fontSize: token.fontSizeSM }}>
-                            {codeRendering.items[codeRendering.index].description}
-                        </Text>
-                    )}
+                <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                    <Button
+                        type={'text'}
+                        size="small"
+                        title={isMaximized ? '还原窗口' : '最大化窗口'}
+                        onClick={toggleMaximize}
+                    >
+                        {isMaximized ? <Minimize size={14} /> : <Maximize size={14} />}
+                    </Button>
+                    <Text strong>{currentItem.fileName}</Text>
                 </div>
+
+                <Flexbox horizontal gap={token.marginXS} style={{ marginRight: token.margin }}>
+                    {isHtml && (
+                        <Button
+                            type={'text'}
+                            size="small"
+                            title={viewMode === 'code' ? '预览HTML' : '查看代码'}
+                            style={{ color: viewMode === 'preview' ? token.colorPrimary : token.colorTextSecondary }}
+                            onClick={togglePreview}
+                        >
+                            {viewMode === 'code' ? <Eye size={14} /> : <Code size={14} />}
+                        </Button>
+                    )}
+                </Flexbox>
+
                 <Button
                     type="text"
                     icon={<X size={16} />}
-                    onClick={() => setCodeRendering({ 
+                    onClick={() => setCodeRendering({
                         ...codeRendering,
                         visible: false,
                         index: 0
                     })}
-                    style={{ marginRight: -8 }}
                 />
             </div>
-            <Highlighter
-                style={{
-                    height: '100%',
-                    flex: 1,
-                    ...vscDarkPlus as any
-                }}
-                language={codeRendering.items[codeRendering.index]?.language}
-            >
-                {codeRendering.items[codeRendering.index]?.code}
-            </Highlighter>
+
+            {renderContent()}
+
             <div style={{
                 padding: `${token.paddingXS}px ${token.padding}px`,
                 borderTop: `1px solid ${token.colorBorderSecondary}`,
@@ -117,6 +191,8 @@ export default function CodeRendering() {
                         disabled={codeRendering.index === 0}
                         onClick={() => {
                             setCodeRendering({ ...codeRendering, index: codeRendering.index - 1 });
+                            setViewMode('code'); // 切换文件时重置为代码视图
+                            setIsMaximized(false); // 切换文件时取消最大化
                         }}
                         icon={<ArrowLeft size={16} />} />
                     <Text>{codeRendering.index + 1}/{codeRendering.items.length}</Text>
@@ -125,6 +201,8 @@ export default function CodeRendering() {
                         disabled={codeRendering.index === codeRendering.items.length - 1}
                         onClick={() => {
                             setCodeRendering({ ...codeRendering, index: codeRendering.index + 1 });
+                            setViewMode('code'); // 切换文件时重置为代码视图
+                            setIsMaximized(false); // 切换文件时取消最大化
                         }}
                         icon={<ArrowRight size={16} />} />
                 </Flexbox>

@@ -40,7 +40,7 @@ export interface ChatState {
 export interface CodeRenderingItem {
     language: string;
     code: string;
-    title: string;
+    fileName: string;
     description: string;
 }
 
