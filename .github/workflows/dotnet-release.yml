@@ -40,7 +40,7 @@ jobs:
         run: cd web && npm run build
 
       - name: Copy front-end build files to back-end wwwroot
-        run: cp -r web/build/* src/Owl.Chat/wwwroot/
+        run: cp -r web/dist/* src/Owl.Chat/wwwroot/
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v2
