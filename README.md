@@ -86,11 +86,11 @@ services:
     environment:
       - RunMigration=true
       - ConnectionStrings:Type=sqlite
-      - ConnectionStrings:Default=Data Source=/app/data/Owl.Chat.db
+      - ConnectionStrings:Default=Data Source=/app/Storage/Owl.Chat.db
       - Chat:App=您的外部可访问地址 # 例如：http://localhost:5000
     volumes:
       - ./wwwroot/images:/app/wwwroot/images
-      - ./data:/app/data
+      - ./Storage:/app/Storage
 ```
 
 如果写入到现有的Postgres数据库，修改环境变量 `ConnectionStrings:Type` 和 `ConnectionStrings:Default`。
@@ -107,6 +107,7 @@ services:
       - Chat:App=您的外部可访问地址 # 例如：http://localhost:5000
     volumes:
       - ./wwwroot/images:/app/wwwroot/images
+      - ./Storage:/app/Storage
 ```
 
 ```bash
