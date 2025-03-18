@@ -4,6 +4,7 @@ import { Button, theme, Typography, message } from "antd";
 import { Highlighter } from "@lobehub/ui";
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useState } from 'react';
+import CodePreview from './CodePreview';
 
 import { Flexbox } from "react-layout-kit";
 const { Text } = Typography;
@@ -29,7 +30,7 @@ export default function CodeRendering() {
 
     const currentItem = codeRendering.items[codeRendering.index];
     const isHtml = currentItem.language === 'html' ||
-        (currentItem.fileName && currentItem.fileName.toLowerCase().endsWith('.html'));
+        (currentItem.fileName && currentItem.fileName.toLowerCase().endsWith('.html')) || currentItem.language === 'jsx';
 
     const handleCopy = () => {
         navigator.clipboard.writeText(currentItem.code)
@@ -55,10 +56,8 @@ export default function CodeRendering() {
     const togglePreview = () => {
         if (viewMode === 'code') {
             setViewMode('preview');
-            // setIsMaximized(true);
         } else {
             setViewMode('code');
-            // setIsMaximized(false);
         }
     };
 
@@ -69,26 +68,11 @@ export default function CodeRendering() {
     const renderContent = () => {
         if (isHtml && viewMode === 'preview') {
             return (
-                <div
-                    style={{
-                        height: '100%',
-                        overflow: 'auto',
-                        padding: 0,
-                        backgroundColor: '#ffffff'
-                    }}
-                >
-                    <iframe
-                        srcDoc={currentItem.code}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            border: 'none',
-                            backgroundColor: '#ffffff'
-                        }}
-                        title={currentItem.fileName}
-                        sandbox="allow-scripts"
-                    />
-                </div>
+                <CodePreview 
+                    code={currentItem.code}
+                    fileName={currentItem.fileName}
+                    language={currentItem.language}
+                />
             );
         }
 
