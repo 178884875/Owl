@@ -30,7 +30,7 @@ export default function CodeRendering() {
 
     const currentItem = codeRendering.items[codeRendering.index];
     const isHtml = currentItem.language === 'html' ||
-        (currentItem.fileName && currentItem.fileName.toLowerCase().endsWith('.html')) || currentItem.language === 'jsx';
+        (currentItem.fileName && currentItem.fileName.toLowerCase().endsWith('.html')) || currentItem.language === 'jsx' || currentItem.language === 'vue';
 
     const handleCopy = () => {
         navigator.clipboard.writeText(currentItem.code)
