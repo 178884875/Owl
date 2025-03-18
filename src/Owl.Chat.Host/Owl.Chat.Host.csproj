@@ -75,7 +75,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Functions\" />
+        <Folder Include="Function\" />
         <Folder Include="wwwroot\images\" />
     </ItemGroup>
 
