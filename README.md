@@ -165,7 +165,7 @@ docker-compose up -d
 ## 联系我们
 
 - 项目维护者: [token](mailto:239573049@qq.com)
-- 官方网站: [https://owl.ai](https://owl.ai)
+- 官方网站: [http://owl.ai-v1.cn/](http://owl.ai-v1.cn/)
 
 ---
 
