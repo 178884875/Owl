@@ -18,7 +18,7 @@ export default function Help() {
             <Card className="w-full">
               <Space align="center">
                 <ThunderboltOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
-                <Title level={2} style={{ margin: 0 }}>雷神咖啡 - 企业级 AI 对话系统</Title>
+                <Title level={2} style={{ margin: 0 }}>Owl - 企业级 AI 对话系统</Title>
               </Space>
               <Paragraph className="mt-4">
                 基于 .NET 构建的企业级 AI 对话系统，提供灵活的渠道集成能力和丰富的功能特性。

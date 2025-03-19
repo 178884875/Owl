@@ -26,6 +26,6 @@ export const PROFESSIONAL_VERSION = '专业版';
 /**
  * 欢迎消息
  */
-export const WELCOME_MESSAGE = `雷神咖啡`;
+export const WELCOME_MESSAGE = `Owl`;
 
 export const GITHUB_URL = github;

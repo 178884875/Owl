@@ -21,6 +21,8 @@ export default function Model() {
         loadModels();
     }, []);
 
+    console.log(model);
+
     return (
         <Tooltip
             title={model?.description}
@@ -80,7 +82,7 @@ export default function Model() {
                         padding: 5,
                     }}
                 >
-                    <BrainCog size={14} />
+                    {getIconByName(model?.provider, 20)}
                     {
                         model?.modelId
                     }

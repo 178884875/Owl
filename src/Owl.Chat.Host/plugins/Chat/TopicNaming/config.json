@@ -4,7 +4,7 @@
   "description": "提供对话内容，返回一个话题名称。",
   "execution_settings": {
     "default": {
-      "max_tokens": 50,
+      "max_completion_tokens": 50,
       "temperature": 0
     }
   },

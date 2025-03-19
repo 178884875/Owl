@@ -13,6 +13,7 @@ public static class ServiceExtensions
         services.AddDbContext<IDbContext, DaMengDbContext>(((provider, builder) =>
         {
             builder.UseDm(configuration.GetConnectionString("Default")!);
+            builder.EnableSensitiveDataLogging(false);
         }));
 
         return services;

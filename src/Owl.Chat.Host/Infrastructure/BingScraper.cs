@@ -21,7 +21,7 @@ public class BingScraper(IHttpClientFactory httpClientFactory)
         // 发送 HTTP GET 请求，获取 HTML 内容
         var response = await client.GetAsync(url);
 
-        var html = "";
+        var html = string.Empty;
 
         // 判断是否需要解压缩
         if (response.Content.Headers.ContentEncoding.Contains("gzip"))

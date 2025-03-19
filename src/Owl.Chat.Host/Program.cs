@@ -6,6 +6,7 @@ using Owl.Chat.Host.Converters;
 using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Extensions;
 using Owl.Chat.Core;
+using Serilog;
 
 namespace Owl.Chat.Host;
 
@@ -15,7 +16,15 @@ public static class Program
     {
         Launch.Initialize();
         
+        
         var builder = WebApplication.CreateBuilder(args);
+
+        var logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .Enrich.FromLogContext()
+            .CreateLogger();
+
+        builder.Host.UseSerilog(logger);
 
         builder.Services.AddServices(builder.Configuration);
 

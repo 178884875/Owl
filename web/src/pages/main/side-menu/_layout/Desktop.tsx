@@ -63,6 +63,12 @@ export default function SideMenu() {
         setExpanded(!expanded);
     }
 
+    useEffect(() => {
+        if (window.innerWidth < 768) {
+            setExpanded(false);
+        }
+    }, []);
+
     return (<>
         <Flexbox style={{
             ...styles.container,

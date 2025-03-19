@@ -101,7 +101,7 @@ export default function ConsoleLayout() {
                     src="/logo.png"
                 />
                 <span>
-                    雷神咖啡
+                    Owl
                 </span>
             </Flexbox>
             <Menu
@@ -137,7 +137,7 @@ export default function ConsoleLayout() {
                     fontSize: 16,
                     fontWeight: 600,
                 }}>
-                    雷神咖啡，给您带来愉快的编码体验！
+                    Owl，给您带来愉快的编码体验！
                 </span>
             </Flexbox>
             <Divider style={{

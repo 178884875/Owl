@@ -1,4 +1,5 @@
 import { IconAvatar } from "@lobehub/icons";
+import { Spin } from "antd";
 import React, { lazy, Suspense } from 'react';
 
 const OpenAI = lazy(() => import('@lobehub/icons').then(module => ({ default: module.OpenAI })));
@@ -157,18 +158,34 @@ const iconMap: { [key: string]: React.LazyExoticComponent<any> } = {
 export function getIconByName(name: string, size: number = 36) {
   if (name === 'AI') {
     return (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div style={{
+        width: size,
+        height: size,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <Spin />
+      </div>}>
         <IconAvatar
           size={size}
           color="var(--color-primary)" />
       </Suspense>
     );
   }
-  
+
   const IconComponent = iconMap[name] || OpenAI;
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div style={{
+      width: size,
+      height: size,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <Spin />
+    </div>}>
       <IconAvatar
         Icon={IconComponent}
         color="var(--color-primary)"

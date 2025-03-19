@@ -6,6 +6,7 @@ import { chatSelectors } from '@/store/chat/selectors';
 import { theme } from 'antd';
 import { getIconByName } from '@/utils/iconutil';
 import { InfoCircleOutlined, DownOutlined, RightOutlined } from '@ant-design/icons';
+import ModelFeatureTags from '@/features/ModelFeatureTags';
 
 const { Title, Text } = Typography;
 
@@ -51,32 +52,68 @@ const ConfigPanel = ({
   );
 };
 
-const ModelSelector = ({ renameModel, models, token }: { renameModel: string | undefined, models: any[], token: any }) => {
-    const renderModel = () => {
-        const item = models?.find(item => item.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel) !== undefined)?.models?.find((chatModel: { id: string | undefined; }) => chatModel.id === renameModel);
-        return <Flexbox
-            horizontal
-            align="center"
-            gap={8}
-            style={{
-                fontSize: 16,
-                padding: '8px 12px',
-                border: `1px solid ${token.colorBorder}`,
-                borderRadius: token.borderRadius,
-                backgroundColor: token.colorBgContainer,
-                boxShadow: token.boxShadowTertiary,
-                width: '100%',
-            }}
-        >
-            {getIconByName(item?.provider, 26)}
-            <Text strong>{item?.displayName || '选择模型'}</Text>
-        </Flexbox>;
-    }
+const ModelSelector = ({ renameModel, models, setRenameModel }: { 
+    renameModel: string | undefined, 
+    models: any[], 
+    setRenameModel: (value: string) => void 
+}) => {
+    
+    // 过滤掉不存在的modelIds
+    const validModelId = renameModel ? 
+        models?.some(model => model.models?.some((chatModel: any) => chatModel.id === renameModel)) ? 
+        renameModel : undefined : undefined;
 
     return (
-        <div style={{ cursor: 'pointer', width: '100%' }}>
-            {renderModel()}
-        </div>
+        <Select
+            value={validModelId}
+            onChange={(value) => setRenameModel(value)}
+            style={{ width: '100%' }}
+            placeholder="选择模型"
+            dropdownStyle={{
+                maxHeight: 450,
+                overflow: "auto",
+            }}
+        >
+            {models?.map((model) => (
+                <Select.OptGroup
+                    key={model.provider}
+                    label={model.provider}
+                >
+                    {model.models?.map((chatModel: any) => (
+                        <Select.Option
+                            key={chatModel.id}
+                            value={chatModel.id}
+                        >
+                            <Flexbox
+                                horizontal
+                                style={{ alignItems: "center" }}
+                            >
+                                {getIconByName(model.provider, 22)}
+                                <span
+                                    style={{
+                                        marginLeft: 8,
+                                        flex: 1,
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                    }}
+                                >
+                                    {chatModel.displayName}
+                                </span>
+                                {chatModel.contextWindowTokens && (
+                                    <Tooltip title="最大上下文窗口大小">
+                                        <ModelFeatureTags
+                                                tokens={chatModel.contextWindowTokens}
+                                                vision={chatModel.abilities?.vision}
+                                                functionCall={chatModel.abilities?.functionCall}
+                                            />
+                                    </Tooltip>
+                                )}
+                            </Flexbox>
+                        </Select.Option>
+                    ))}
+                </Select.OptGroup>
+            ))}
+        </Select>
     );
 }
 
@@ -117,7 +154,7 @@ export default function SessionConfig() {
         chatSelectors.getCurrentModel(state),
         state.currentSession,
         state.updateSession,
-        state.chatModels]);
+        state.models]);
 
     const [form] = Form.useForm();
     const [renameModel, setRenameModel] = useState<string | undefined>(undefined);
@@ -245,8 +282,8 @@ export default function SessionConfig() {
                         <Form.Item label="话题重命名模型" name="renameModel">
                             <ModelSelector
                                 renameModel={renameModel}
+                                setRenameModel={setRenameModel}
                                 models={models}
-                                token={token}
                             />
                         </Form.Item>
                     </Card>

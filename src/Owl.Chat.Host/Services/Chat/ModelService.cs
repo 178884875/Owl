@@ -62,6 +62,7 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
                     x.Description,
                     x.Type,
                     x.ContextWindowTokens,
+                    provider = item.Key,
                     x.MaxOutput,
                     x.Enabled,
                     x.ReleasedAt,
@@ -149,7 +150,7 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
 
         // 先获取用户所有渠道，包括共享的
         var channels = (await context.ModelChannels
-            .Where(x => x.CreatedBy == userContext.UserId || sharedChannels.Contains(x.Id))
+            .Where(x => (x.CreatedBy == userContext.UserId || sharedChannels.Contains(x.Id)) && x.Enabled)
             .Select(x => x.ModelIds)
             .ToListAsync()).SelectMany(x => x);
 
@@ -194,6 +195,7 @@ public class ModelService(IDbContext context, IMapper mapper, IUserContext userC
                     x.MaxOutput,
                     x.Enabled,
                     x.ReleasedAt,
+                    provider = item.Key,
                     x.Abilities,
                     x.Pricing,
                 })

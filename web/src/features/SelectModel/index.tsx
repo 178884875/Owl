@@ -11,9 +11,10 @@ const { useToken } = theme;
 interface SelectModelProps {
     modelIds: string[];
     onSelect: (modelIds: string[]) => void;
+    maxCount?: number;
 }
 
-export default function SelectModel({  modelIds, onSelect }: SelectModelProps) {
+export default function SelectModel({ modelIds, onSelect, maxCount}: SelectModelProps) {
     const { token } = useToken();
     const [loadEnabledModels, models] = useChatStore(state => [state.loadEnabledModels, state.models]);
 
@@ -42,6 +43,7 @@ export default function SelectModel({  modelIds, onSelect }: SelectModelProps) {
                 }}
                 placeholder="请选择模型"
                 mode='tags'
+                maxCount={maxCount}
                 value={validModelIds}
                 onChange={(value: string[]) => {
                     value = value.filter(x => x !== '' && x !== undefined);

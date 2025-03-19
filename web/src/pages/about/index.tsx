@@ -99,7 +99,7 @@ export default function About() {
                     }}>
                         <Title level={1} style={{ marginBottom: 24 }}>
                             <ThunderboltOutlined style={{ marginRight: 12, color: '#1890ff' }} />
-                            雷神咖啡 AI Chat
+                            Owl AI Chat
                         </Title>
                         <Paragraph style={{
                             fontSize: 20,

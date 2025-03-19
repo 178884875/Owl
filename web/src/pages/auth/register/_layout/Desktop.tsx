@@ -107,7 +107,7 @@ export default function Register() {
                         }}
                     />
                     <TypewriterEffect
-                        text="加入雷神咖啡，放大你的想法"
+                        text="加入Owl，放大你的想法"
                         style={{
                             fontSize: '48px',
                             marginBottom: '16px',
@@ -254,7 +254,7 @@ export default function Register() {
                         textAlign: 'center',
                         display: 'block'
                     }}>
-                        继续使用，即表示你同意雷神咖啡的{' '}
+                        继续使用，即表示你同意Owl的{' '}
                         <Link href="#" style={{ color: token.colorPrimary }}>
                             用户协议
                         </Link>

@@ -375,6 +375,16 @@ export default function WelcomePage() {
               <TextArea
                 placeholder={`嗨，${user?.displayName || 'Guest'}，${getGreeting()}我可以帮助您什么？`}
                 autoSize={{ minRows: 3, maxRows: 6 }}
+                // 拦截回车键，但是不包含Shift+Enter
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    if (inputValue.trim() === '' || !model) {
+                      return;
+                    }
+
+                    createChat();
+                  }
+                }}
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -559,8 +569,6 @@ export default function WelcomePage() {
                 </div>
               </div>
             </Card>
-
-            {/* Pasted banner */}
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}

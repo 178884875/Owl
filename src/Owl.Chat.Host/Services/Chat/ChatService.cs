@@ -244,7 +244,7 @@ public sealed class ChatService(
                 }
             });
 
-
+            // DeepSeek-R1 和 deepseek-reasoner 需要添加提示词，不支持连续的角色会话
             if (model.ModelId.EndsWith("DeepSeek-R1") || model.ModelId == "deepseek-reasoner")
             {
                 messages.Insert(1, new Message()

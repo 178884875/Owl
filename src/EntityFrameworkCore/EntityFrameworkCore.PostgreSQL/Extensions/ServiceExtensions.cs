@@ -12,6 +12,7 @@ public static class ServiceExtensions
         services.AddDbContext<IDbContext, PostgreSQLDbContext>(((provider, builder) =>
         {
             builder.UseNpgsql(configuration.GetConnectionString("Default"));
+            
         }));
 
         return services;

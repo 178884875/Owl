@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Owl.Chat.Host.Dto;
 using Owl.Chat.Core;
 using Owl.Chat.Core.Entities;
+using Owl.Chat.Host.Infrastructure;
 
 namespace Owl.Chat.Host.Backstage;
 
@@ -118,10 +119,19 @@ public sealed class InitModelBackstageService(
 
         await context.UserPrompts.AddRangeAsync(UserPrompt.CreateDefault(user.Id));
 
-        await CreateChannelAsync(context, "OpenAI", "OpenAI", "OpenAI", "https://api.openai.com/v1",
+        // OpenAIEndpoint
+        var openAIEndpoint = Environment.GetEnvironmentVariable("OpenAIEndpoint");
+        var openAIKey = Environment.GetEnvironmentVariable("OpenAIKey");
+
+        if (!string.IsNullOrEmpty(openAIEndpoint) && string.IsNullOrEmpty(openAIKey))
+        {
+            throw new BusinessException("OpenAIEndpoint和OpenAIKey必须同时设置");
+        }
+
+        await CreateChannelAsync(context, "OpenAI", "OpenAI", "OpenAI", openAIEndpoint ?? "https://api.openai.com/v1",
             items
                 .Where(x => x.Enabled == true && x.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "OpenAI", true, ["OpenAI", "官方"], user.Id);
+                .Select(x => x.Id).ToList(), "OpenAI", true, ["OpenAI", "官方"], user.Id, openAIKey);
 
         // 创建DeepSeek
         await CreateChannelAsync(context, "DeepSeek", "DeepSeek", "DeepSeek", "https://api.deepseek.com/v1",
@@ -161,7 +171,8 @@ public sealed class InitModelBackstageService(
     /// 创建渠道
     /// </summary>
     private static async Task CreateChannelAsync(IDbContext context, string name, string description, string avatar,
-        string endpoint, List<string> modelIds, string provider, bool favorite, string[] tags, string userId)
+        string endpoint, List<string> modelIds, string provider, bool favorite, string[] tags, string userId,
+        string? key = null)
     {
         var channel = new ModelChannel()
         {
@@ -175,11 +186,22 @@ public sealed class InitModelBackstageService(
             Favorite = favorite,
             Available = true,
             Tags = tags,
-            CreatedBy = userId
+            CreatedBy = userId,
         };
 
-        await context.ModelChannels.AddAsync(channel);
+        if (!string.IsNullOrEmpty(key))
+        {
+            channel.Keys =
+            [
+                new()
+                {
+                    Key = key,
+                    Description = "系统默认密钥",
+                    Order = 999,
+                }
+            ];
+        }
 
-        Console.Write("");
+        await context.ModelChannels.AddAsync(channel);
     }
 }
