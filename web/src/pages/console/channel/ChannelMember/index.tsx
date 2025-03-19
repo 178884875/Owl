@@ -1,13 +1,15 @@
-import { Avatar, Typography, Divider, Table, Tag, Button, Dropdown, Menu, message } from "antd";
+import { Avatar, Typography, Divider, Table, Tag, Button, Dropdown, Menu, message, Pagination } from "antd";
 import { ChannelItem } from "../ChannelList";
 import { Flexbox } from "react-layout-kit";
 import { UserOutlined,
     MoreOutlined,
     EditOutlined,
     DeleteOutlined,
- } from "@ant-design/icons";
-import { enableShareUser } from "@/apis/ModelaChannel";
+    ReloadOutlined
+} from "@ant-design/icons";
+import { enableShareUser, getShareList, deleteChannelShare } from "@/apis/ModelaChannel";
 import { useState, useEffect } from "react";
+import { renderQuota } from "@/utils/render";
 
 interface ChannelMemberProps {
     channel: ChannelItem | null;
@@ -17,22 +19,50 @@ interface ChannelMemberProps {
 
 export default function ChannelMember({ channel, onUpdateChannel }: ChannelMemberProps) {
     const [memberList, setMemberList] = useState<any[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 10,
+        total: 0
+    });
+
+    const fetchMemberList = async () => {
+        if (!channel?.id) return;
+        
+        setLoading(true);
+        try {
+            const result = await getShareList(channel.id);
+            if (result.success) {
+                const data = result.data.map(({ user, requestCount, tokenCount, enabled, id,quota }: any) => ({
+                    key: user.id,
+                    id,
+                    quota,
+                    avatar: user.avatar,
+                    displayName: user.displayName,
+                    email: user.email,
+                    phone: user.phone,
+                    requestCount,
+                    tokenCount,
+                    enabled,
+                }));
+                setMemberList(data);
+                setPagination({
+                    ...pagination,
+                    total: data.length
+                });
+            } else {
+                message.error("获取成员列表失败");
+            }
+        } catch (error) {
+            console.error("获取成员列表出错:", error);
+            message.error("获取成员列表出错");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        if (channel?.shareUsers) {
-            const data = channel.shareUsers.map(({ user, requestCount, tokenCount, enabled, id }) => ({
-                key: user.id,
-                id,
-                avatar: user.avatar,
-                displayName: user.displayName,
-                email: user.email,
-                phone: user.phone,
-                requestCount,
-                tokenCount,
-                enabled,
-            }));
-            setMemberList(data);
-        }
+        fetchMemberList();
     }, [channel]);
 
     const columns = [
@@ -67,6 +97,14 @@ export default function ChannelMember({ channel, onUpdateChannel }: ChannelMembe
             title: '消费token',
             dataIndex: 'tokenCount',
             key: 'tokenCount',
+        },
+        {
+            title: '剩余配额',
+            dataIndex: 'quota',
+            key: 'quota',
+            render: (quota: number) => {
+                return renderQuota(quota);
+            },
         },
         {
             title: '是否启用',
@@ -105,17 +143,42 @@ export default function ChannelMember({ channel, onUpdateChannel }: ChannelMembe
 
         if(result.success) {
             message.success("操作成功");
+            fetchMemberList();
             onUpdateChannel();
         } else {
             message.error("操作失败");
         }
     };
 
-    const handleDelete = (record: any) => {
-        console.log(record);
+    const handleDelete = async (record: any) => {
+        try {
+            const result = await deleteChannelShare(record.id);
+            if (result.success) {
+                message.success("删除成员成功");
+                fetchMemberList();
+                onUpdateChannel();
+            } else {
+                message.error("删除成员失败");
+            }
+        } catch (error) {
+            console.error("删除成员出错:", error);
+            message.error("删除成员出错");
+        }
     };
 
-    const dataSource = memberList;
+    const handlePageChange = (page: number, pageSize?: number) => {
+        setPagination({
+            ...pagination,
+            current: page,
+            pageSize: pageSize || pagination.pageSize
+        });
+    };
+
+    // 分页后的数据
+    const paginatedData = memberList.slice(
+        (pagination.current - 1) * pagination.pageSize,
+        pagination.current * pagination.pageSize
+    );
 
     return (
         <Flexbox
@@ -132,12 +195,20 @@ export default function ChannelMember({ channel, onUpdateChannel }: ChannelMembe
                 <Typography.Title level={4}>
                     成员列表
                 </Typography.Title>
+                <Button 
+                    type="primary" 
+                    icon={<ReloadOutlined />} 
+                    onClick={fetchMemberList}
+                >
+                    刷新
+                </Button>
             </Flexbox>
             <Divider />
             <Table
                 columns={columns}
-                dataSource={dataSource}
+                dataSource={paginatedData}
                 pagination={false}
+                loading={loading}
                 locale={{
                     emptyText: <Typography.Text style={{
                         fontSize: '16px',
@@ -147,6 +218,17 @@ export default function ChannelMember({ channel, onUpdateChannel }: ChannelMembe
                     }}>暂无成员</Typography.Text>
                 }}
             />
+            <Flexbox horizontal style={{ justifyContent: 'flex-end', padding: '16px' }}>
+                <Pagination
+                    current={pagination.current}
+                    pageSize={pagination.pageSize}
+                    total={pagination.total}
+                    onChange={handlePageChange}
+                    showSizeChanger
+                    showQuickJumper
+                    showTotal={(total) => `共 ${total} 条记录`}
+                />
+            </Flexbox>
         </Flexbox>
     );
 }

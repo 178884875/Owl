@@ -3,7 +3,6 @@ import { useEffect } from "react";
 
 import { Flexbox } from "react-layout-kit";
 import { getIconByName } from "@/utils/iconutil";
-import { BrainCog } from "lucide-react";
 import { MenuItemGroupType } from "antd/es/menu/interface";
 import ModelFeatureTags from "../../../../../../../features/ModelFeatureTags";
 import { useChatStore } from "@/store/chat";

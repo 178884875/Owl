@@ -9,6 +9,11 @@ public class ModelChannelShareUserDto : EntityDto<long>
     public string UserId { get; set; } = null!;
 
     /// <summary>
+    /// 可用额度
+    /// </summary>
+    public int Quota { get; set; }
+
+    /// <summary>
     /// 是否启用 这个由用户自己控制
     /// </summary>
     public bool Enabled { get; set; }

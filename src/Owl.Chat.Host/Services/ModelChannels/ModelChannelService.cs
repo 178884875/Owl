@@ -9,7 +9,9 @@ using Owl.Chat.Host.Infrastructure;
 using Owl.Chat.Host.Services.ModelChannels.Dto;
 using Owl.Chat.Host.Services.ModelChannels.Input;
 using Owl.Chat.Core;
+using Owl.Chat.Core.Dto;
 using Owl.Chat.Core.Entities;
+using Owl.Chat.Host.Dto;
 
 namespace Owl.Chat.Host.Services.ModelChannels;
 
@@ -66,9 +68,9 @@ public class ModelChannelService(
         return dto.OrderByDescending(x => x.Enabled).ToList();
     }
 
+    [EndpointSummary("获取共享用户列表")]
     [Authorize]
-    [EndpointSummary("获取渠道详情")]
-    public async Task<ModelChannelDto> GetAsync(long id)
+    public async Task<List<ModelChannelShareUserDto>> GetShareListAsync(long id)
     {
         var result = await dbContext.ModelChannels
             .AsNoTracking()
@@ -83,8 +85,61 @@ public class ModelChannelService(
                 .Include(x => x.User)
                 .ToListAsync();
 
-            result.ShareUsers = shareUsers;
+            return mapper.Map<List<ModelChannelShareUserDto>>(shareUsers);
         }
+
+        throw new BusinessException("当前用户没有权限访问");
+    }
+
+    [Authorize]
+    [EndpointSummary("获取渠道消息列表")]
+    public async Task<PageDto> GetChatMessageAsync(long id, int page, int pageSize)
+    {
+        var query = dbContext.ChatMessages
+            .Where(x => x.ChannelId == id);
+
+        var result = await query
+            .OrderByDescending(x => x.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(x => new ChatMessageDto
+            {
+                Id = x.Id,
+                ChannelId = x.ChannelId,
+                CreatedAt = x.CreatedAt,
+                CreatedBy = x.CreatedBy,
+                ModelId = x.ModelId,
+                ResponseTime = x.ResponseTime,
+                CompleteTokens = x.CompleteTokens,
+                PromptTokens = x.PromptTokens,
+                ShareId = x.ShareId
+            })
+            .ToListAsync();
+
+        var total = await query.CountAsync();
+
+        return new PageDto(total, result);
+    }
+
+    [Authorize]
+    [EndpointSummary("获取渠道详情")]
+    public async Task<ModelChannelDto> GetAsync(long id)
+    {
+        var result = await dbContext.ModelChannels
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .FirstOrDefaultAsync();
+
+        // if (userContext.UserId == result.CreatedBy)
+        // {
+        //     // 查询共享用户
+        //     var shareUsers = await dbContext.ModelChannelShareUsers
+        //         .Where(x => x.ChannelId == id)
+        //         .Include(x => x.User)
+        //         .ToListAsync();
+        //
+        //     result.ShareUsers = shareUsers;
+        // }
 
         var dto = mapper.Map<ModelChannelDto>(result);
         // 如果不是创建人，但是属于共享列表，则清空敏感数据
@@ -104,7 +159,6 @@ public class ModelChannelService(
                 dto.ShareQuota = shareUser.Quota;
                 dto.Keys = [];
                 dto.Endpoint = string.Empty;
-                dto.ShareUsers = [];
                 dto.RequestCount = 0;
                 dto.ResponseTime = 0;
                 dto.TokenCost = 0;
@@ -186,7 +240,7 @@ public class ModelChannelService(
         // 将密钥脱敏
         result?.ForEach(x =>
         {
-            if(x.Key.Length > 10)
+            if (x.Key.Length > 10)
             {
                 x.Key = x.Key[..3] + "******" + x.Key[^3..];
             }

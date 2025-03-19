@@ -155,5 +155,17 @@ export const enableChannel = async (id: number) => {
     return res;
 }
 
+export const getShareList = async (id: number) => {
+    const res = await get(`/api/modelChannel/shareList?id=${id}`);
+    return res;
+}
+
+
+
+export const getChatMessageList = async (id: number, page: number, pageSize: number) => {
+    const res = await get(`/api/modelChannel/ChatMessage?id=${id}&page=${page}&pageSize=${pageSize}`);
+    return res;
+}
+
 
 

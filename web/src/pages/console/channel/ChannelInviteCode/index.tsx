@@ -16,7 +16,7 @@ export default function ChannelInviteCode({ channel }: ChannelInviteCodeProps) {
 
     useEffect(() => {
         fetchChannels();
-    }, []);
+    }, [channel]);
 
     const fetchChannels = async () => {
         try {
@@ -30,32 +30,15 @@ export default function ChannelInviteCode({ channel }: ChannelInviteCodeProps) {
 
     const columns = [
         {
-            title: '邀请码',
-            dataIndex: 'code',
-        },
-        {
             title: '创建时间',
             dataIndex: 'createdAt',
-        },
-        {
-            title: '状态',
-            dataIndex: 'status',
         },
         {
             title: '过期时间',
             dataIndex: 'expireTime',
         },
         {
-            title: '是否已使用',
-            dataIndex: 'isUsed',
-            render: (text: boolean) => text ? '是' : '否',
-        },
-        {
-            title: '使用人数',
-            dataIndex: 'usedCount',
-        },
-        {
-            title: '最大使用人数',
+            title: '剩余使用次数',
             dataIndex: 'maxUseCount',
         },
         {
@@ -82,6 +65,11 @@ export default function ChannelInviteCode({ channel }: ChannelInviteCodeProps) {
                                 key: 'copy',
                                 onClick: () => handleCopyInviteCode(record.id)
                             },
+                            {
+                                label: '查看邀请连接',
+                                key: 'view',
+                                onClick: () => handleViewInviteCode(record.id)
+                            }
                         ],
                     }}>
                     <Button type="link">
@@ -103,6 +91,15 @@ export default function ChannelInviteCode({ channel }: ChannelInviteCodeProps) {
         if (inviteCode) {
             navigator.clipboard.writeText(`${window.location.origin}/invite/${inviteCode}`);
             message.success("邀请连接已复制到剪贴板");
+        } else {
+            message.error("邀请连接不存在");
+        }
+    };
+
+    const handleViewInviteCode = (id: string) => {
+        const inviteCode = dataSource.find(item => item.id === id)?.code;
+        if (inviteCode) {
+            message.info(`${window.location.origin}/invite/${inviteCode}`);
         } else {
             message.error("邀请连接不存在");
         }

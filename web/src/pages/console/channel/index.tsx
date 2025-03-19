@@ -9,6 +9,7 @@ import ChannelInviteCode from "./ChannelInviteCode";
 import "./index.css";
 import ChannelKey from "./ChannelKey";
 import { useUser } from "@/hooks/useUser";
+import ChannelMessage from "./ChannelMessage";
 
 export default function ConsoleChannel() {
     const [channel, setChannel] = useState<ChannelItem | null>(null);
@@ -81,7 +82,7 @@ export default function ConsoleChannel() {
                     style={{
                         flex: 1,
                         marginRight: '16px',
-                               height: '100%',
+                        height: '100%',
                         overflow: 'auto',
                     }}
                     defaultActiveKey="channelConfig" >
@@ -100,6 +101,9 @@ export default function ConsoleChannel() {
                             </Tabs.TabPane>
                             <Tabs.TabPane tab="渠道密钥管理" key="channelKey">
                                 <ChannelKey channel={channel} />
+                            </Tabs.TabPane>
+                            <Tabs.TabPane tab="消息记录" key="channelMessage">
+                                <ChannelMessage channel={channel} />
                             </Tabs.TabPane>
                         </>
                     )}

@@ -8,7 +8,7 @@ import { getIconByName } from '@/utils/iconutil';
 import { InfoCircleOutlined, DownOutlined, RightOutlined } from '@ant-design/icons';
 import ModelFeatureTags from '@/features/ModelFeatureTags';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 // 自定义的配置面板组件
 const ConfigPanel = ({ 
