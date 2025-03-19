@@ -34,7 +34,7 @@ export default function ConsoleLayout() {
                 },
                 {
                     icon: <Webhook />,
-                    label: '渠道管理',
+                    label: '模型服务',
                     key: '/console/channel',
                 },
                 {
@@ -57,7 +57,7 @@ export default function ConsoleLayout() {
                 },
                 {
                     icon: <Webhook />,
-                    label: '渠道管理',
+                    label: '模型服务',
                     key: '/console/channel',
                 }
             ])

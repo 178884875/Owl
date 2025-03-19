@@ -19,13 +19,13 @@ public sealed class GlobalMiddleware(ILogger<GlobalMiddleware> logger) : IMiddle
         }
         catch (BusinessException e)
         {
-            context.Response.StatusCode = 400;
+            context.Response.StatusCode = 200;
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsJsonAsync(ResultDto.FailResult(e.Message));
         }
         catch (Exception e) when (e is ArgumentException or ArgumentNullException)
         {
-            context.Response.StatusCode = 400;
+            context.Response.StatusCode = 200;
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsJsonAsync(ResultDto.FailResult("参数错误"));
         }

@@ -4,6 +4,7 @@ using Owl.Chat.Host.Dto;
 using Owl.Chat.Core;
 using Owl.Chat.Core.Entities;
 using Owl.Chat.Host.Infrastructure;
+using Owl.Chat.Host.Services.User;
 
 namespace Owl.Chat.Host.Backstage;
 
@@ -33,6 +34,7 @@ public sealed class InitModelBackstageService(
                 JsonOptions.DefaultJsonSerializerOptions);
 
             var dbContext = scope.ServiceProvider.GetService<IDbContext>();
+            var userService = scope.ServiceProvider.GetService<UserService>();
 
             if (await dbContext!.Models.AnyAsync(cancellationToken: stoppingToken))
             {
@@ -75,7 +77,7 @@ public sealed class InitModelBackstageService(
 
                 await dbContext.Models.AddRangeAsync(items, stoppingToken);
 
-                await HandleAsync(dbContext, items);
+                await HandleAsync(dbContext, items, userService);
 
                 await dbContext.SaveChangesAsync();
             }
@@ -92,7 +94,7 @@ public sealed class InitModelBackstageService(
     /// <summary>
     /// 初始化渠道
     /// </summary>
-    private async Task HandleAsync(IDbContext context, List<Model> items)
+    private async Task HandleAsync(IDbContext context, List<Model> items, UserService? userService)
     {
         // 判断是否已经初始化
         if (await context.ModelChannels.AnyAsync())
@@ -128,80 +130,6 @@ public sealed class InitModelBackstageService(
             throw new BusinessException("OpenAIEndpoint和OpenAIKey必须同时设置");
         }
 
-        await CreateChannelAsync(context, "OpenAI", "OpenAI", "OpenAI", openAIEndpoint ?? "https://api.openai.com/v1",
-            items
-                .Where(x => x.Enabled == true && x.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "OpenAI", true, ["OpenAI", "官方"], user.Id, openAIKey);
-
-        // 创建DeepSeek
-        await CreateChannelAsync(context, "DeepSeek", "DeepSeek", "DeepSeek", "https://api.deepseek.com/v1",
-            items.Where(x => x.Enabled == true && x.Provider.Equals("DeepSeek", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "DeepSeek", true, ["DeepSeek"], user.Id);
-
-        // 创建google,使用OpenAI兼容接口
-        await CreateChannelAsync(context, "Google", "Google", "Google",
-            "https://generativelanguage.googleapis.com/v1beta/openai/",
-            items
-                .Where(x => x.Enabled == true && x.Provider.Equals("Google", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "Google", false, ["Google"], user.Id);
-
-        await CreateChannelAsync(context, "Anthropic", "Anthropic", "Anthropic", "https://api.anthropic.com/v1",
-            items
-                .Where(x => x.Enabled == true && x.Provider.Equals("Anthropic", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "Anthropic", false, ["Anthropic"], user.Id);
-
-        await CreateChannelAsync(context, "SiliconCloud", "SiliconCloud", "SiliconCloud",
-            "https://api.siliconcloud.com/v1",
-            items
-                .Where(x => x.Enabled == true && x.Provider.Equals("SiliconCloud", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "SiliconCloud", false, ["SiliconCloud"], user.Id);
-
-        await CreateChannelAsync(context, "GiteeAI", "GiteeAI", "GiteeAI", "https://api.gitee.com/v1",
-            items
-                .Where(x => x.Enabled == true && x.Provider.Equals("GiteeAI", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "GiteeAI", false, ["GiteeAI"], user.Id);
-
-        await CreateChannelAsync(context, "Grok", "Grok", "Grok", "https://api.token-ai.cn/v1",
-            items
-                .Where(x => x.Enabled == true && x.Provider.Equals("Grok", StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.Id).ToList(), "Grok", false, ["Grok"], user.Id);
-    }
-
-    /// <summary>
-    /// 创建渠道
-    /// </summary>
-    private static async Task CreateChannelAsync(IDbContext context, string name, string description, string avatar,
-        string endpoint, List<string> modelIds, string provider, bool favorite, string[] tags, string userId,
-        string? key = null)
-    {
-        var channel = new ModelChannel()
-        {
-            Name = name,
-            Description = description,
-            Avatar = avatar,
-            Endpoint = endpoint,
-            Enabled = true,
-            ModelIds = modelIds,
-            Provider = provider,
-            Favorite = favorite,
-            Available = true,
-            Tags = tags,
-            CreatedBy = userId,
-        };
-
-        if (!string.IsNullOrEmpty(key))
-        {
-            channel.Keys =
-            [
-                new()
-                {
-                    Key = key,
-                    Description = "系统默认密钥",
-                    Order = 999,
-                }
-            ];
-        }
-
-        await context.ModelChannels.AddAsync(channel);
+        await userService.InitUserModelServiceAsync(user.Id, items, context, openAIEndpoint, openAIKey);
     }
 }

@@ -136,6 +136,10 @@ public class AuthService(
 
         await dbContext.UserPrompts.AddRangeAsync(UserPrompt.CreateDefault(user.Id));
 
+        var items = await dbContext.Models.ToListAsync();
+
+        await userService.InitUserModelServiceAsync(user.Id, items, dbContext);
+
         await dbContext.SaveChangesAsync();
 
         user.PasswordHash = string.Empty;
@@ -369,12 +373,19 @@ public class AuthService(
                     Favorite = true,
                     Tags = ["Thor", "Default"],
                     ModelIds = models.Select(x => x.Id).ToList(),
+                    Keys =
+                    [
+                        new ModelChannelKey()
+                        {
+                            Key = apiKey,
+                            Description = "Thor API Key",
+                            Order = 999,
+                        }
+                    ],
                     Available = true
                 };
 
                 await dbContext.ModelChannels.AddAsync(channel);
-                
-
             }
 
             await dbContext.UserOAuths.AddAsync(oauth);
@@ -382,6 +393,11 @@ public class AuthService(
             user = (await dbContext.Users.AddAsync(user)).Entity;
 
             await dbContext.UserPrompts.AddRangeAsync(UserPrompt.CreateDefault(user.Id));
+
+            var items = await dbContext.Models.ToListAsync();
+
+            // 初始化用户模型
+            await userService.InitUserModelServiceAsync(user.Id, items, dbContext);
 
             await dbContext.SaveChangesAsync();
         }

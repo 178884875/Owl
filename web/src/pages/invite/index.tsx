@@ -53,7 +53,7 @@ export default function Invite() {
             setShowEasterEgg(false);
             setParticles([]);
             navigate('/');
-        }, 5000);
+        }, 3000);
     };
 
     const copyInviteCode = () => {

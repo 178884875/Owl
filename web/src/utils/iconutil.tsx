@@ -19,6 +19,8 @@ const Zhipu = lazy(() => import('@lobehub/icons').then(module => ({ default: mod
 const DeepSeek = lazy(() => import('@lobehub/icons').then(module => ({ default: module.DeepSeek })));
 const Qingyan = lazy(() => import('@lobehub/icons').then(module => ({ default: module.Qingyan })));
 const Qwen = lazy(() => import('@lobehub/icons').then(module => ({ default: module.Qwen })));
+const Volcengine = lazy(() => import('@lobehub/icons').then(module => ({ default: module.Volcengine })));
+
 
 const Adobe = lazy(() => import('@lobehub/icons').then(module => ({ default: module.Adobe })));
 const AdobeFirefly = lazy(() => import('@lobehub/icons').then(module => ({ default: module.AdobeFirefly })));
@@ -151,8 +153,83 @@ const iconMap: { [key: string]: React.LazyExoticComponent<any> } = {
   Recraft, Replicate, Replit, Runway, Rwkv, SenseNova, SiliconCloud, Stability,
   Stepfun, Suno, Sync, Tencent, TencentCloud, Tiangong, TII, Together, Tripo,
   Udio, Upstage, V0, Vercel, VertexAI, Vidu, Viggle, Vllm, WorkersAI, XAI,
-  Xuanyuan, Zeabur, ZeroOne
+  Xuanyuan, Zeabur, ZeroOne,Volcengine 
 };
+
+export function getProvider(name: string) {
+  switch (name) {
+    case 'OpenAI':
+      return "OpenAI";
+    case 'ChatGLM':
+      return "智谱GLM";
+    case 'Claude':
+      return "Anthropic";
+    case 'Baichuan':
+      return "百川";
+    case 'Ai21':
+      return "AI21";
+    case 'Google':
+      return "Google";
+    case 'Grok':
+      return "xAI";
+    case 'Hunyuan':
+      return "腾讯混元";
+    case 'Minimax':
+      return "MiniMax";
+    case 'Spark':
+      return "讯飞星火";
+    case 'Wenxin':
+      return "百度文心一言";
+    case 'Yi':
+      return "01.AI";
+    case 'Zhipu':
+      return "智谱AI";
+    case 'DeepSeek':
+      return "深度求索";
+    case 'Qingyan':
+      return "阿里云清言";
+    case 'Qwen':
+      return "阿里通义千问";
+    case 'Anthropic':
+      return "Anthropic";
+    case 'Azure':
+      return "Microsoft Azure";
+    case 'Volcengine':
+      return "火山引擎";
+    case 'XAI':
+      return "xAI";
+    case 'Xuanyuan':
+      return "轩辕";
+    case 'Zeabur':
+      return "Zeabur";
+    case 'ZeroOne':
+      return "01.AI";
+    case 'SiliconCloud':
+      return '硅基流动';
+    case 'Stability':
+      return 'Stability';
+    case 'Stepfun':
+      return 'Stepfun';
+    case 'Suno':
+      return 'Suno';
+    case 'Ollama':
+      return 'Ollama';
+    case 'GiteeAI':
+      return '模力方舟(GiteeAI)';
+    case 'CoresHub':
+      return '基石智算'
+    case 'BaiduCloud':
+      return '百度云';
+    case 'Github':
+      return 'Github';
+    case 'Nvidia':
+      return 'Nvidia';
+    case 'Moonshot':
+      return '月之暗面';
+    default:
+      return name;
+  }
+}
 
 // 根据名称获取对应的图标
 export function getIconByName(name: string, size: number = 36) {

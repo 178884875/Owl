@@ -164,7 +164,7 @@ export function UserMenu({
                         {
                             key: 'channel',
                             icon: <Webhook size={18} />,
-                            label: '渠道管理',
+                            label: '模型服务',
                             onClick: () => {
                                 navigate('/console/channel')
                             }

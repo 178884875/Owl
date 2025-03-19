@@ -84,7 +84,7 @@ export default function ChannelConfig({ channel }: ChannelConfigProps) {
                             <Flexbox>
                                 <Typography.Text type="secondary">共享配额</Typography.Text>
                                 <Typography.Text strong style={{ fontSize: 20 }}>
-                                    {renderQuota(channel.shareQuota || 0)}
+                                    {channel.shareQuota === -1 ? "无限制" : renderQuota(channel.shareQuota || 0)}
                                 </Typography.Text>
                             </Flexbox>
                         </Flexbox>

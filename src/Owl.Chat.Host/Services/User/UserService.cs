@@ -151,6 +151,13 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
         newUser.PasswordHash = EncryptionHelper.Md5(newUser.PasswordHash);
         await dbContext.Users.AddAsync(newUser);
         await dbContext.UserPrompts.AddRangeAsync(UserPrompt.CreateDefault(newUser.Id));
+        
+        
+        var items = await dbContext.Models.ToListAsync();
+        
+        await InitUserModelServiceAsync(userContext.UserId, items, dbContext);
+
+        
         await dbContext.SaveChangesAsync();
         return mapper.Map<UserDto>(newUser);
     }
@@ -345,6 +352,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
             Prompt = input.Prompt
         };
         await dbContext.UserPrompts.AddAsync(userPrompt);
+
         await dbContext.SaveChangesAsync();
     }
 
@@ -374,5 +382,119 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
             .ExecuteUpdateAsync(a => a.SetProperty(a => a.Name, input.Name)
                 .SetProperty(a => a.Description, input.Description)
                 .SetProperty(a => a.Prompt, input.Prompt));
+    }
+
+    /// <summary>
+    /// 初始化用户模型服务
+    /// </summary>
+    [IgnoreRoute]
+    public async Task InitUserModelServiceAsync(string userId, List<Model> items, IDbContext context,
+        string? endpoint = null,
+        string? key = null)
+    {
+        await CreateChannelAsync(context, "OpenAI", "OpenAI", "OpenAI", endpoint ?? "https://api.openai.com/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "OpenAI", true, ["OpenAI", "官方"], userId, key);
+
+        // 创建DeepSeek
+        await CreateChannelAsync(context, "DeepSeek", "DeepSeek", "DeepSeek", "https://api.deepseek.com/v1",
+            items.Where(x => x.Enabled == true && x.Provider.Equals("DeepSeek", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "DeepSeek", true, ["DeepSeek"], userId);
+
+        // 创建google,使用OpenAI兼容接口
+        await CreateChannelAsync(context, "Google", "Google", "Google",
+            "https://generativelanguage.googleapis.com/v1beta/openai/",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("Google", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "Google", false, ["Google"], userId);
+
+        await CreateChannelAsync(context, "Anthropic", "Anthropic", "Anthropic", "https://api.anthropic.com/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("Anthropic", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "Anthropic", false, ["Anthropic"], userId);
+
+        await CreateChannelAsync(context, "SiliconCloud", "SiliconCloud", "SiliconCloud",
+            "https://api.siliconflow.cn/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("SiliconCloud", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "SiliconCloud", false, ["SiliconCloud"], userId);
+
+        await CreateChannelAsync(context, "GiteeAI", "GiteeAI", "GiteeAI", "https://api.gitee.com/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("GiteeAI", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "GiteeAI", false, ["GiteeAI"], userId);
+
+        await CreateChannelAsync(context, "Volcengine", "火山引擎", "Volcengine", "https://ark.cn-beijing.volces.com/api/v3",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("Volcengine", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "Volcengine", false, ["Volcengine"], userId);
+        
+        await CreateChannelAsync(context, "CoresHub", "基石智算", "CoresHub", "https://openapi.coreshub.cn/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("CoresHub", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "CoresHub", false, ["CoresHub"], userId);
+        
+        
+        await CreateChannelAsync(context, "BaiduCloud", "百度云", "CoresHub", "https://qianfan.baidubce.com/v2",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("BaiduCloud", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "BaiduCloud", false, ["BaiduCloud"], userId);
+        
+        
+        await CreateChannelAsync(context, "Github", "Github", "Github", "https://models.github.ai/inference",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("Github", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "Github", false, ["Github"], userId);
+
+        
+        await CreateChannelAsync(context, "Moonshot", "Moonshot", "Moonshot", "https://api.moonshot.cn/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("Moonshot", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "Moonshot", false, ["Moonshot"], userId);
+
+        await CreateChannelAsync(context, "Nvidia", "Nvidia", "Nvidia", "https://integrate.api.nvidia.com/v1",
+            items
+                .Where(x => x.Enabled == true && x.Provider.Equals("Nvidia", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Id).ToList(), "Nvidia", false, ["Nvidia"], userId);
+
+    }
+
+    /// <summary>
+    /// 创建渠道
+    /// </summary>
+    private static async Task CreateChannelAsync(IDbContext context, string name, string description, string avatar,
+        string endpoint, List<string> modelIds, string provider, bool favorite, string[] tags, string userId,
+        string? key = null)
+    {
+        var channel = new ModelChannel()
+        {
+            Name = name,
+            Description = description,
+            Avatar = avatar,
+            Endpoint = endpoint,
+            Enabled = true,
+            ModelIds = modelIds,
+            Provider = provider,
+            Favorite = favorite,
+            Available = true,
+            Tags = tags,
+            CreatedBy = userId,
+        };
+
+        if (!string.IsNullOrEmpty(key))
+        {
+            channel.Keys =
+            [
+                new()
+                {
+                    Key = key,
+                    Description = "系统默认密钥",
+                    Order = 999,
+                }
+            ];
+        }
+
+        await context.ModelChannels.AddAsync(channel);
     }
 }
