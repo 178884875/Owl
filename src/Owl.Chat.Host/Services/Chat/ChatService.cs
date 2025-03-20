@@ -949,6 +949,6 @@ public sealed class ChatService(
             }
         }
 
-        throw new InvalidOperationException("No key found for the given channels.");
+        throw new InvalidOperationException("没有可用的渠道，请前往模型服务器管理添加渠道");
     }
 }

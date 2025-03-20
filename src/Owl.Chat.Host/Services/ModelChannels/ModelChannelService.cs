@@ -130,17 +130,6 @@ public class ModelChannelService(
             .Where(x => x.Id == id)
             .FirstOrDefaultAsync();
 
-        // if (userContext.UserId == result.CreatedBy)
-        // {
-        //     // 查询共享用户
-        //     var shareUsers = await dbContext.ModelChannelShareUsers
-        //         .Where(x => x.ChannelId == id)
-        //         .Include(x => x.User)
-        //         .ToListAsync();
-        //
-        //     result.ShareUsers = shareUsers;
-        // }
-
         var dto = mapper.Map<ModelChannelDto>(result);
         // 如果不是创建人，但是属于共享列表，则清空敏感数据
         if (userContext.UserId != result.CreatedBy)

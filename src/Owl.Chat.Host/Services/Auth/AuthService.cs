@@ -430,6 +430,10 @@ public class AuthService(
             name = "Owl",
             unlimitedExpired = true,
             unlimitedQuota = true,
+            groups = new List<string>()
+            {
+                "default"
+            }
         }), Encoding.UTF8, "application/json");
 
         var responseMessage = await client.SendAsync(requestMessage);

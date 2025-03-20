@@ -473,7 +473,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
             Description = description,
             Avatar = avatar,
             Endpoint = endpoint,
-            Enabled = true,
+            Enabled = false,
             ModelIds = modelIds,
             Provider = provider,
             Favorite = favorite,
