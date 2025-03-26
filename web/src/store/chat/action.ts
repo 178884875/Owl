@@ -414,6 +414,8 @@ export const createChatSlice: StateCreator<
 
         const fileItems = []
 
+        set({ generateLoading: true });
+
         for (let i = 0; i < get().files.length; i++) {
             const file = get().files[i];
             const result = await uploadFile(file.originFileObj);
@@ -441,7 +443,7 @@ export const createChatSlice: StateCreator<
         const messageResponse = await createMessage(userMessage);
         userMessage.id = messageResponse.data.id;
 
-        set({ messages: [...get().messages, userMessage], value: '', files: [], generateLoading: true });
+        set({ messages: [...get().messages, userMessage], value: '', files: []});
 
         const tempAiMessage = {
             sessionId: input.sessionId,

@@ -9,6 +9,7 @@ import CodePreview from './CodePreview';
 import { Flexbox } from "react-layout-kit";
 const { Text } = Typography;
 const { useToken } = theme;
+import { GPTVis } from '@antv/gpt-vis';
 
 export default function CodeRendering() {
     const [codeRendering, setCodeRendering] = useChatStore((state) => [state.codeRendering, state.setCodeRendering]);
@@ -68,7 +69,7 @@ export default function CodeRendering() {
     const renderContent = () => {
         if (isHtml && viewMode === 'preview') {
             return (
-                <CodePreview 
+                <CodePreview
                     code={currentItem.code}
                     fileName={currentItem.fileName}
                     language={currentItem.language}

@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import {  theme } from 'antd';
+import { theme } from 'antd';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Highlighter } from '@lobehub/ui';
@@ -11,6 +11,7 @@ import './styles.css';
 import { useChatStore } from '@/store/chat';
 import { Code } from 'lucide-react';
 import { getCodeBlocks } from '@/utils/render';
+import { ChartType, GPTVisLite, Pie, withChartCode } from '@antv/gpt-vis';
 const { Title, Text, Paragraph } = Typography;
 const { useToken } = theme;
 
@@ -31,11 +32,11 @@ export default function MarkdownIRender({ content, className }: MarkdownIRenderP
             .toLowerCase();
         const normalizedCode = normalizeCode(code);
         const items = getCodeBlocks(content);
-        
-        const index = items.findIndex(item => 
+
+        const index = items.findIndex(item =>
             normalizeCode(item.code) === normalizedCode
         );
-        
+
         if (index !== -1) {
             setCodeRendering({
                 ...codeRendering,
@@ -49,6 +50,17 @@ export default function MarkdownIRender({ content, className }: MarkdownIRenderP
         }
     };
 
+    const customRenderers = {
+        'my-ui': ({ children }: any) => <div>{children}</div>,
+    };
+    const components = {
+        code: withChartCode({
+            // register custom block renderer
+            languageRenderers: customRenderers,
+            // register a pie chart
+            components: { [ChartType.Pie]: Pie },
+        }),
+    };
 
     return (
         <div className={`markdown-render ${className || ''}`}>
@@ -112,11 +124,11 @@ export default function MarkdownIRender({ content, className }: MarkdownIRenderP
                             </code>
                         }
 
+
                         const language = match[1];
                         let codeTitle = '';
                         let codeDescription = '';
                         let shouldHideCode = false;
-
                         // 解析文件名和描述 [filename.ext:description]
                         if (match[2]) {
                             const titleMatch = /\[(.*?)(?:\:(.*?))?\]/.exec(match[2]);

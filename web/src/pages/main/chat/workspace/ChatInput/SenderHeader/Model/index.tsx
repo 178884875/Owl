@@ -20,8 +20,6 @@ export default function Model() {
         loadModels();
     }, []);
 
-    console.log(model);
-
     return (
         <Tooltip
             title={model?.description}
