@@ -133,23 +133,23 @@ export default function ChatList() {
             if (generateLoading) {
                 setCodeRendering({
                     visible: true,
-                    index: 0,
+                    index: codeBlocks.length - 1,
                     items: codeBlocks.map((codeBlock) => ({
                         language: codeBlock.language,
                         code: codeBlock.code,
                         title: codeBlock.fileName,
-                        description: codeBlock.description
+                        description: codeBlock.description,
                     }))
                 });
             } else {
                 setCodeRendering({
                     ...codeRendering,
-                    index: 0,
+                    index: codeBlocks.length - 1,
                     items: codeBlocks.map((codeBlock) => ({
                         language: codeBlock.language,
                         code: codeBlock.code,
                         title: codeBlock.fileName,
-                        description: codeBlock.description
+                        description: codeBlock.description,
                     }))
                 });
             }

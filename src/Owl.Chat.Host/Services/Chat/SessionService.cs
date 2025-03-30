@@ -102,13 +102,13 @@ public class SessionService(
     [EndpointSummary("删除会话")]
     public async Task DeleteAsync(long id)
     {
-        await dbContext.Sessions
-            .Where(s => s.Id == id && s.CreatedBy == userContext.UserId)
-            .ExecuteDeleteAsync();
-
         // 删除会话的同时删除会话的所有消息
         await dbContext.Messages
             .Where(m => m.SessionId == id)
+            .ExecuteDeleteAsync();
+        
+        await dbContext.Sessions
+            .Where(s => s.Id == id && s.CreatedBy == userContext.UserId)
             .ExecuteDeleteAsync();
     }
 

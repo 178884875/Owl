@@ -30,7 +30,6 @@ const CodePreview: React.FC<CodePreviewProps> = ({ code, fileName, language }) =
         processedCode = processedCode.replace(/export\s+{.*?};?/g, '');
         processedCode = processedCode.replace(/export\s+/g, '');
         
-        // 为React代码准备HTML模板
         const htmlTemplate = `
           <!DOCTYPE html>
           <html>

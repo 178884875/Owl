@@ -100,7 +100,10 @@ export default function ChannelMessage({ channel }: ChannelMessageProps) {
   ];
 
   return (
-    <Flexbox gap={16} style={{ height: '100%', overflow: 'auto' }}>
+    <Flexbox gap={16} style={{ height: '100%', 
+      overflowX: 'hidden',
+      overflowY: 'auto',
+     }}>
       <Flexbox horizontal justify="space-between" align="center" style={{ padding: '0 8px' }}>
         <Typography.Title level={4} style={{ margin: 0 }}>
           渠道消息记录

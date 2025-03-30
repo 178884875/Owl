@@ -11,7 +11,6 @@ import './styles.css';
 import { useChatStore } from '@/store/chat';
 import { Code } from 'lucide-react';
 import { getCodeBlocks } from '@/utils/render';
-import { ChartType, GPTVisLite, Pie, withChartCode } from '@antv/gpt-vis';
 const { Title, Text, Paragraph } = Typography;
 const { useToken } = theme;
 
@@ -45,22 +44,15 @@ export default function MarkdownIRender({ content, className }: MarkdownIRenderP
                 visible: true
             });
         } else {
-            // 如果没有找到完全匹配，可以考虑添加一个新项
-            console.log('未找到匹配的代码块', code, codeRendering.items);
+            setCodeRendering({
+                ...codeRendering,
+                index: items.length - 1,
+                items,
+                visible: true
+            });
         }
     };
 
-    const customRenderers = {
-        'my-ui': ({ children }: any) => <div>{children}</div>,
-    };
-    const components = {
-        code: withChartCode({
-            // register custom block renderer
-            languageRenderers: customRenderers,
-            // register a pie chart
-            components: { [ChartType.Pie]: Pie },
-        }),
-    };
 
     return (
         <div className={`markdown-render ${className || ''}`}>
@@ -118,6 +110,7 @@ export default function MarkdownIRender({ content, className }: MarkdownIRenderP
                     code: ({ node, className, children, ...props }) => {
                         const match = /language-(\w+)(?:\|(\[.*?\]))?.*/i.exec(className || '');
 
+                        debugger;
                         if (!match) {
                             return <code className={className} {...props}>
                                 {children}

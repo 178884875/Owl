@@ -58,6 +58,7 @@ export default function CreateSession() {
             return;
         }
 
+
         let files: any[] = [];
 
         // 处理图片文件

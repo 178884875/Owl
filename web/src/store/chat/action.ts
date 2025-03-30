@@ -279,7 +279,7 @@ export const createChatSlice: StateCreator<
         const messageResponse = await createMessage(userMessage);
         userMessage.id = messageResponse.data.id;
 
-        set({ messages: [...get().messages, userMessage] });
+        set({ messages: [...get().messages, userMessage], value: '' });
     },
     createUserMessage: async () => {
         const value = get().value;
@@ -298,7 +298,7 @@ export const createChatSlice: StateCreator<
         const messageResponse = await createMessage(userMessage);
         userMessage.id = messageResponse.data.id;
 
-        set({ messages: [...get().messages, userMessage] });
+        set({ messages: [...get().messages, userMessage], value: '' });
     },
     renameSession: async (id: number) => {
         try {
@@ -392,12 +392,12 @@ export const createChatSlice: StateCreator<
         files
     }: CreateSessionInput) => {
         const result = await createSession({
-            name: '默认会话',
-            description: '默认会话',
+            name: '新对话',
+            description: '新对话',
             modelId: modelId,
         });
 
-        set({ currentSession: result.data, messages: [] });
+        set({ currentSession: result.data, messages: []});
         await get().loadSessions('');
 
         setTimeout(() => {

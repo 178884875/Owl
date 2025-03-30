@@ -3,7 +3,7 @@ import { useChatStore } from "@/store/chat";
 import { Button, Divider, Input, Tooltip } from "antd";
 import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import Session from "../session";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import UserInfo from "../user-info";
 import CreateSession from "../create-session";
 import Chat from "../chat";
@@ -48,8 +48,20 @@ const styles = {
 };
 
 export default function SideMenu() {
-    const [expanded, setExpanded, search, setSearch, loadSessions] =
-        useChatStore(state => [state.sideBarExpanded, state.setSideBarExpanded, state.searchSessionValue, state.setSearchSessionValue, state.loadSessions]);
+    const { setSideBarExpanded, setSearchSessionValue, loadSessions } =
+        useMemo(() => {
+            const state = useChatStore.getState();
+            return {
+                sideBarExpanded: state.sideBarExpanded,
+                setSideBarExpanded: state.setSideBarExpanded,
+                searchSessionValue: state.searchSessionValue,
+                setSearchSessionValue: state.setSearchSessionValue,
+                loadSessions: state.loadSessions
+            };
+        }, []);
+
+    const expanded = useChatStore(state => state.sideBarExpanded);
+    const search = useChatStore(state => state.searchSessionValue);
 
     const onSearch = useCallback((value?: string) => {
         loadSessions(value || '');
@@ -59,15 +71,15 @@ export default function SideMenu() {
         onSearch(search);
     }, [search, onSearch]);
 
-    const toggleExpanded = () => {
-        setExpanded(!expanded);
-    }
+    const toggleExpanded = useCallback(() => {
+        setSideBarExpanded(!expanded);
+    }, [expanded, setSideBarExpanded]);
 
     useEffect(() => {
         if (window.innerWidth < 768) {
-            setExpanded(false);
+            setSideBarExpanded(false);
         }
-    }, []);
+    }, [setSideBarExpanded]);
 
     return (<>
         <Flexbox style={{
@@ -84,7 +96,7 @@ export default function SideMenu() {
                 }}>
                     <Input.Search
                         value={search}
-                        onChange={e => setSearch(e.target.value)}
+                        onChange={e => setSearchSessionValue(e.target.value)}
                         style={{ width: expanded ? 180 : 0 }}
                         placeholder="搜索"
                     />
@@ -99,7 +111,6 @@ export default function SideMenu() {
                 </Tooltip>
             </Flexbox>
             <Session />
-            <Flexbox flex={1} />
             <Chat />
             <UserInfo />
             <CreateSession />

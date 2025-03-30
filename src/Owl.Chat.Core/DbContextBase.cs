@@ -41,7 +41,7 @@ public abstract class DbContextBase<TDbContext>(DbContextOptions<TDbContext> opt
 
     public async Task SaveChangesAsync()
     {
-        await SaveChangesAsync(new CancellationToken());
+        await SaveChangesAsync(CancellationToken.None);
     }
 
     public virtual Task MigrateAsync()
@@ -56,7 +56,7 @@ public abstract class DbContextBase<TDbContext>(DbContextOptions<TDbContext> opt
         base.OnModelCreating(modelBuilder);
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
     {
         BeforeSaveChanges();
 

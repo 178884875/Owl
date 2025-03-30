@@ -2,19 +2,15 @@
 
 <task>Create an ultra-concise title (maximum 10 characters) that captures the essence of the user's conversation.</task>
 
-
 <requirements>
 - Title must be 10 characters or fewer
 - Capture the core topic or main point of the conversation
 - Be descriptive yet extremely concise
 </requirements>
 
-<output_format>
-Your 10-character or less title
-</output_format>
-
-
 <input>
 User Question:
 {{$content}}
 </input>
+
+Your 10-character or less title:
