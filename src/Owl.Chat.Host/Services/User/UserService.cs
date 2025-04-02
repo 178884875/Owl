@@ -105,8 +105,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
         }
 
         // 校验邮箱格式
-        if (!string.IsNullOrEmpty(createUserDto.Email) &&
-            !Regex.IsMatch(createUserDto.Email, @"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$"))
+        if ( !Regex.IsMatch(createUserDto.Email ?? "", @"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$"))
         {
             throw new BusinessException("邮箱格式不正确");
         }
@@ -193,8 +192,7 @@ public class UserService(IDbContext dbContext, IMapper mapper, IUserContext user
         }
 
         // 校验邮箱格式
-        if (!string.IsNullOrEmpty(updateUserDto.Email) &&
-            !Regex.IsMatch(updateUserDto.Email, @"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$"))
+        if ( !Regex.IsMatch(updateUserDto.Email ?? "", @"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$"))
         {
             throw new BusinessException("邮箱格式不正确");
         }
