@@ -13,12 +13,20 @@ namespace Owl.Chat.Host.Backstage;
 /// </summary>
 public sealed class InitModelBackstageService(
     IServiceProvider serviceProvider,
+    IConfiguration configuration,
     ILogger<InitModelBackstageService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
+            
+            var runMigration = configuration.GetValue<bool>("RunMigration");
+            if (!runMigration)
+            {
+                return;
+            }
+            
             await using var scope = serviceProvider.CreateAsyncScope();
 
             var modelPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Models.json");
