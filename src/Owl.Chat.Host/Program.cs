@@ -15,115 +15,127 @@ public static class Program
     public static async Task Main(string[] args)
     {
         Launch.Initialize();
-        
-        
-        var builder = WebApplication.CreateBuilder(args);
 
-        var logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(builder.Configuration)
-            .Enrich.FromLogContext()
-            .CreateLogger();
+        try
+        {
+            var builder = WebApplication.CreateBuilder(args);
 
-        builder.Host.UseSerilog(logger);
+            var logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .Enrich.FromLogContext()
+                .CreateLogger();
 
-        builder.Services.AddServices(builder.Configuration);
+            builder.Host.UseSerilog(logger);
 
-        builder.Services.AddSingleton<FileStaticMiddleware>();
-        builder.Services.AddSingleton<GlobalMiddleware>();
-        
-        builder.Services.AddHttpClient();
+            builder.Services.AddServices(builder.Configuration);
 
-        builder.Services.AddHttpClient("Authorize")
-            .ConfigureHttpClient(((_, client) =>
+            builder.Services.AddSingleton<FileStaticMiddleware>();
+            builder.Services.AddSingleton<GlobalMiddleware>();
+
+            builder.Services.AddHttpClient();
+
+            builder.Services.AddHttpClient("Authorize")
+                .ConfigureHttpClient(((_, client) =>
+                {
+                    client.DefaultRequestHeaders.Add("Accept", "application/json");
+                    client.DefaultRequestHeaders.Add("User-Agent", "ThorChat");
+                }));
+
+            builder.Services.AddHttpClient(nameof(BingScraper))
+                .ConfigureHttpClient(((provider, client) =>
+                {
+                    // 模仿浏览器请求，设置 User-Agent
+                    client.DefaultRequestHeaders.Add("User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0");
+                    client.DefaultRequestHeaders.Add("x-client-data",
+                        "eyIxIjoiMSIsIjIiOiIxIiwiMyI6IjAiLCI0IjoiMjgwNDcxNzQzOTQ1Mzc1MjUwMCIsIjYiOiJzdGFibGUiLCI5IjoiZGVza3RvcCJ9");
+                    client.DefaultRequestHeaders.Add("Accept",
+                        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+                    client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                    client.DefaultRequestHeaders.Add("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
+                    client.DefaultRequestHeaders.Add("Cache-Control", "max-age=0");
+                    client.DefaultRequestHeaders.Add("Connection", "keep-alive");
+                    client.DefaultRequestHeaders.Add("Host", "www.bing.com");
+                    client.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
+                    client.DefaultRequestHeaders.Add("Referer", "https://www.bing.com/");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "document");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "navigate");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "none");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-User", "?1");
+                    client.DefaultRequestHeaders.Add("Sec-GPC", "1");
+                    client.DefaultRequestHeaders.Add("TE", "trailers");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua",
+                        "\"Not(A:Brand\";v=\"99\", \"Microsoft Edge\";v=\"133\", \"Chromium\";v=\"133\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-arch", "\"x86\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-bitness", "\"64\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-full-version", "\"133.0.3065.82\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-model", "\"\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-platform-version", "\"14.0.0\"");
+                    client.DefaultRequestHeaders.Add("sec-fetch-dest", "document");
+                    client.DefaultRequestHeaders.Add("sec-fetch-mode", "navigate");
+                    client.DefaultRequestHeaders.Add("sec-fetch-site", "cross-site");
+
+                    // 默认启用h2
+                    client.DefaultRequestVersion = HttpVersion.Version20;
+                    client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+                }));
+
+            builder.Services.ConfigureHttpJsonOptions((options =>
             {
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-                client.DefaultRequestHeaders.Add("User-Agent", "ThorChat");
+                options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                options.SerializerOptions.Converters.Add(new JsonDateTimeConverter());
+                options.SerializerOptions.Converters.Add(new JsonDateTimeOffsetConverter());
             }));
 
-        builder.Services.AddHttpClient(nameof(BingScraper))
-            .ConfigureHttpClient(((provider, client) =>
+            builder.Services.AddHostedService<InitModelBackstageService>();
+
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            var app = builder.Build();
+
+            Console.WriteLine("Owl.Chat 启动中...");
+
+            if (app.Environment.IsDevelopment())
             {
-                // 模仿浏览器请求，设置 User-Agent
-                client.DefaultRequestHeaders.Add("User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0");
-                client.DefaultRequestHeaders.Add("x-client-data",
-                    "eyIxIjoiMSIsIjIiOiIxIiwiMyI6IjAiLCI0IjoiMjgwNDcxNzQzOTQ1Mzc1MjUwMCIsIjYiOiJzdGFibGUiLCI5IjoiZGVza3RvcCJ9");
-                client.DefaultRequestHeaders.Add("Accept",
-                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-                client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
-                client.DefaultRequestHeaders.Add("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
-                client.DefaultRequestHeaders.Add("Cache-Control", "max-age=0");
-                client.DefaultRequestHeaders.Add("Connection", "keep-alive");
-                client.DefaultRequestHeaders.Add("Host", "www.bing.com");
-                client.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
-                client.DefaultRequestHeaders.Add("Referer", "https://www.bing.com/");
-                client.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "document");
-                client.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "navigate");
-                client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "none");
-                client.DefaultRequestHeaders.Add("Sec-Fetch-User", "?1");
-                client.DefaultRequestHeaders.Add("Sec-GPC", "1");
-                client.DefaultRequestHeaders.Add("TE", "trailers");
-                client.DefaultRequestHeaders.Add("sec-ch-ua",
-                    "\"Not(A:Brand\";v=\"99\", \"Microsoft Edge\";v=\"133\", \"Chromium\";v=\"133\"");
-                client.DefaultRequestHeaders.Add("sec-ch-ua-arch", "\"x86\"");
-                client.DefaultRequestHeaders.Add("sec-ch-ua-bitness", "\"64\"");
-                client.DefaultRequestHeaders.Add("sec-ch-ua-full-version", "\"133.0.3065.82\"");
-                client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
-                client.DefaultRequestHeaders.Add("sec-ch-ua-model", "\"\"");
-                client.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
-                client.DefaultRequestHeaders.Add("sec-ch-ua-platform-version", "\"14.0.0\"");
-                client.DefaultRequestHeaders.Add("sec-fetch-dest", "document");
-                client.DefaultRequestHeaders.Add("sec-fetch-mode", "navigate");
-                client.DefaultRequestHeaders.Add("sec-fetch-site", "cross-site");
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
 
-                // 默认启用h2
-                client.DefaultRequestVersion = HttpVersion.Version20;
-                client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
-            }));
+            app.UseAuthentication();
+            app.UseAuthorization();
 
-        builder.Services.ConfigureHttpJsonOptions((options =>
-        {
-            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            options.SerializerOptions.Converters.Add(new JsonDateTimeConverter());
-            options.SerializerOptions.Converters.Add(new JsonDateTimeOffsetConverter());
-        }));
+            app.UseMiddleware<GlobalMiddleware>();
+            app.UseMiddleware<FileStaticMiddleware>();
 
-        builder.Services.AddHostedService<InitModelBackstageService>();
+            app.UseStaticFiles();
 
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+            app.MapMiniApis();
 
-        var app = builder.Build();
+            var runMigration = builder.Configuration.GetValue<bool>("RunMigration");
+            if (runMigration)
+            {
+                using var scope = app.Services.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+                await dbContext.MigrateAsync();
+            }
+
+            await app.RunAsync();
         }
-
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        app.UseMiddleware<GlobalMiddleware>();
-        app.UseMiddleware<FileStaticMiddleware>();
-
-        app.UseStaticFiles();
-
-        app.MapMiniApis();
-
-        // RunMigration
-        var runMigration = builder.Configuration.GetValue<bool>("RunMigration");
-        if (runMigration)
+        catch (Exception exception)
         {
-            using var scope = app.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
-
-            await dbContext.MigrateAsync();
-            
+            Console.WriteLine(exception.ToString());
         }
-
-        await app.RunAsync();
+        finally
+        {
+            Console.WriteLine("Owl.Chat 结束运行");
+            Console.WriteLine();
+            Console.WriteLine();
+        }
     }
 }
