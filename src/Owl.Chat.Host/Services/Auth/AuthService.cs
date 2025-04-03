@@ -74,8 +74,7 @@ public class AuthService(
     public async Task<string> Register(RegisterInput input)
     {
         // 校验邮箱格式
-        if (!string.IsNullOrEmpty(input.Email) &&
-            !Regex.IsMatch(input.Email, @"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$"))
+        if (!Regex.IsMatch(input.Email ?? "", @"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$"))
         {
             throw new BusinessException("邮箱格式不正确");
         }

@@ -481,9 +481,6 @@ export const createChatSlice: StateCreator<
         for await (const chunk of chatComplete(chatCompleteParams)) {
             if (first) {
                 first = false;
-                set({
-                    generateLoading: false
-                });
             }
 
             const { data, type } = chunk;

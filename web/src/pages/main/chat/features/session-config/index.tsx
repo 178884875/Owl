@@ -147,14 +147,15 @@ export default function SessionConfig() {
         model,
         currentSession,
         updateSession,
-        models
+        models,
+        loadEnabledModels
     ] = useChatStore(state => [
         state.sessionConfigExpanded,
         state.setSessionConfigExpanded,
         chatSelectors.getCurrentModel(state),
         state.currentSession,
         state.updateSession,
-        state.models]);
+        state.models,state.loadEnabledModels]);
 
     const [form] = Form.useForm();
     const [renameModel, setRenameModel] = useState<string | undefined>(undefined);
@@ -165,6 +166,10 @@ export default function SessionConfig() {
             setRenameModel(currentSession.renameModel);
         }
     }, [currentSession, form]);
+
+    useEffect(() => {
+        loadEnabledModels();
+    }, [loadEnabledModels]);
 
     const onSubmitted = async (values: any) => {
         values.id = currentSession.id;
