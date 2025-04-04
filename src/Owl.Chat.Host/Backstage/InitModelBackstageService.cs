@@ -38,11 +38,7 @@ public sealed class InitModelBackstageService(
                 var dbContext = scope.ServiceProvider.GetService<IDbContext>();
                 var userService = scope.ServiceProvider.GetService<UserService>();
 
-                if (await dbContext!.Models.AnyAsync(cancellationToken: stoppingToken))
-                {
-                    return;
-                }
-                else
+                if (!await dbContext!.Models.AnyAsync(cancellationToken: stoppingToken))
                 {
                     var items = new List<Model>(models.SelectMany(x => x.Models).Count());
 
@@ -54,7 +50,7 @@ public sealed class InitModelBackstageService(
                             ModelId = chatModel.Id,
                             ContextWindowTokens = chatModel.ContextWindowTokens,
                             Enabled = chatModel.Enabled,
-                            DisplayName = chatModel.DisplayName,
+                            DisplayName = chatModel.DisplayName ?? chatModel.Id,
                             Description = chatModel.Description,
                             Pricing = new Pricing()
                             {
@@ -87,9 +83,6 @@ public sealed class InitModelBackstageService(
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error occurred while processing logs");
-            }
-            finally
-            {
             }
         }), stoppingToken);
     }
@@ -133,6 +126,6 @@ public sealed class InitModelBackstageService(
             throw new BusinessException("OpenAIEndpoint和OpenAIKey必须同时设置");
         }
 
-        await userService.InitUserModelServiceAsync(user.Id, items, context, openAIEndpoint, openAIKey);
+        await userService!.InitUserModelServiceAsync(user.Id, items, context, openAIEndpoint, openAIKey);
     }
 }

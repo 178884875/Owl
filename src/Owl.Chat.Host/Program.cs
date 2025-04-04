@@ -21,8 +21,9 @@ public static class Program
             var builder = WebApplication.CreateBuilder(args);
 
             var logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Information)
                 .ReadFrom.Configuration(builder.Configuration)
-                .Enrich.FromLogContext()
                 .CreateLogger();
 
             builder.Host.UseSerilog(logger);
