@@ -13,90 +13,85 @@ namespace Owl.Chat.Host.Backstage;
 /// </summary>
 public sealed class InitModelBackstageService(
     IServiceProvider serviceProvider,
-    IConfiguration configuration,
     ILogger<InitModelBackstageService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        try
+        await Task.Run((async () =>
         {
-            
-            var runMigration = configuration.GetValue<bool>("RunMigration");
-            if (!runMigration)
+            try
             {
-                return;
-            }
-            
-            await using var scope = serviceProvider.CreateAsyncScope();
+                await using var scope = serviceProvider.CreateAsyncScope();
 
-            var modelPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Models.json");
+                var modelPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Models.json");
 
-            if (!File.Exists(modelPath))
-            {
-                return;
-            }
-
-            var json = await File.ReadAllTextAsync(modelPath, stoppingToken);
-
-            var models = JsonSerializer.Deserialize<InitModelsDto[]>(json,
-                JsonOptions.DefaultJsonSerializerOptions);
-
-            var dbContext = scope.ServiceProvider.GetService<IDbContext>();
-            var userService = scope.ServiceProvider.GetService<UserService>();
-
-            if (await dbContext!.Models.AnyAsync(cancellationToken: stoppingToken))
-            {
-                return;
-            }
-            else
-            {
-                var items = new List<Model>(models.SelectMany(x => x.Models).Count());
-
-                foreach (var model in models)
+                if (!File.Exists(modelPath))
                 {
-                    items.AddRange(model.Models.Select(chatModel => new Model()
-                    {
-                        Id = Guid.NewGuid().ToString("N"),
-                        ModelId = chatModel.Id,
-                        ContextWindowTokens = chatModel.ContextWindowTokens,
-                        Enabled = chatModel.Enabled,
-                        DisplayName = chatModel.DisplayName,
-                        Description = chatModel.Description,
-                        Pricing = new Pricing()
-                        {
-                            Input = chatModel.Pricing?.Input,
-                            Output = chatModel.Pricing?.Output,
-                            WriteCacheInput = chatModel.Pricing?.WriteCacheInput,
-                            AudioInput = chatModel.Pricing?.AudioInput,
-                            AudioOutput = chatModel.Pricing?.AudioOutput,
-                            CachedInput = chatModel.Pricing?.CachedInput,
-                            CachedAudioInput = chatModel.Pricing?.CachedAudioInput,
-                            Standard = chatModel.Pricing?.Standard
-                        },
-                        Type = chatModel.Type,
-                        MaxOutput = chatModel.MaxOutput,
-                        Provider = model.Provider,
-                        ReleasedAt = chatModel.ReleasedAt,
-                        CreatedAt = DateTime.Now,
-                        Abilities =
-                            new Abilities() { Vision = chatModel.Vision, FunctionCall = chatModel.FunctionCall },
-                    }));
+                    return;
                 }
 
-                await dbContext.Models.AddRangeAsync(items, stoppingToken);
+                var json = await File.ReadAllTextAsync(modelPath, stoppingToken);
 
-                await HandleAsync(dbContext, items, userService);
+                var models = JsonSerializer.Deserialize<InitModelsDto[]>(json,
+                    JsonOptions.DefaultJsonSerializerOptions);
 
-                await dbContext.SaveChangesAsync();
+                var dbContext = scope.ServiceProvider.GetService<IDbContext>();
+                var userService = scope.ServiceProvider.GetService<UserService>();
+
+                if (await dbContext!.Models.AnyAsync(cancellationToken: stoppingToken))
+                {
+                    return;
+                }
+                else
+                {
+                    var items = new List<Model>(models.SelectMany(x => x.Models).Count());
+
+                    foreach (var model in models)
+                    {
+                        items.AddRange(model.Models.Select(chatModel => new Model()
+                        {
+                            Id = Guid.NewGuid().ToString("N"),
+                            ModelId = chatModel.Id,
+                            ContextWindowTokens = chatModel.ContextWindowTokens,
+                            Enabled = chatModel.Enabled,
+                            DisplayName = chatModel.DisplayName,
+                            Description = chatModel.Description,
+                            Pricing = new Pricing()
+                            {
+                                Input = chatModel.Pricing?.Input,
+                                Output = chatModel.Pricing?.Output,
+                                WriteCacheInput = chatModel.Pricing?.WriteCacheInput,
+                                AudioInput = chatModel.Pricing?.AudioInput,
+                                AudioOutput = chatModel.Pricing?.AudioOutput,
+                                CachedInput = chatModel.Pricing?.CachedInput,
+                                CachedAudioInput = chatModel.Pricing?.CachedAudioInput,
+                                Standard = chatModel.Pricing?.Standard
+                            },
+                            Type = chatModel.Type,
+                            MaxOutput = chatModel.MaxOutput,
+                            Provider = model.Provider,
+                            ReleasedAt = chatModel.ReleasedAt,
+                            CreatedAt = DateTime.Now,
+                            Abilities =
+                                new Abilities() { Vision = chatModel.Vision, FunctionCall = chatModel.FunctionCall },
+                        }));
+                    }
+
+                    await dbContext.Models.AddRangeAsync(items, stoppingToken);
+
+                    await HandleAsync(dbContext, items, userService);
+
+                    await dbContext.SaveChangesAsync();
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error occurred while processing logs");
-        }
-        finally
-        {
-        }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while processing logs");
+            }
+            finally
+            {
+            }
+        }), stoppingToken);
     }
 
     /// <summary>

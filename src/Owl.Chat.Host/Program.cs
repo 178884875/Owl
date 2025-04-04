@@ -119,13 +119,16 @@ public static class Program
             var runMigration = builder.Configuration.GetValue<bool>("RunMigration");
             if (runMigration)
             {
-                Console.WriteLine("正在迁移数据库...");;
+                Console.WriteLine("正在迁移数据库...");
+                ;
                 using var scope = app.Services.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
 
                 await dbContext.MigrateAsync();
                 Console.WriteLine("数据库迁移完成");
             }
+
+            Console.WriteLine("Owl.Chat 启动完成");
 
             await app.RunAsync();
         }
